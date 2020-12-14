@@ -393,73 +393,64 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
 fn parse_percent_or_float(s: &str) -> Option<f64> {
     if s.ends_with('%') {
         let s = s.strip_suffix("%").unwrap();
-        let t = s.parse::<f64>();
-        if t.is_err() {
-            return None;
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t / 100.);
         }
-        return Some(t.unwrap() / 100.0);
-    }
-    let t = s.parse::<f64>();
-    if t.is_err() {
         return None;
     }
-    Some(t.unwrap())
+    if let Ok(t) = s.parse::<f64>() {
+        return Some(t);
+    }
+    None
 }
 
 fn parse_percent_or_255(s: &str) -> Option<f64> {
     if s.ends_with('%') {
         let s = s.strip_suffix("%").unwrap();
-        let t = s.parse::<f64>();
-        if t.is_err() {
-            return None;
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t / 100.);
         }
-        return Some(t.unwrap() / 100.0);
-    }
-    let t = s.parse::<f64>();
-    if t.is_err() {
         return None;
     }
-    Some(t.unwrap() / 255.0)
+    if let Ok(t) = s.parse::<f64>() {
+        return Some(t / 255.);
+    }
+    None
 }
 
 fn parse_angle(s: &str) -> Option<f64> {
     if s.ends_with("deg") {
         let s = s.strip_suffix("deg").unwrap();
-        let t = s.parse::<f64>();
-        if t.is_err() {
-            return None;
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t);
         }
-        return Some(t.unwrap());
+        return None;
     }
     if s.ends_with("grad") {
         let s = s.strip_suffix("grad").unwrap();
-        let t = s.parse::<f64>();
-        if t.is_err() {
-            return None;
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t * 360. / 400.);
         }
-        return Some(t.unwrap() * 360.0 / 400.0);
+        return None;
     }
     if s.ends_with("rad") {
         let s = s.strip_suffix("rad").unwrap();
-        let t = s.parse::<f64>();
-        if t.is_err() {
-            return None;
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t * 180. / PI);
         }
-        return Some(t.unwrap() * 180.0 / PI);
+        return None;
     }
     if s.ends_with("turn") {
         let s = s.strip_suffix("turn").unwrap();
-        let t = s.parse::<f64>();
-        if t.is_err() {
-            return None;
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t * 360.);
         }
-        return Some(t.unwrap() * 360.0);
-    }
-    let t = s.parse::<f64>();
-    if t.is_err() {
         return None;
     }
-    Some(t.unwrap())
+    if let Ok(t) = s.parse::<f64>() {
+        return Some(t);
+    }
+    None
 }
 
 fn normalize_angle(t: f64) -> f64 {

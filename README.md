@@ -1,11 +1,11 @@
 # CSS Color Parser for Rust
-<!--
+
 [![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
 [![Documentation](https://docs.rs/csscolorparser/badge.svg)](https://docs.rs/csscolorparser)
-[![Build Status](https://travis-ci.org/mazznoer/csscolorparser.svg?branch=master)](https://travis-ci.org/mazznoer/csscolorparser)
-[![Build Status](https://github.com/mazznoer/csscolorparser/workflows/Go/badge.svg)](https://github.com/mazznoer/csscolorparser/actions)
-[![codecov](https://codecov.io/gh/mazznoer/csscolorparser/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser)
--->
+[![Build Status](https://github.com/mazznoer/csscolorparser-rs/workflows/Rust/badge.svg)](https://github.com/mazznoer/csscolorparser-rs/actions)
+[![Build Status](https://travis-ci.org/mazznoer/csscolorparser-rs.svg?branch=master)](https://travis-ci.org/mazznoer/csscolorparser-rs)
+[![codecov](https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser-rs)
+
 Rust CSS color parser.
 
 It support W3C's CSS color module level 4.

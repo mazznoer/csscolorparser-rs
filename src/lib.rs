@@ -2,6 +2,8 @@
 //!
 //! Rust library for parsing CSS color string.
 //!
+//! ## Examples
+//!
 //! ```rust
 //! let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
 //!
@@ -10,13 +12,24 @@
 //! assert_eq!(c.to_hex_string(), "#ff0000");
 //! assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
 //! ```
+//!
+//! Hexadecimal color format with transparency
+//!
+//! ```rust
+//! use csscolorparser::Color;
+//!
+//! let c = "#ff00007f".parse::<Color>().unwrap();
+//!
+//! assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
+//! assert_eq!(c.to_hex_string(), "#ff00007f");
+//! ```
 
 #![allow(clippy::many_single_char_names, clippy::float_cmp)]
 
-use std::f64::consts::PI;
-
 use std::error::Error as StdError;
+use std::f64::consts::PI;
 use std::fmt;
+use std::str::FromStr;
 
 /// The output color
 #[derive(Debug, Clone, PartialEq)]
@@ -66,6 +79,14 @@ impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (r, g, b, a) = self.rgba();
         write!(f, "Color({}, {}, {}, {})", r, g, b, a)
+    }
+}
+
+impl FromStr for Color {
+    type Err = ParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse(s)
     }
 }
 
@@ -176,118 +197,100 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
         });
     }
 
-    if s.starts_with('#') {
-        let s = s.strip_prefix("#").unwrap();
+    if let Some(s) = s.strip_prefix("#") {
         if let Ok(c) = parse_hex(s) {
             return Ok(c);
         }
         return Err(ParseError::InvalidHex);
     }
 
-    if let Some(op) = s.find('(') {
-        if !s.ends_with(')') {
-            return Err(ParseError::InvalidUnknown);
-        }
-        let fname = s.get(..op).unwrap().trim();
-        let s = s.strip_suffix(")").unwrap();
-        let s = s.get((op + 1)..).unwrap();
+    if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(")")) {
+        let fname = &s[..i].trim_end();
+        let s = &s[i + 1..].replace(",", " ").replace("/", " ");
+        let params: Vec<&str> = s.split_whitespace().collect();
+        let p_len = params.len();
 
         let mut a = Some(1.0);
-        let s = s.replace(",", " ");
-        let s = s.replace("/", " ");
-        let params: Vec<&str> = s.split_whitespace().collect();
 
-        if fname == "rgb" || fname == "rgba" {
-            if params.len() != 3 && params.len() != 4 {
+        if *fname == "rgb" || *fname == "rgba" {
+            if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidRgb);
             }
             let r = parse_percent_or_255(params[0]);
             let g = parse_percent_or_255(params[1]);
             let b = parse_percent_or_255(params[2]);
-            if params.len() == 4 {
+            if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
-            if r.is_none() || g.is_none() || b.is_none() || a.is_none() {
-                return Err(ParseError::InvalidRgb);
+            if let (Some(r), Some(g), Some(b), Some(a)) = (r, g, b, a) {
+                return Ok(Color {
+                    r: clamp0_1(r),
+                    g: clamp0_1(g),
+                    b: clamp0_1(b),
+                    a: clamp0_1(a),
+                });
             }
-            return Ok(Color {
-                r: clamp0_1(r.unwrap()),
-                g: clamp0_1(g.unwrap()),
-                b: clamp0_1(b.unwrap()),
-                a: clamp0_1(a.unwrap()),
-            });
-        } else if fname == "hsl" || fname == "hsla" {
-            if params.len() != 3 && params.len() != 4 {
+            return Err(ParseError::InvalidRgb);
+        } else if *fname == "hsl" || *fname == "hsla" {
+            if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHsl);
             }
             let h = parse_angle(params[0]);
             let s = parse_percent_or_float(params[1]);
             let l = parse_percent_or_float(params[2]);
-            if params.len() == 4 {
+            if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
-            if h.is_none() || s.is_none() || l.is_none() || a.is_none() {
-                return Err(ParseError::InvalidHsl);
+            if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
+                let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
+                return Ok(Color {
+                    r: clamp0_1(r),
+                    g: clamp0_1(g),
+                    b: clamp0_1(b),
+                    a: clamp0_1(a),
+                });
             }
-            let (r, g, b) = hsl_to_rgb(
-                normalize_angle(h.unwrap()),
-                clamp0_1(s.unwrap()),
-                clamp0_1(l.unwrap()),
-            );
-            return Ok(Color {
-                r: clamp0_1(r),
-                g: clamp0_1(g),
-                b: clamp0_1(b),
-                a: clamp0_1(a.unwrap()),
-            });
-        } else if fname == "hwb" {
-            if params.len() != 3 && params.len() != 4 {
+            return Err(ParseError::InvalidHsl);
+        } else if *fname == "hwb" {
+            if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHwb);
             }
             let h = parse_angle(params[0]);
             let w = parse_percent_or_float(params[1]);
             let b = parse_percent_or_float(params[2]);
-            if params.len() == 4 {
+            if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
-            if h.is_none() || w.is_none() || b.is_none() || a.is_none() {
-                return Err(ParseError::InvalidHwb);
+            if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
+                let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
+                return Ok(Color {
+                    r: clamp0_1(r),
+                    g: clamp0_1(g),
+                    b: clamp0_1(b),
+                    a: clamp0_1(a),
+                });
             }
-            let (r, g, b) = hwb_to_rgb(
-                normalize_angle(h.unwrap()),
-                clamp0_1(w.unwrap()),
-                clamp0_1(b.unwrap()),
-            );
-            return Ok(Color {
-                r: clamp0_1(r),
-                g: clamp0_1(g),
-                b: clamp0_1(b),
-                a: clamp0_1(a.unwrap()),
-            });
-        } else if fname == "hsv" {
-            if params.len() != 3 && params.len() != 4 {
+            return Err(ParseError::InvalidHwb);
+        } else if *fname == "hsv" {
+            if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHsv);
             }
             let h = parse_angle(params[0]);
             let s = parse_percent_or_float(params[1]);
             let v = parse_percent_or_float(params[2]);
-            if params.len() == 4 {
+            if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
-            if h.is_none() || s.is_none() || v.is_none() || a.is_none() {
-                return Err(ParseError::InvalidHsv);
+            if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
+                let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
+                return Ok(Color {
+                    r: clamp0_1(r),
+                    g: clamp0_1(g),
+                    b: clamp0_1(b),
+                    a: clamp0_1(a),
+                });
             }
-            let (r, g, b) = hsv_to_rgb(
-                normalize_angle(h.unwrap()),
-                clamp0_1(s.unwrap()),
-                clamp0_1(v.unwrap()),
-            );
-            return Ok(Color {
-                r: clamp0_1(r),
-                g: clamp0_1(g),
-                b: clamp0_1(b),
-                a: clamp0_1(a.unwrap()),
-            });
+            return Err(ParseError::InvalidHsv);
         }
     }
 
@@ -391,8 +394,7 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
 }
 
 fn parse_percent_or_float(s: &str) -> Option<f64> {
-    if s.ends_with('%') {
-        let s = s.strip_suffix("%").unwrap();
+    if let Some(s) = s.strip_suffix("%") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t / 100.);
         }
@@ -405,8 +407,7 @@ fn parse_percent_or_float(s: &str) -> Option<f64> {
 }
 
 fn parse_percent_or_255(s: &str) -> Option<f64> {
-    if s.ends_with('%') {
-        let s = s.strip_suffix("%").unwrap();
+    if let Some(s) = s.strip_suffix("%") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t / 100.);
         }
@@ -419,29 +420,25 @@ fn parse_percent_or_255(s: &str) -> Option<f64> {
 }
 
 fn parse_angle(s: &str) -> Option<f64> {
-    if s.ends_with("deg") {
-        let s = s.strip_suffix("deg").unwrap();
+    if let Some(s) = s.strip_suffix("deg") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t);
         }
         return None;
     }
-    if s.ends_with("grad") {
-        let s = s.strip_suffix("grad").unwrap();
+    if let Some(s) = s.strip_suffix("grad") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t * 360. / 400.);
         }
         return None;
     }
-    if s.ends_with("rad") {
-        let s = s.strip_suffix("rad").unwrap();
+    if let Some(s) = s.strip_suffix("rad") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t * 180. / PI);
         }
         return None;
     }
-    if s.ends_with("turn") {
-        let s = s.strip_suffix("turn").unwrap();
+    if let Some(s) = s.strip_suffix("turn") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t * 360.);
         }
@@ -454,19 +451,19 @@ fn parse_angle(s: &str) -> Option<f64> {
 }
 
 fn normalize_angle(t: f64) -> f64 {
-    let mut t = t % 360.0;
-    if t < 0.0 {
-        t += 360.0;
+    let mut t = t % 360.;
+    if t < 0. {
+        t += 360.;
     }
     t
 }
 
 fn clamp0_1(t: f64) -> f64 {
-    if t < 0.0 {
-        return 0.0;
+    if t < 0. {
+        return 0.;
     }
-    if t > 1.0 {
-        return 1.0;
+    if t > 1. {
+        return 1.;
     }
     t
 }

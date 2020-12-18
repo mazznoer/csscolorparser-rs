@@ -1,13 +1,11 @@
 language: rust
 
-sudo: required
-
 rust:
   - stable
   - beta
   - nightly
 
-matrix:
+jobs:
   allow_failures:
     - rust: nightly
 

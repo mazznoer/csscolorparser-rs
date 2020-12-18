@@ -1,6 +1,6 @@
 extern crate csscolorparser;
 
-use csscolorparser::parse;
+use csscolorparser::{parse, Color};
 
 #[test]
 fn test_parser() {
@@ -18,8 +18,10 @@ fn test_parser() {
         ("hsv(0 0% 19%)", (48, 48, 48, 255)),
     ];
     for (s, expected) in test_data {
-        let c = parse(s).unwrap().rgba_u8();
-        assert_eq!(expected, c);
+        let a = parse(s).unwrap().rgba_u8();
+        let b = s.parse::<Color>().unwrap().rgba_u8();
+        assert_eq!(expected, a);
+        assert_eq!(expected, b);
     }
 }
 

@@ -16,7 +16,7 @@ Add `csscolorparser` to your `Cargo.toml`
 
 ```
 [dependencies]
-csscolorparser = "0.1.0"
+csscolorparser = "0.2.0"
 ```
 
 ```rust

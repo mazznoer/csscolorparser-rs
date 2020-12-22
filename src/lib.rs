@@ -24,24 +24,91 @@
 //! assert_eq!(c.to_hex_string(), "#ff00007f");
 //! ```
 
-#![allow(clippy::many_single_char_names, clippy::float_cmp)]
+#![allow(clippy::many_single_char_names)]
 
 use std::error::Error as StdError;
 use std::f64::consts::PI;
 use std::fmt;
 use std::str::FromStr;
 
-/// The output color
+/// The color
 #[derive(Debug, Clone, PartialEq)]
 pub struct Color {
-    pub r: f64,
-    pub g: f64,
-    pub b: f64,
-    pub a: f64,
+    r: f64,
+    g: f64,
+    b: f64,
+    a: f64,
 }
 
 impl Color {
-    /// Get red, green, blue, and alpha in the range [0.0, 1.0].
+    /// r, g, b in the range [0, 1]
+    pub fn from_rgb(r: f64, g: f64, b: f64) -> Color {
+        Color { r, g, b, a: 1. }
+    }
+
+    /// r, g, b, a in the range [0, 1]
+    pub fn from_rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
+        Color { r, g, b, a }
+    }
+
+    /// r, g, b in the range [0, 255]
+    pub fn from_rgb_u8(r: u8, g: u8, b: u8) -> Color {
+        Color {
+            r: r as f64 / 255.,
+            g: g as f64 / 255.,
+            b: b as f64 / 255.,
+            a: 1.,
+        }
+    }
+
+    /// r, g, b, a in the range [0, 255]
+    pub fn from_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
+        Color {
+            r: r as f64 / 255.,
+            g: g as f64 / 255.,
+            b: b as f64 / 255.,
+            a: a as f64 / 255.,
+        }
+    }
+
+    /// Hue (h) in the range [0, 360].
+    /// Saturation (s) and value (v) in the range [0, 1].
+    pub fn from_hsv(h: f64, s: f64, v: f64) -> Color {
+        Color::from_hsva(h, s, v, 1.)
+    }
+
+    pub fn from_hsva(h: f64, s: f64, v: f64, a: f64) -> Color {
+        let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
+        Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+    }
+
+    /// Hue (h) in the range [0, 360].
+    /// Saturation (s) and lightness (l) in the range [0, 1].
+    pub fn from_hsl(h: f64, s: f64, l: f64) -> Color {
+        Color::from_hsla(h, s, l, 1.)
+    }
+
+    pub fn from_hsla(h: f64, s: f64, l: f64, a: f64) -> Color {
+        let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
+        Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+    }
+
+    /// Hue (h) in the range [0, 360].
+    /// Whiteness (w) and blackness (b) in the range [0, 1].
+    pub fn from_hwb(h: f64, w: f64, b: f64) -> Color {
+        Color::from_hwba(h, w, b, 1.)
+    }
+
+    pub fn from_hwba(h: f64, w: f64, b: f64, a: f64) -> Color {
+        let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
+        Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
+    }
+
+    pub fn from_html(s: &str) -> Result<Color, ParseError> {
+        parse(s)
+    }
+
+    /// Get red, green, blue, and alpha in the range [0, 1].
     pub fn rgba(&self) -> (f64, f64, f64, f64) {
         (self.r, self.g, self.b, self.a)
     }
@@ -49,10 +116,10 @@ impl Color {
     /// Get red, green, blue, and alpha in the range [0, 255].
     pub fn rgba_u8(&self) -> (u8, u8, u8, u8) {
         (
-            (self.r * 255.0) as u8,
-            (self.g * 255.0) as u8,
-            (self.b * 255.0) as u8,
-            (self.a * 255.0) as u8,
+            (self.r * 255.) as u8,
+            (self.g * 255.) as u8,
+            (self.b * 255.) as u8,
+            (self.a * 255.) as u8,
         )
     }
 
@@ -68,17 +135,35 @@ impl Color {
     /// Get the CSS `rgb()` format string.
     pub fn to_rgb_string(&self) -> String {
         let (r, g, b, _) = self.rgba_u8();
-        if self.a < 1.0 {
+        if self.a < 1. {
             return format!("rgba({},{},{},{})", r, g, b, self.a);
         }
         format!("rgb({},{},{})", r, g, b)
+    }
+
+    pub fn interpolate_rgb(&self, other: &Color, t: f64) -> Color {
+        Color {
+            r: self.r + t * (other.r - self.r),
+            g: self.g + t * (other.g - self.g),
+            b: self.b + t * (other.b - self.b),
+            a: self.a + t * (other.a - self.a),
+        }
+    }
+
+    pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
+        Color {
+            r: (self.r.powi(2) * (1. - t) + other.r.powi(2) * t).sqrt(),
+            g: (self.g.powi(2) * (1. - t) + other.g.powi(2) * t).sqrt(),
+            b: (self.b.powi(2) * (1. - t) + other.b.powi(2) * t).sqrt(),
+            a: (self.a.powi(2) * (1. - t) + other.a.powi(2) * t).sqrt(),
+        }
     }
 }
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (r, g, b, a) = self.rgba();
-        write!(f, "Color({}, {}, {}, {})", r, g, b, a)
+        write!(f, "RGBA({},{},{},{})", r, g, b, a)
     }
 }
 
@@ -147,7 +232,8 @@ impl StdError for ParseError {
 ///
 /// ## Supported Format
 ///
-/// It support named colors, hexadecimal (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`), `rgb()`, `rgba()`, `hsl()`, `hsla()`, `hwb()`, and `hsv()`.
+/// It support named colors, hexadecimal (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`), `rgb()`, `rgba()`,
+/// `hsl()`, `hsla()`, `hwb()`, and `hsv()`.
 ///
 /// ```text
 /// ------ Example color format
@@ -180,21 +266,11 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
     let s = s.trim().to_lowercase();
 
     if s == "transparent" {
-        return Ok(Color {
-            r: 0.0,
-            g: 0.0,
-            b: 0.0,
-            a: 0.0,
-        });
+        return Ok(Color::from_rgba(0., 0., 0., 0.));
     }
 
     if let Some(c) = named_colors(&s) {
-        return Ok(Color {
-            r: c[0] as f64 / 255.0,
-            g: c[1] as f64 / 255.0,
-            b: c[2] as f64 / 255.0,
-            a: 1.0,
-        });
+        return Ok(Color::from_rgb_u8(c[0], c[1], c[2]));
     }
 
     if let Some(s) = s.strip_prefix("#") {
@@ -210,7 +286,7 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
         let params: Vec<&str> = s.split_whitespace().collect();
         let p_len = params.len();
 
-        let mut a = Some(1.0);
+        let mut a = Some(1.);
 
         if *fname == "rgb" || *fname == "rgba" {
             if p_len != 3 && p_len != 4 {
@@ -242,16 +318,10 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
                 a = parse_percent_or_float(params[3]);
             }
             if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
-                let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
-                return Ok(Color {
-                    r: clamp0_1(r),
-                    g: clamp0_1(g),
-                    b: clamp0_1(b),
-                    a: clamp0_1(a),
-                });
+                return Ok(Color::from_hsla(h, s, l, a));
             }
             return Err(ParseError::InvalidHsl);
-        } else if *fname == "hwb" {
+        } else if *fname == "hwb" || *fname == "hwba" {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHwb);
             }
@@ -262,16 +332,10 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
                 a = parse_percent_or_float(params[3]);
             }
             if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
-                let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
-                return Ok(Color {
-                    r: clamp0_1(r),
-                    g: clamp0_1(g),
-                    b: clamp0_1(b),
-                    a: clamp0_1(a),
-                });
+                return Ok(Color::from_hwba(h, w, b, a));
             }
             return Err(ParseError::InvalidHwb);
-        } else if *fname == "hsv" {
+        } else if *fname == "hsv" || *fname == "hsva" {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHsv);
             }
@@ -282,13 +346,7 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
                 a = parse_percent_or_float(params[3]);
             }
             if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
-                let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
-                return Ok(Color {
-                    r: clamp0_1(r),
-                    g: clamp0_1(g),
-                    b: clamp0_1(b),
-                    a: clamp0_1(a),
-                });
+                return Ok(Color::from_hsva(h, s, v, a));
             }
             return Err(ParseError::InvalidHsv);
         }
@@ -318,24 +376,19 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn StdError>> {
     } else {
         return Err(Box::new(ParseError::InvalidHex));
     }
-    Ok(Color {
-        r: r as f64 / 255.,
-        g: g as f64 / 255.,
-        b: b as f64 / 255.,
-        a: a as f64 / 255.,
-    })
+    Ok(Color::from_rgba_u8(r, g, b, a))
 }
 
 fn hue_to_rgb(n1: f64, n2: f64, h: f64) -> f64 {
-    let h = h % 6.0;
-    if h < 1.0 {
+    let h = h % 6.;
+    if h < 1. {
         return n1 + ((n2 - n1) * h);
     }
-    if h < 3.0 {
+    if h < 3. {
         return n2;
     }
-    if h < 4.0 {
-        return n1 + ((n2 - n1) * (4.0 - h));
+    if h < 4. {
+        return n1 + ((n2 - n1) * (4. - h));
     }
     n1
 }
@@ -344,45 +397,46 @@ fn hue_to_rgb(n1: f64, n2: f64, h: f64) -> f64 {
 // s, l = 0..1
 // r, g, b = 0..1
 fn hsl_to_rgb(h: f64, s: f64, l: f64) -> (f64, f64, f64) {
-    if s == 0.0 {
+    if s == 0. {
         return (l, l, l);
     }
     let n2;
     if l < 0.5 {
-        n2 = l * (1.0 + s);
+        n2 = l * (1. + s);
     } else {
         n2 = l + s - (l * s);
     }
-    let n1 = 2.0 * l - n2;
-    let h = h / 60.0;
-    let r = hue_to_rgb(n1, n2, h + 2.0);
+    let n1 = 2. * l - n2;
+    let h = h / 60.;
+    let r = hue_to_rgb(n1, n2, h + 2.);
     let g = hue_to_rgb(n1, n2, h);
-    let b = hue_to_rgb(n1, n2, h - 2.0);
+    let b = hue_to_rgb(n1, n2, h - 2.);
     (r, g, b)
 }
 
 fn hwb_to_rgb(hue: f64, white: f64, black: f64) -> (f64, f64, f64) {
-    if white + black >= 1.0 {
+    if white + black >= 1. {
         let l = white / (white + black);
         return (l, l, l);
     }
-    let (r, g, b) = hsl_to_rgb(hue, 1.0, 0.5);
-    let r = r * (1.0 - white - black) + white;
-    let g = g * (1.0 - white - black) + white;
-    let b = b * (1.0 - white - black) + white;
+    let (r, g, b) = hsl_to_rgb(hue, 1., 0.5);
+    let r = r * (1. - white - black) + white;
+    let g = g * (1. - white - black) + white;
+    let b = b * (1. - white - black) + white;
     (r, g, b)
 }
 
+#[allow(clippy::float_cmp)]
 fn hsv_to_hsl(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
     let mut s = s;
-    let l = (2.0 - s) * v / 2.0;
-    if l != 0.0 {
-        if l == 1.0 {
-            s = 0.0;
+    let l = (2. - s) * v / 2.;
+    if l != 0. {
+        if l == 1. {
+            s = 0.;
         } else if l < 0.5 {
-            s = s * v / (l * 2.0);
+            s = s * v / (l * 2.);
         } else {
-            s = s * v / (2.0 - l * 2.0);
+            s = s * v / (2. - l * 2.);
         }
     }
     (h, s, l)
@@ -631,15 +685,15 @@ mod tests {
     #[test]
     fn test_parse_angle() {
         let data = vec![
-            ("360", 360.0),
+            ("360", 360.),
             ("127.356", 127.356),
-            ("+120deg", 120.0),
-            ("90deg", 90.0),
-            ("-127deg", -127.0),
-            ("100grad", 90.0),
-            ("1.5707963267948966rad", 90.0),
-            ("0.25turn", 90.0),
-            ("-0.25turn", -90.0),
+            ("+120deg", 120.),
+            ("90deg", 90.),
+            ("-127deg", -127.),
+            ("100grad", 90.),
+            ("1.5707963267948966rad", 90.),
+            ("0.25turn", 90.),
+            ("-0.25turn", -90.),
         ];
         for (s, expected) in data {
             let c = parse_angle(s);
@@ -650,13 +704,13 @@ mod tests {
     #[test]
     fn test_normalize_angle() {
         let data = vec![
-            (0.0, 0.0),
-            (360.0, 0.0),
-            (400.0, 40.0),
-            (1155.0, 75.0),
-            (-360.0, 0.0),
-            (-90.0, 270.0),
-            (-765.0, 315.0),
+            (0., 0.),
+            (360., 0.),
+            (400., 40.),
+            (1155., 75.),
+            (-360., 0.),
+            (-90., 270.),
+            (-765., 315.),
         ];
         for (x, expected) in data {
             let c = normalize_angle(x);

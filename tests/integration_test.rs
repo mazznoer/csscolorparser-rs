@@ -3,6 +3,31 @@ extern crate csscolorparser;
 use csscolorparser::{parse, Color};
 
 #[test]
+fn test_color() {
+    let c = Color::from_rgb(1., 0., 0.);
+    assert_eq!(c.rgba(), (1., 0., 0., 1.));
+    assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+    assert_eq!(c.to_hex_string(), "#ff0000");
+    assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+
+    let data = vec![
+        Color::from_rgb(1., 0., 0.),
+        Color::from_rgba(1., 0., 0., 1.),
+        Color::from_rgb_u8(255, 0, 0),
+        Color::from_rgba_u8(255, 0, 0, 255),
+        Color::from_hsv(0., 1., 1.),
+        Color::from_hsl(360., 1., 0.5),
+        Color::from_hwb(0., 0., 0.),
+        Color::from_html("red").unwrap(),
+        Color::from_html("#f00").unwrap(),
+        Color::from_html("hsv(360,100%,100%)").unwrap(),
+    ];
+    for c in data {
+        assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+    }
+}
+
+#[test]
 fn test_parser() {
     let test_data = vec![
         ("transparent", (0, 0, 0, 0)),
@@ -20,8 +45,10 @@ fn test_parser() {
     for (s, expected) in test_data {
         let a = parse(s).unwrap().rgba_u8();
         let b = s.parse::<Color>().unwrap().rgba_u8();
+        let c = Color::from_html(s).unwrap().rgba_u8();
         assert_eq!(expected, a);
         assert_eq!(expected, b);
+        assert_eq!(expected, c);
     }
 }
 
@@ -62,7 +89,7 @@ fn test_red() {
         "rgb(100% 0% 0%)",
         "rgb(200% -10% -100%)", // clamp to 0%..100%
         "rgb(255 0 0 100%)",
-        "RGB( 255 , 0 , 0 )",
+        " RGB ( 255 , 0 , 0 ) ",
         "RGB( 255   0   0 )",
         "hsl(0,100%,50%)",
         "hsl(360 100% 50%)",

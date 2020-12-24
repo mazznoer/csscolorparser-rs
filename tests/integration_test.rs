@@ -9,6 +9,14 @@ fn test_color() {
     assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
     assert_eq!(c.to_hex_string(), "#ff0000");
     assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+    assert_eq!(c.to_string(), "RGBA(1,0,0,1)");
+
+    let c = Color::from_rgba(1., 0., 0., 0.5);
+    assert_eq!(c.rgba(), (1., 0., 0., 0.5));
+    assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
+    assert_eq!(c.to_hex_string(), "#ff00007f");
+    assert_eq!(c.to_rgb_string(), "rgba(255,0,0,0.5)");
+    assert_eq!(c.to_string(), "RGBA(1,0,0,0.5)");
 
     let data = vec![
         Color::from_rgb(1., 0., 0.),
@@ -25,6 +33,21 @@ fn test_color() {
     for c in data {
         assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
     }
+
+    let a = Color::from_rgb(1., 1., 1.);
+    let b = Color::from_rgb(0., 0., 0.);
+
+    assert_eq!(a.interpolate_rgb(&b, 0.0).rgba_u8(), (255, 255, 255, 255));
+    assert_eq!(a.interpolate_rgb(&b, 0.5).rgba_u8(), (127, 127, 127, 255));
+    assert_eq!(a.interpolate_rgb(&b, 1.0).rgba_u8(), (0, 0, 0, 255));
+
+    assert_eq!(b.interpolate_rgb(&a, 0.0).rgba_u8(), (0, 0, 0, 255));
+    assert_eq!(b.interpolate_rgb(&a, 0.5).rgba_u8(), (127, 127, 127, 255));
+    assert_eq!(b.interpolate_rgb(&a, 1.0).rgba_u8(), (255, 255, 255, 255));
+
+    assert_eq!(a.interpolate_lrgb(&b, 0.0).rgba_u8(), (255, 255, 255, 255));
+    assert_eq!(a.interpolate_lrgb(&b, 0.5).rgba_u8(), (180, 180, 180, 255));
+    assert_eq!(a.interpolate_lrgb(&b, 1.0).rgba_u8(), (0, 0, 0, 255));
 }
 
 #[test]
@@ -184,7 +207,7 @@ fn test_lime_alpha() {
 
 #[test]
 fn test_invalid_format() {
-    let data = vec![
+    let test_data = vec![
         "",
         "bloodred",
         "#78afzd",
@@ -205,8 +228,22 @@ fn test_invalid_format() {
         "hsv(120 100% 100% 1 50%)",
         "hsv(120 XXX 100%)",
     ];
-    for s in data {
+    for s in test_data {
         let c = parse(s);
         assert!(c.is_err());
+    }
+
+    let test_data = vec![
+        ("#78afzd", "Invalid hex format."),
+        ("rgb(255,0)", "Invalid rgb format."),
+        ("hsl(360,100%,50%,100%,100%)", "Invalid hsl format."),
+        ("hsv(360)", "Invalid hsv format."),
+        ("hwb(270,0%,0%,x)", "Invalid hwb format."),
+        ("blood", "Invalid unknown format."),
+        ("cmyk(0,0,0,0)", "Invalid unknown format."),
+    ];
+    for (s, err_msg) in test_data {
+        let c = parse(s);
+        assert_eq!(c.unwrap_err().to_string(), err_msg);
     }
 }

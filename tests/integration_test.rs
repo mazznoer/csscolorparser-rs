@@ -26,6 +26,11 @@ fn test_color() {
     assert_eq!(c.to_hsla(), (120., 1., 0.5, 1.));
     assert_eq!(c.to_hwba(), (120., 0., 0., 1.));
 
+    let c = Color::from_rgb(0.5, 0.5, 0.5);
+    assert_eq!(c.to_hsva(), (0., 0., 0.5, 1.));
+    assert_eq!(c.to_hsla(), (0., 0., 0.5, 1.));
+    assert_eq!(c.to_hwba(), (0., 0.5, 0.5, 1.));
+
     let data = vec![
         Color::from_rgb(1., 0., 0.),
         Color::from_rgba(1., 0., 0., 1.),
@@ -56,6 +61,13 @@ fn test_color() {
     assert_eq!(a.interpolate_lrgb(&b, 0.0).rgba_u8(), (255, 255, 255, 255));
     assert_eq!(a.interpolate_lrgb(&b, 0.5).rgba_u8(), (180, 180, 180, 255));
     assert_eq!(a.interpolate_lrgb(&b, 1.0).rgba_u8(), (0, 0, 0, 255));
+
+    let a = Color::from_rgb(0., 1., 0.);
+    let b = Color::from_rgb(0., 0., 1.);
+
+    assert_eq!(a.interpolate_hsv(&b, 0.0).rgba_u8(), (0, 255, 0, 255));
+    assert_eq!(a.interpolate_hsv(&b, 0.5).rgba_u8(), (0, 255, 255, 255));
+    assert_eq!(a.interpolate_hsv(&b, 1.0).rgba_u8(), (0, 0, 255, 255));
 }
 
 #[test]

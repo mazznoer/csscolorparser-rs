@@ -125,6 +125,21 @@ impl Color {
         )
     }
 
+    pub fn to_hsva(&self) -> (f64, f64, f64, f64) {
+        let (h, s, v) = rgb_to_hsv(self.r, self.g, self.b);
+        (h, s, v, self.a)
+    }
+
+    pub fn to_hsla(&self) -> (f64, f64, f64, f64) {
+        let (h, s, l) = rgb_to_hsl(self.r, self.g, self.b);
+        (h, s, l, self.a)
+    }
+
+    pub fn to_hwba(&self) -> (f64, f64, f64, f64) {
+        let (h, w, b) = rgb_to_hwb(self.r, self.g, self.b);
+        (h, w, b, self.a)
+    }
+
     /// Get the hexadecimal color string.
     pub fn to_hex_string(&self) -> String {
         let (r, g, b, a) = self.rgba_u8();
@@ -159,6 +174,17 @@ impl Color {
             b: (self.b.powi(2) * (1. - t) + other.b.powi(2) * t).sqrt(),
             a: (self.a.powi(2) * (1. - t) + other.a.powi(2) * t).sqrt(),
         }
+    }
+
+    pub fn interpolate_hsv(&self, other: &Color, t: f64) -> Color {
+        let (h1, s1, v1, a1) = self.to_hsva();
+        let (h2, s2, v2, a2) = other.to_hsva();
+        Color::from_hsva(
+            interp_angle(h1, h2, t),
+            s1 + t * (s2 - s1),
+            v1 + t * (v2 - v1),
+            a1 + t * (a2 - a1),
+        )
     }
 }
 
@@ -449,6 +475,66 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
     hsl_to_rgb(h, s, l)
 }
 
+#[allow(clippy::float_cmp)]
+fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
+    let v = r.max(g.max(b));
+    let d = v - r.min(g.min(b));
+    if d == 0. {
+        return (0., 0., v);
+    }
+    let s = d / v;
+    let dr = (v - r) / d;
+    let dg = (v - g) / d;
+    let db = (v - b) / d;
+    let mut h;
+    if r == v {
+        h = db - dg;
+    } else if g == v {
+        h = 2. + dr - db;
+    } else {
+        h = 4. + dg - dr;
+    }
+    h = (h * 60.) % 360.;
+    (h, s, v)
+}
+
+#[allow(clippy::float_cmp)]
+fn rgb_to_hsl(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
+    let min = r.min(g.min(b));
+    let max = r.max(g.max(b));
+    let l = (max + min) / 2.;
+    if min == max {
+        return (0., 0., l);
+    }
+    let d = max - min;
+    let s;
+    if l < 0.5 {
+        s = d / (max + min);
+    } else {
+        s = d / (2. - max - min);
+    }
+    let dr = (max - r) / d;
+    let dg = (max - g) / d;
+    let db = (max - b) / d;
+    let mut h;
+    if r == max {
+        h = db - dg;
+    } else if g == max {
+        h = 2. + dr - db;
+    } else {
+        h = 4. + dg - dr;
+    }
+    h = (h * 60.) % 360.;
+    (h, s, l)
+}
+
+fn rgb_to_hwb(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
+    let (hue, _, _) = rgb_to_hsl(r, g, b);
+    let white = r.min(g.min(b));
+    let black = 1. - r.max(g.max(b));
+    (hue, white, black)
+}
+
 fn parse_percent_or_float(s: &str) -> Option<f64> {
     if let Some(s) = s.strip_suffix("%") {
         if let Ok(t) = s.parse::<f64>() {
@@ -512,6 +598,11 @@ fn normalize_angle(t: f64) -> f64 {
         t += 360.;
     }
     t
+}
+
+fn interp_angle(a0: f64, a1: f64, t: f64) -> f64 {
+    let delta = (((a1 - a0) % 360.) + 540.) % 360. - 180.;
+    (a0 + t * delta + 360.) % 360.
 }
 
 fn clamp0_1(t: f64) -> f64 {
@@ -714,6 +805,20 @@ mod tests {
         for (x, expected) in data {
             let c = normalize_angle(x);
             assert_eq!(expected, c);
+        }
+    }
+
+    #[test]
+    fn test_interp_angle() {
+        let data = vec![
+            ((0., 360., 0.5), 0.),
+            ((360., 90., 0.), 0.),
+            ((360., 90., 0.5), 45.),
+            ((360., 90., 1.), 90.),
+        ];
+        for ((a, b, t), expected) in data {
+            let v = interp_angle(a, b, t);
+            assert_eq!(expected, v);
         }
     }
 }

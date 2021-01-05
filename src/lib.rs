@@ -495,7 +495,7 @@ fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
         h = 4. + dg - dr;
     }
     h = (h * 60.) % 360.;
-    (h, s, v)
+    (normalize_angle(h), s, v)
 }
 
 #[allow(clippy::float_cmp)]
@@ -525,7 +525,7 @@ fn rgb_to_hsl(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
         h = 4. + dg - dr;
     }
     h = (h * 60.) % 360.;
-    (h, s, l)
+    (normalize_angle(h), s, l)
 }
 
 fn rgb_to_hwb(r: f64, g: f64, b: f64) -> (f64, f64, f64) {

@@ -1,8 +1,63 @@
 //! # Overview
 //!
-//! Rust library for parsing CSS color string.
+//! Rust library for parsing CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
+//!
+//! ## Supported Color Format
+//!
+//! * [Named colors](https://www.w3.org/TR/css-color-4/#named-colors)
+//! * RGB hexadecimal
+//!      + Short format `#rgb`
+//!      + Short format with alpha `#rgba`
+//!      + Long format `#rrggbb`
+//!      + Long format with alpha `#rrggbbaa`
+//! * `rgb()` and `rgba()`
+//! * `hsl()` and `hsla()`
+//! * `hwb()`
+//! * `hsv()` - Not in CSS standard.
+//!
+//! Not yet supported: `lab()`, `lch()`.
+//!
+//! ### Example color format
+//!
+//! ```text
+//! transparent
+//! gold
+//! rebeccapurple
+//! lime
+//! #0f0
+//! #0f0f
+//! #00ff00
+//! #00ff00ff
+//! rgb(0,255,0)
+//! rgb(0% 100% 0%)
+//! rgb(0 255 0 / 100%)
+//! rgba(0,255,0,1)
+//! hsl(120,100%,50%)
+//! hsl(120deg 100% 50%)
+//! hsl(-240 100% 50%)
+//! hsl(-240deg 100% 50%)
+//! hsl(0.3333turn 100% 50%)
+//! hsl(133.333grad 100% 50%)
+//! hsl(2.0944rad 100% 50%)
+//! hsla(120,100%,50%,100%)
+//! hwb(120 0% 0%)
+//! hwb(480deg 0% 0% / 100%)
+//! hsv(120,100%,100%)
+//! hsv(120deg 100% 100% / 100%)
+//! ```
+//!
+//! ## Usage
+//!
+//! Add `csscolorparser` to your `Cargo.toml`
+//!
+//! ```text
+//! [dependencies]
+//! csscolorparser = "0.2.0"
+//! ```
 //!
 //! ## Examples
+//!
+//! Using [`parse()`](fn.parse.html) function.
 //!
 //! ```rust
 //! let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
@@ -13,7 +68,7 @@
 //! assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
 //! ```
 //!
-//! Hexadecimal color format with transparency
+//! Using `parse()` method on string.
 //!
 //! ```rust
 //! use csscolorparser::Color;
@@ -22,6 +77,18 @@
 //!
 //! assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
 //! assert_eq!(c.to_hex_string(), "#ff00007f");
+//! ```
+//!
+//! Using [`Color::from_html()`](struct.Color.html#method.from_html).
+//!
+//! ```rust
+//! use csscolorparser::Color;
+//!
+//! let c = Color::from_html("skyblue").unwrap();
+//!
+//! assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
+//! assert_eq!(c.to_hex_string(), "#87ceeb");
+//! assert_eq!(c.to_rgb_string(), "rgb(135,206,235)");
 //! ```
 
 #![allow(clippy::many_single_char_names)]
@@ -43,17 +110,30 @@ pub struct Color {
 }
 
 impl Color {
-    /// r, g, b in the range [0, 1]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
     pub fn from_rgb(r: f64, g: f64, b: f64) -> Color {
         Color { r, g, b, a: 1. }
     }
 
-    /// r, g, b, a in the range [0, 1]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
+    /// * `a`: Alpha value [0..1]
     pub fn from_rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
         Color { r, g, b, a }
     }
 
-    /// r, g, b in the range [0, 255]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
     pub fn from_rgb_u8(r: u8, g: u8, b: u8) -> Color {
         Color {
             r: r as f64 / 255.,
@@ -63,7 +143,12 @@ impl Color {
         }
     }
 
-    /// r, g, b, a in the range [0, 255]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    /// * `a`: Alpha value [0..255]
     pub fn from_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color {
             r: r as f64 / 255.,
@@ -73,49 +158,93 @@ impl Color {
         }
     }
 
-    /// Hue (h) in the range [0, 360].
-    /// Saturation (s) and value (v) in the range [0, 1].
+    /// Arguments:
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `v`: Value [0..1]
     pub fn from_hsv(h: f64, s: f64, v: f64) -> Color {
         Color::from_hsva(h, s, v, 1.)
     }
 
+    /// Arguments:
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `v`: Value [0..1]
+    /// * `a`: Alpha [0..1]
     pub fn from_hsva(h: f64, s: f64, v: f64, a: f64) -> Color {
         let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
         Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
     }
 
-    /// Hue (h) in the range [0, 360].
-    /// Saturation (s) and lightness (l) in the range [0, 1].
+    /// Arguments:
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `l`: Lightness [0..1]
     pub fn from_hsl(h: f64, s: f64, l: f64) -> Color {
         Color::from_hsla(h, s, l, 1.)
     }
 
+    /// Arguments:
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `l`: Lightness [0..1]
+    /// * `a`: Alpha [0..1]
     pub fn from_hsla(h: f64, s: f64, l: f64, a: f64) -> Color {
         let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
         Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
     }
 
-    /// Hue (h) in the range [0, 360].
-    /// Whiteness (w) and blackness (b) in the range [0, 1].
+    /// Arguments:
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `w`: Whiteness [0..1]
+    /// * `b`: Blackness [0..1]
     pub fn from_hwb(h: f64, w: f64, b: f64) -> Color {
         Color::from_hwba(h, w, b, 1.)
     }
 
+    /// Arguments:
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `w`: Whiteness [0..1]
+    /// * `b`: Blackness [0..1]
+    /// * `a`: Alpha [0..1]
     pub fn from_hwba(h: f64, w: f64, b: f64, a: f64) -> Color {
         let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
         Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
     }
 
+    /// Create color from CSS color string.
+    ///
+    /// # Examples
+    /// ```
+    /// use csscolorparser::Color;
+    ///
+    /// let c = Color::from_html("red").unwrap();
+    ///
+    /// assert_eq!(c.rgba(), (1., 0., 0., 1.));
+    /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+    /// assert_eq!(c.to_hex_string(), "#ff0000");
+    /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+    /// ```
     pub fn from_html(s: &str) -> Result<Color, ParseError> {
         parse(s)
     }
 
-    /// Get red, green, blue, and alpha in the range [0, 1].
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
     pub fn rgba(&self) -> (f64, f64, f64, f64) {
         (self.r, self.g, self.b, self.a)
     }
 
-    /// Get red, green, blue, and alpha in the range [0, 255].
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
     pub fn rgba_u8(&self) -> (u8, u8, u8, u8) {
         (
             (self.r * 255.) as u8,
@@ -125,22 +254,40 @@ impl Color {
         )
     }
 
+    /// Returns: `(h, s, v, a)`
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `v`: Value [0..1]
+    /// * `a`: Alpha [0..1]
     pub fn to_hsva(&self) -> (f64, f64, f64, f64) {
         let (h, s, v) = rgb_to_hsv(self.r, self.g, self.b);
         (h, s, v, self.a)
     }
 
+    /// Returns: `(h, s, l, a)`
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `l`: Lightness [0..1]
+    /// * `a`: Alpha [0..1]
     pub fn to_hsla(&self) -> (f64, f64, f64, f64) {
         let (h, s, l) = rgb_to_hsl(self.r, self.g, self.b);
         (h, s, l, self.a)
     }
 
+    /// Returns: `(h, w, b, a)`
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `w`: Whiteness [0..1]
+    /// * `b`: Blackness [0..1]
+    /// * `a`: Alpha [0..1]
     pub fn to_hwba(&self) -> (f64, f64, f64, f64) {
         let (h, w, b) = rgb_to_hwb(self.r, self.g, self.b);
         (h, w, b, self.a)
     }
 
-    /// Get the hexadecimal color string.
+    /// Get the RGB hexadecimal color string.
     pub fn to_hex_string(&self) -> String {
         let (r, g, b, a) = self.rgba_u8();
         if a < 255 {
@@ -158,6 +305,7 @@ impl Color {
         format!("rgb({},{},{})", r, g, b)
     }
 
+    /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
     pub fn interpolate_rgb(&self, other: &Color, t: f64) -> Color {
         Color {
             r: self.r + t * (other.r - self.r),
@@ -167,6 +315,7 @@ impl Color {
         }
     }
 
+    /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
     pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
         Color {
             r: (self.r.powi(2) * (1. - t) + other.r.powi(2) * t).sqrt(),
@@ -176,6 +325,7 @@ impl Color {
         }
     }
 
+    /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].
     pub fn interpolate_hsv(&self, other: &Color, t: f64) -> Color {
         let (h1, s1, v1, a1) = self.to_hsva();
         let (h2, s2, v2, a2) = other.to_hsva();
@@ -242,53 +392,21 @@ impl StdError for ParseError {
 /// Parse CSS color string
 ///
 /// # Examples
+///
 /// ```
-/// // short hexadecimal format
 /// let c = csscolorparser::parse("#ff0").unwrap();
 /// assert_eq!(c.rgba(), (1., 1., 0., 1.));
 /// assert_eq!(c.rgba_u8(), (255, 255, 0, 255));
 /// assert_eq!(c.to_hex_string(), "#ffff00");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,255,0)");
+/// ```
 ///
-/// // hsl() format
+/// ```
 /// let c = csscolorparser::parse("hsl(360deg,100%,50%)").unwrap();
 /// assert_eq!(c.rgba(), (1., 0., 0., 1.));
 /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
 /// assert_eq!(c.to_hex_string(), "#ff0000");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
-/// ```
-///
-/// ## Supported Format
-///
-/// It support named colors, hexadecimal (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`), `rgb()`, `rgba()`,
-/// `hsl()`, `hsla()`, `hwb()`, and `hsv()`.
-///
-/// ```text
-/// ------ Example color format
-/// transparent
-/// gold
-/// rebeccapurple
-/// lime
-/// #0f0
-/// #0f0f
-/// #00ff00
-/// #00ff00ff
-/// rgb(0,255,0)
-/// rgb(0% 100% 0%)
-/// rgb(0 255 0 / 100%)
-/// rgba(0,255,0,1)
-/// hsl(120,100%,50%)
-/// hsl(120deg 100% 50%)
-/// hsl(-240 100% 50%)
-/// hsl(-240deg 100% 50%)
-/// hsl(0.3333turn 100% 50%)
-/// hsl(133.333grad 100% 50%)
-/// hsl(2.0944rad 100% 50%)
-/// hsla(120,100%,50%,100%)
-/// hwb(120 0% 0%)
-/// hwb(480deg 0% 0% / 100%)
-/// hsv(120,100%,100%)
-/// hsv(120deg 100% 100% / 100%)
 /// ```
 pub fn parse(s: &str) -> Result<Color, ParseError> {
     let s = s.trim().to_lowercase();

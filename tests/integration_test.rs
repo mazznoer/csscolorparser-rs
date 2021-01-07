@@ -13,6 +13,10 @@ fn test_color() {
     assert_eq!(c.to_hsva(), (0., 1., 1., 1.));
     assert_eq!(c.to_hsla(), (0., 1., 0.5, 1.));
     assert_eq!(c.to_hwba(), (0., 0., 0., 1.));
+    assert_eq!(c.red(), 1.);
+    assert_eq!(c.green(), 0.);
+    assert_eq!(c.blue(), 0.);
+    assert_eq!(c.alpha(), 1.);
 
     let c = Color::from_rgba(1., 0., 0., 0.5);
     assert_eq!(c.rgba(), (1., 0., 0., 0.5));

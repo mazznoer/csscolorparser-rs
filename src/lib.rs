@@ -254,6 +254,26 @@ impl Color {
         )
     }
 
+    /// Get the red value [0..1].
+    pub fn red(&self) -> f64 {
+        self.r
+    }
+
+    /// Get the green value [0..1].
+    pub fn green(&self) -> f64 {
+        self.g
+    }
+
+    /// Get the blue value [0..1].
+    pub fn blue(&self) -> f64 {
+        self.b
+    }
+
+    /// Get the alpha value [0..1].
+    pub fn alpha(&self) -> f64 {
+        self.a
+    }
+
     /// Returns: `(h, s, v, a)`
     ///
     /// * `h`: Hue angle [0..360]

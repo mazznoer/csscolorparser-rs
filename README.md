@@ -1,4 +1,4 @@
-# CSS Color Parser for Rust
+# Rust CSS Color Parser
 
 [![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
 [![Documentation](https://docs.rs/csscolorparser/badge.svg)](https://docs.rs/csscolorparser)
@@ -6,38 +6,29 @@
 [![Build Status](https://travis-ci.org/mazznoer/csscolorparser-rs.svg?branch=master)](https://travis-ci.org/mazznoer/csscolorparser-rs)
 [![codecov](https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser-rs)
 
-Rust CSS color parser.
+Rust library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 
-It support W3C's CSS color module level 4.
+## Supported Color Format
 
-## Usage
+* [Named colors](https://www.w3.org/TR/css-color-4/#named-colors)
+* RGB hexadecimal
+     + Short format `#rgb`
+     + Short format with alpha `#rgba`
+     + Long format `#rrggbb`
+     + Long format with alpha `#rrggbbaa`
+* `rgb()` and `rgba()`
+* `hsl()` and `hsla()`
+* `hwb()`
+* `hsv()` - not in CSS standard.
 
-Add `csscolorparser` to your `Cargo.toml`
+Not yet supported: `lab()`, `lch()`.
 
-```
-[dependencies]
-csscolorparser = "0.2.0"
-```
-
-```rust
-let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
-
-assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
-assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
-assert_eq!(c.to_hex_string(), "#ff0000");
-assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
-```
-
-## Supported Format
-
-It support named colors, hexadecimal (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`), `rgb()`, `rgba()`, `hsl()`, `hsla()`, `hwb()`, and `hsv()`.
+### Example Color Format
 
 ```text
---- example color format
 transparent
 gold
 rebeccapurple
-skyblue
 lime
 #0f0
 #0f0f
@@ -61,3 +52,51 @@ hsv(120,100%,100%)
 hsv(120deg 100% 100% / 100%)
 ```
 
+## Usage
+
+Add `csscolorparser` to your `Cargo.toml`
+
+```text
+[dependencies]
+csscolorparser = "0.2.0"
+```
+
+## Examples
+
+Using `parse()` function.
+
+```rust
+let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
+
+assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
+assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+assert_eq!(c.to_hex_string(), "#ff0000");
+assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+```
+
+Using `parse()` method on string.
+
+```rust
+use csscolorparser::Color;
+
+let c = "#ff00007f".parse::<Color>().unwrap();
+
+assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
+assert_eq!(c.to_hex_string(), "#ff00007f");
+```
+
+Using `Color::from_html()`.
+
+```rust
+use csscolorparser::Color;
+
+let c = Color::from_html("skyblue").unwrap();
+
+assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
+assert_eq!(c.to_hex_string(), "#87ceeb");
+assert_eq!(c.to_rgb_string(), "rgb(135,206,235)");
+```
+
+## Links
+
+* [csscolorparser](https://github.com/mazznoer/csscolorparser) - Go version of this library.

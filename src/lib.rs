@@ -1,6 +1,9 @@
+//! [![github](https://img.shields.io/static/v1?logo=github&label=github&message=mazznoer/csscolorparser-rs&color=8da0cb)](https://github.com/mazznoer/csscolorparser-rs/)
+//! [![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
+//!
 //! # Overview
 //!
-//! Rust library for parsing CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
+//! Rust library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 //!
 //! ## Supported Color Format
 //!
@@ -17,7 +20,7 @@
 //!
 //! Not yet supported: `lab()`, `lch()`.
 //!
-//! ### Example color format
+//! ### Example Color Format
 //!
 //! ```text
 //! transparent
@@ -57,7 +60,7 @@
 //!
 //! ## Examples
 //!
-//! Using [`parse()`](fn.parse.html) function.
+//! Using [`csscolorparser::parse()`](fn.parse.html) function.
 //!
 //! ```rust
 //! let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();

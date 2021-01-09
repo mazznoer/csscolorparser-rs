@@ -399,18 +399,7 @@ impl fmt::Display for ParseError {
     }
 }
 
-impl StdError for ParseError {
-    fn description(&self) -> &str {
-        match *self {
-            ParseError::InvalidHex => "Invalid hex format.",
-            ParseError::InvalidRgb => "Invalid rgb format.",
-            ParseError::InvalidHsl => "Invalid hsl format.",
-            ParseError::InvalidHwb => "Invalid hwb format.",
-            ParseError::InvalidHsv => "Invalid hsv format.",
-            ParseError::InvalidUnknown => "Invalid unknown format.",
-        }
-    }
-}
+impl StdError for ParseError {}
 
 /// Parse CSS color string
 ///

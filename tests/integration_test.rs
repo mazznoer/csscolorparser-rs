@@ -20,8 +20,8 @@ fn test_color() {
 
     let c = Color::from_rgba(1., 0., 0., 0.5);
     assert_eq!(c.rgba(), (1., 0., 0., 0.5));
-    assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
-    assert_eq!(c.to_hex_string(), "#ff00007f");
+    assert_eq!(c.rgba_u8(), (255, 0, 0, 128));
+    assert_eq!(c.to_hex_string(), "#ff000080");
     assert_eq!(c.to_rgb_string(), "rgba(255,0,0,0.5)");
     assert_eq!(c.to_string(), "RGBA(1,0,0,0.5)");
 
@@ -55,11 +55,11 @@ fn test_color() {
     let b = Color::from_rgb(0., 0., 0.);
 
     assert_eq!(a.interpolate_rgb(&b, 0.0).rgba_u8(), (255, 255, 255, 255));
-    assert_eq!(a.interpolate_rgb(&b, 0.5).rgba_u8(), (127, 127, 127, 255));
+    assert_eq!(a.interpolate_rgb(&b, 0.5).rgba_u8(), (128, 128, 128, 255));
     assert_eq!(a.interpolate_rgb(&b, 1.0).rgba_u8(), (0, 0, 0, 255));
 
     assert_eq!(b.interpolate_rgb(&a, 0.0).rgba_u8(), (0, 0, 0, 255));
-    assert_eq!(b.interpolate_rgb(&a, 0.5).rgba_u8(), (127, 127, 127, 255));
+    assert_eq!(b.interpolate_rgb(&a, 0.5).rgba_u8(), (128, 128, 128, 255));
     assert_eq!(b.interpolate_rgb(&a, 1.0).rgba_u8(), (255, 255, 255, 255));
 
     assert_eq!(a.interpolate_lrgb(&b, 0.0).rgba_u8(), (255, 255, 255, 255));
@@ -81,11 +81,11 @@ fn test_parser() {
         ("rebeccapurple", (102, 51, 153, 255)),
         ("#ff00ff64", (255, 0, 255, 100)),
         ("rgb(247,179,99)", (247, 179, 99, 255)),
-        ("rgb(50% 50% 50%)", (127, 127, 127, 255)),
+        ("rgb(50% 50% 50%)", (128, 128, 128, 255)),
         ("rgb(247,179,99,0.37)", (247, 179, 99, 94)),
-        ("hsl(270 0% 50%)", (127, 127, 127, 255)),
-        ("hwb(0 50% 50%)", (127, 127, 127, 255)),
-        ("hsv(0 0% 50%)", (127, 127, 127, 255)),
+        ("hsl(270 0% 50%)", (128, 128, 128, 255)),
+        ("hwb(0 50% 50%)", (128, 128, 128, 255)),
+        ("hsv(0 0% 50%)", (128, 128, 128, 255)),
         ("hsv(0 0% 100%)", (255, 255, 255, 255)),
         ("hsv(0 0% 19%)", (48, 48, 48, 255)),
     ];
@@ -212,7 +212,7 @@ fn test_lime() {
 #[test]
 fn test_lime_alpha() {
     let data = vec![
-        "#00ff007f",
+        "#00ff0080",
         "rgb(0,255,0,50%)",
         "rgb(0% 100% 0% / 0.5)",
         "rgba(0%,100%,0%,50%)",
@@ -222,7 +222,7 @@ fn test_lime_alpha() {
         "hwb(120 0% 0% / 50%)",
         "hsv(120 100% 100% / 50%)",
     ];
-    let lime_alpha = (0, 255, 0, 127);
+    let lime_alpha = (0, 255, 0, 128);
     for s in data {
         let c = parse(s).unwrap().rgba_u8();
         assert_eq!(lime_alpha, c);

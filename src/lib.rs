@@ -250,10 +250,10 @@ impl Color {
     /// * Red, green, blue and alpha in the range [0..255]
     pub fn rgba_u8(&self) -> (u8, u8, u8, u8) {
         (
-            (self.r * 255.) as u8,
-            (self.g * 255.) as u8,
-            (self.b * 255.) as u8,
-            (self.a * 255.) as u8,
+            (self.r * 255.).round() as u8,
+            (self.g * 255.).round() as u8,
+            (self.b * 255.).round() as u8,
+            (self.a * 255.).round() as u8,
         )
     }
 
@@ -549,7 +549,7 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn StdError>> {
 }
 
 fn hue_to_rgb(n1: f64, n2: f64, h: f64) -> f64 {
-    let h = h % 6.;
+    let h = modulo(h, 6.);
     if h < 1. {
         return n1 + ((n2 - n1) * h);
     }
@@ -754,6 +754,10 @@ fn clamp0_1(t: f64) -> f64 {
         return 1.;
     }
     t
+}
+
+fn modulo(x: f64, n: f64) -> f64 {
+    (x % n + n) % n
 }
 
 // https://www.w3.org/TR/css-color-4/#named-colors

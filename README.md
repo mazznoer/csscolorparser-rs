@@ -58,17 +58,17 @@ Add `csscolorparser` to your `Cargo.toml`
 
 ```text
 [dependencies]
-csscolorparser = "0.2.0"
+csscolorparser = "0.3.0"
 ```
 
 ## Examples
 
-Using `parse()` function.
+Using `csscolorparser::parse()` function.
 
 ```rust
 let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
 
-assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
+assert_eq!(c.rgba(), (1., 0., 0., 1.));
 assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
 assert_eq!(c.to_hex_string(), "#ff0000");
 assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");

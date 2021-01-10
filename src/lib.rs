@@ -510,6 +510,10 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
         }
     }
 
+    if let Ok(c) = parse_hex(&s) {
+        return Ok(c);
+    }
+
     Err(ParseError::InvalidUnknown)
 }
 

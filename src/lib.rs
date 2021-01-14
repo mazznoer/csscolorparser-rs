@@ -161,6 +161,20 @@ impl Color {
         }
     }
 
+    pub fn from_lrgb(r: f64, g: f64, b: f64) -> Color {
+        Color::from_lrgba(r, g, b, 1.)
+    }
+
+    pub fn from_lrgba(r: f64, g: f64, b: f64, a: f64) -> Color {
+        fn from_linear(x: f64) -> f64 {
+            if x >= 0.0031308 {
+                return 1.055 * x.powf(1. / 2.4) - 0.055;
+            }
+            12.92 * x
+        }
+        Color::from_rgba(from_linear(r), from_linear(g), from_linear(b), a)
+    }
+
     /// Arguments:
     ///
     /// * `h`: Hue angle [0..360]
@@ -219,6 +233,20 @@ impl Color {
     pub fn from_hwba(h: f64, w: f64, b: f64, a: f64) -> Color {
         let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
         Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
+    }
+
+    pub fn from_oklab(l: f64, a: f64, b: f64) -> Color {
+        Color::from_oklaba(l, a, b, 1.)
+    }
+
+    pub fn from_oklaba(l: f64, a: f64, b: f64, alpha: f64) -> Color {
+        let l_ = (l + 0.3963377774 * a + 0.2158037573 * b).powi(3);
+        let m_ = (l - 0.1055613458 * a - 0.0638541728 * b).powi(3);
+        let s_ = (l - 0.0894841775 * a - 1.2914855480 * b).powi(3);
+        let r = 4.0767245293 * l_ - 3.3072168827 * m_ + 0.2307590544 * s_;
+        let g = -1.2681437731 * l_ + 2.6093323231 * m_ - 0.3411344290 * s_;
+        let b = -0.0041119885 * l_ - 0.7034763098 * m_ + 1.7068625689 * s_;
+        Color::from_lrgba(r, g, b, alpha)
     }
 
     /// Create color from CSS color string.
@@ -310,6 +338,32 @@ impl Color {
         (h, w, b, self.a)
     }
 
+    pub fn to_lrgba(&self) -> (f64, f64, f64, f64) {
+        fn to_linear(x: f64) -> f64 {
+            if x >= 0.04045 {
+                return ((x + 0.055) / 1.055).powf(2.4);
+            }
+            x / 12.92
+        }
+        (
+            to_linear(self.r),
+            to_linear(self.g),
+            to_linear(self.b),
+            self.a,
+        )
+    }
+
+    pub fn to_oklaba(&self) -> (f64, f64, f64, f64) {
+        let (r, g, b, _) = self.to_lrgba();
+        let l_ = (0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b).cbrt();
+        let m_ = (0.2118591070 * r + 0.6807189584 * g + 0.1074065790 * b).cbrt();
+        let s_ = (0.0883097947 * r + 0.2818474174 * g + 0.6302613616 * b).cbrt();
+        let l = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
+        let a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
+        let b = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
+        (l, a, b, self.a)
+    }
+
     /// Get the RGB hexadecimal color string.
     pub fn to_hex_string(&self) -> String {
         let (r, g, b, a) = self.rgba_u8();
@@ -357,6 +411,18 @@ impl Color {
             s1 + t * (s2 - s1),
             v1 + t * (v2 - v1),
             a1 + t * (a2 - a1),
+        )
+    }
+
+    /// Blend this color with the other one, in the [Oklab](https://bottosson.github.io/posts/oklab/) color-space. `t` in the range [0..1].
+    pub fn interpolate_oklab(&self, other: &Color, t: f64) -> Color {
+        let (l1, a1, b1, alpha1) = self.to_oklaba();
+        let (l2, a2, b2, alpha2) = other.to_oklaba();
+        Color::from_oklaba(
+            l1 + t * (l2 - l1),
+            a1 + t * (a2 - a1),
+            b1 + t * (b2 - b1),
+            alpha1 + t * (alpha2 - alpha1),
         )
     }
 }

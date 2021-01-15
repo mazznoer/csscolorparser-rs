@@ -161,10 +161,21 @@ impl Color {
         }
     }
 
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
     pub fn from_lrgb(r: f64, g: f64, b: f64) -> Color {
         Color::from_lrgba(r, g, b, 1.)
     }
 
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
+    /// * `a`: Alpha value [0..1]
     pub fn from_lrgba(r: f64, g: f64, b: f64, a: f64) -> Color {
         fn from_linear(x: f64) -> f64 {
             if x >= 0.0031308 {
@@ -235,10 +246,21 @@ impl Color {
         Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
     }
 
+    /// Arguments:
+    ///
+    /// * `l`: Perceived lightness
+    /// * `a`: How green/red the color is
+    /// * `b`: How blue/yellow the color is
     pub fn from_oklab(l: f64, a: f64, b: f64) -> Color {
         Color::from_oklaba(l, a, b, 1.)
     }
 
+    /// Arguments:
+    ///
+    /// * `l`: Perceived lightness
+    /// * `a`: How green/red the color is
+    /// * `b`: How blue/yellow the color is
+    /// * `alpha`: Alpha [0..1]
     pub fn from_oklaba(l: f64, a: f64, b: f64, alpha: f64) -> Color {
         let l_ = (l + 0.3963377774 * a + 0.2158037573 * b).powi(3);
         let m_ = (l - 0.1055613458 * a - 0.0638541728 * b).powi(3);
@@ -338,6 +360,9 @@ impl Color {
         (h, w, b, self.a)
     }
 
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
     pub fn to_lrgba(&self) -> (f64, f64, f64, f64) {
         fn to_linear(x: f64) -> f64 {
             if x >= 0.04045 {
@@ -353,6 +378,7 @@ impl Color {
         )
     }
 
+    /// Returns: `(l, a, b, alpha)`
     pub fn to_oklaba(&self) -> (f64, f64, f64, f64) {
         let (r, g, b, _) = self.to_lrgba();
         let l_ = (0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b).cbrt();

@@ -53,7 +53,7 @@
 //!
 //! Add `csscolorparser` to your `Cargo.toml`
 //!
-//! ```text
+//! ```toml
 //! [dependencies]
 //! csscolorparser = "0.3.0"
 //! ```

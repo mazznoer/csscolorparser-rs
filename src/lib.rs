@@ -63,35 +63,47 @@
 //! Using [`csscolorparser::parse()`](fn.parse.html) function.
 //!
 //! ```rust
-//! let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 //!
 //! assert_eq!(c.rgba(), (1., 0., 0., 1.));
 //! assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
 //! assert_eq!(c.to_hex_string(), "#ff0000");
 //! assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! Using `parse()` method on string.
 //!
 //! ```rust
 //! use csscolorparser::Color;
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //!
-//! let c = "#ff00007f".parse::<Color>().unwrap();
+//! let c = "#ff00007f".parse::<Color>()?;
 //!
 //! assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
 //! assert_eq!(c.to_hex_string(), "#ff00007f");
+//! # Ok(())
+//! # }
 //! ```
 //!
 //! Using [`Color::from_html()`](struct.Color.html#method.from_html).
 //!
 //! ```rust
 //! use csscolorparser::Color;
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //!
-//! let c = Color::from_html("skyblue").unwrap();
+//! let c = Color::from_html("skyblue")?;
 //!
 //! assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
 //! assert_eq!(c.to_hex_string(), "#87ceeb");
 //! assert_eq!(c.to_rgb_string(), "rgb(135,206,235)");
+//! # Ok(())
+//! # }
 //! ```
 
 #![allow(clippy::many_single_char_names)]
@@ -276,13 +288,17 @@ impl Color {
     /// # Examples
     /// ```
     /// use csscolorparser::Color;
+    /// # use std::error::Error;
+    /// # fn main() -> Result<(), Box<dyn Error>> {
     ///
-    /// let c = Color::from_html("red").unwrap();
+    /// let c = Color::from_html("red")?;
     ///
     /// assert_eq!(c.rgba(), (1., 0., 0., 1.));
     /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
     /// assert_eq!(c.to_hex_string(), "#ff0000");
     /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_html(s: &str) -> Result<Color, ParseError> {
         parse(s)
@@ -500,19 +516,29 @@ impl StdError for ParseError {}
 /// # Examples
 ///
 /// ```
-/// let c = csscolorparser::parse("#ff0").unwrap();
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// let c = csscolorparser::parse("#ff0")?;
+///
 /// assert_eq!(c.rgba(), (1., 1., 0., 1.));
 /// assert_eq!(c.rgba_u8(), (255, 255, 0, 255));
 /// assert_eq!(c.to_hex_string(), "#ffff00");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,255,0)");
+/// # Ok(())
+/// # }
 /// ```
 ///
 /// ```
-/// let c = csscolorparser::parse("hsl(360deg,100%,50%)").unwrap();
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// let c = csscolorparser::parse("hsl(360deg,100%,50%)")?;
+///
 /// assert_eq!(c.rgba(), (1., 0., 0., 1.));
 /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
 /// assert_eq!(c.to_hex_string(), "#ff0000");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+/// # Ok(())
+/// # }
 /// ```
 pub fn parse(s: &str) -> Result<Color, ParseError> {
     let s = s.trim().to_lowercase();

@@ -66,7 +66,7 @@ csscolorparser = "0.3.0"
 Using `csscolorparser::parse()` function.
 
 ```rust
-let c = csscolorparser::parse("rgb(100%,0%,0%)").unwrap();
+let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 
 assert_eq!(c.rgba(), (1., 0., 0., 1.));
 assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
@@ -79,7 +79,7 @@ Using `parse()` method on string.
 ```rust
 use csscolorparser::Color;
 
-let c = "#ff00007f".parse::<Color>().unwrap();
+let c = "#ff00007f".parse::<Color>()?;
 
 assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
 assert_eq!(c.to_hex_string(), "#ff00007f");
@@ -90,7 +90,7 @@ Using `Color::from_html()`.
 ```rust
 use csscolorparser::Color;
 
-let c = Color::from_html("skyblue").unwrap();
+let c = Color::from_html("skyblue")?;
 
 assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
 assert_eq!(c.to_hex_string(), "#87ceeb");

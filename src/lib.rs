@@ -420,12 +420,14 @@ impl Color {
 
     /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
     pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
-        Color {
-            r: (self.r.powi(2) * (1. - t) + other.r.powi(2) * t).sqrt(),
-            g: (self.g.powi(2) * (1. - t) + other.g.powi(2) * t).sqrt(),
-            b: (self.b.powi(2) * (1. - t) + other.b.powi(2) * t).sqrt(),
-            a: (self.a.powi(2) * (1. - t) + other.a.powi(2) * t).sqrt(),
-        }
+        let (r1, g1, b1, a1) = self.to_lrgba();
+        let (r2, g2, b2, a2) = other.to_lrgba();
+        Color::from_lrgba(
+            r1 + t * (r2 - r1),
+            g1 + t * (g2 - g1),
+            b1 + t * (b2 - b1),
+            a1 + t * (a2 - a1),
+        )
     }
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].

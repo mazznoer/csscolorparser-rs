@@ -81,7 +81,7 @@ fn interpolate() {
     assert_eq!(b.interpolate_rgb(&a, 1.0).rgba_u8(), (0, 255, 0, 255));
 
     assert_eq!(a.interpolate_lrgb(&b, 0.0).rgba_u8(), (0, 255, 0, 255));
-    assert_eq!(a.interpolate_lrgb(&b, 0.5).rgba_u8(), (0, 180, 180, 255));
+    assert_eq!(a.interpolate_lrgb(&b, 0.5).rgba_u8(), (0, 188, 188, 255));
     assert_eq!(a.interpolate_lrgb(&b, 1.0).rgba_u8(), (0, 0, 255, 255));
 
     assert_eq!(a.interpolate_hsv(&b, 0.0).rgba_u8(), (0, 255, 0, 255));

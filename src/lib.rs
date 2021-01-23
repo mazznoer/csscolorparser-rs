@@ -200,6 +200,30 @@ impl Color {
 
     /// Arguments:
     ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    pub fn from_lrgb_u8(r: u8, g: u8, b: u8) -> Color {
+        Color::from_lrgba(r as f64 / 255., g as f64 / 255., b as f64 / 255., 1.)
+    }
+
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    /// * `a`: Alpha value [0..255]
+    pub fn from_lrgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
+        Color::from_lrgba(
+            r as f64 / 255.,
+            g as f64 / 255.,
+            b as f64 / 255.,
+            a as f64 / 255.,
+        )
+    }
+
+    /// Arguments:
+    ///
     /// * `h`: Hue angle [0..360]
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
@@ -391,6 +415,19 @@ impl Color {
             to_linear(self.g),
             to_linear(self.b),
             self.a,
+        )
+    }
+
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
+    pub fn to_lrgba_u8(&self) -> (u8, u8, u8, u8) {
+        let (r, g, b, a) = self.to_lrgba();
+        (
+            (r * 255.).round() as u8,
+            (g * 255.).round() as u8,
+            (b * 255.).round() as u8,
+            (a * 255.).round() as u8,
         )
     }
 

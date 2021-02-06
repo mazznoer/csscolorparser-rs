@@ -58,7 +58,7 @@ Add `csscolorparser` to your `Cargo.toml`
 
 ```toml
 [dependencies]
-csscolorparser = "0.3.0"
+csscolorparser = "0.4.0"
 ```
 
 ## Examples

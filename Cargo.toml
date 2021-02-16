@@ -16,5 +16,10 @@ exclude = [
 	"tests/*",
 ]
 
+[features]
+default = []
+rust-rgb = ["rgb"]
+
 [dependencies]
 phf = {version="0.8.0", features=["macros"]}
+rgb = {version = "0.8.25", optional = true}

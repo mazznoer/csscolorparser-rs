@@ -114,6 +114,8 @@ use std::error::Error as StdError;
 use std::f64::consts::PI;
 use std::fmt;
 use std::str::FromStr;
+#[cfg(feature = "rust-rgb")]
+use rgb::{RGB, RGBA};
 
 /// The color
 #[derive(Debug, Clone, PartialEq)]
@@ -520,6 +522,22 @@ impl FromStr for Color {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse(s)
+    }
+}
+
+/// Convert rust-rgb's `RGB<f64>` type into `Color`.
+#[cfg(feature = "rust-rgb")]
+impl From<RGB<f64>> for Color {
+    fn from(item: RGB<f64>) -> Self {
+        Color::from_rgb(item.r, item.g, item.b)
+    }
+}
+
+/// Convert rust-rgb's `RGBA<f64>` type into `Color`.
+#[cfg(feature = "rust-rgb")]
+impl From<RGBA<f64>> for Color {
+    fn from(item: RGBA<f64>) -> Self {
+        Color::from_rgba(item.r, item.g, item.b, item.a)
     }
 }
 
@@ -1115,5 +1133,17 @@ mod tests {
             let v = interp_angle(a, b, t);
             assert_eq!(expected, v);
         }
+    }
+
+    #[cfg(feature = "rust-rgb")]
+    #[test]
+    fn convert_rust_rgb_to_color() {
+        let rgb = RGB::new(0.0, 0.5, 1.0);
+
+        assert_eq!(Color::from_rgb(0.0, 0.5, 1.0), Color::from(rgb));
+
+        let rgba = RGBA::new(1.0, 0.5, 0.0, 0.5);
+
+        assert_eq!(Color::from_rgba(1.0, 0.5, 0.0, 0.5), Color::from(rgba));
     }
 }

@@ -51,10 +51,9 @@
 //!
 //! ## Usage
 //!
-//! Add `csscolorparser` to your `Cargo.toml`
+//! Add this to your `Cargo.toml`
 //!
 //! ```toml
-//! [dependencies]
 //! csscolorparser = "0.4.0"
 //! ```
 //!
@@ -109,13 +108,11 @@
 #![allow(clippy::many_single_char_names)]
 
 use phf::phf_map;
-
-use std::error::Error as StdError;
-use std::f64::consts::PI;
-use std::fmt;
-use std::str::FromStr;
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
+use std::error::Error as StdError;
+use std::fmt;
+use std::str::FromStr;
 
 /// The color
 #[derive(Debug, Clone, PartialEq)]
@@ -885,7 +882,7 @@ fn parse_angle(s: &str) -> Option<f64> {
     }
     if let Some(s) = s.strip_suffix("rad") {
         if let Ok(t) = s.parse::<f64>() {
-            return Some(t * 180. / PI);
+            return Some(t.to_degrees());
         }
         return None;
     }
@@ -915,13 +912,7 @@ fn interp_angle(a0: f64, a1: f64, t: f64) -> f64 {
 }
 
 fn clamp0_1(t: f64) -> f64 {
-    if t < 0. {
-        return 0.;
-    }
-    if t > 1. {
-        return 1.;
-    }
-    t
+    t.clamp(0., 1.)
 }
 
 fn modulo(x: f64, n: f64) -> f64 {

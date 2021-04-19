@@ -110,6 +110,7 @@
 use phf::phf_map;
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
+use std::convert::TryFrom;
 use std::error::Error as StdError;
 use std::fmt;
 use std::str::FromStr;
@@ -507,6 +508,17 @@ impl Color {
     }
 }
 
+impl Default for Color {
+    fn default() -> Self {
+        Color {
+            r: 0.,
+            g: 0.,
+            b: 0.,
+            a: 1.,
+        }
+    }
+}
+
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (r, g, b, a) = self.rgba();
@@ -518,6 +530,14 @@ impl FromStr for Color {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        parse(s)
+    }
+}
+
+impl TryFrom<&str> for Color {
+    type Error = ParseError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
         parse(s)
     }
 }
@@ -592,17 +612,19 @@ impl StdError for ParseError {}
 /// # Ok(())
 /// # }
 /// ```
-pub fn parse(s: &str) -> Result<Color, ParseError> {
-    let s = s.trim().to_lowercase();
+pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
+    let s = s.as_ref().trim().to_lowercase();
 
     if s == "transparent" {
         return Ok(Color::from_rgba(0., 0., 0., 0.));
     }
 
-    if let Some(c) = NAMED_COLORS.get(&*s) {
-        return Ok(Color::from_rgb_u8(c[0], c[1], c[2]));
+    // Named colors
+    if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
+        return Ok(Color::from_rgb_u8(*r, *g, *b));
     }
 
+    // Hex format
     if let Some(s) = s.strip_prefix("#") {
         if let Ok(c) = parse_hex(s) {
             return Ok(c);
@@ -613,7 +635,7 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
     if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(")")) {
         let fname = &s[..i].trim_end();
         let s = &s[i + 1..].replace(",", " ").replace("/", " ");
-        let params: Vec<&str> = s.split_whitespace().collect();
+        let params = s.split_whitespace().collect::<Vec<&str>>();
         let p_len = params.len();
 
         let mut a = Some(1.);
@@ -682,6 +704,7 @@ pub fn parse(s: &str) -> Result<Color, ParseError> {
         }
     }
 
+    // Hex format without prefix '#'
     if let Ok(c) = parse_hex(&s) {
         return Ok(c);
     }

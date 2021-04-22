@@ -541,6 +541,54 @@ impl TryFrom<&str> for Color {
     }
 }
 
+impl From<(f64, f64, f64, f64)> for Color {
+    fn from((r, g, b, a): (f64, f64, f64, f64)) -> Self {
+        Color { r, g, b, a }
+    }
+}
+
+impl From<(f64, f64, f64)> for Color {
+    fn from((r, g, b): (f64, f64, f64)) -> Self {
+        Color { r, g, b, a: 1. }
+    }
+}
+
+impl From<[f64; 4]> for Color {
+    fn from([r, g, b, a]: [f64; 4]) -> Self {
+        Color { r, g, b, a }
+    }
+}
+
+impl From<[f64; 3]> for Color {
+    fn from([r, g, b]: [f64; 3]) -> Self {
+        Color { r, g, b, a: 1. }
+    }
+}
+
+impl From<(u8, u8, u8, u8)> for Color {
+    fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self {
+        Color::from_rgba_u8(r, g, b, a)
+    }
+}
+
+impl From<(u8, u8, u8)> for Color {
+    fn from((r, g, b): (u8, u8, u8)) -> Self {
+        Color::from_rgb_u8(r, g, b)
+    }
+}
+
+impl From<[u8; 4]> for Color {
+    fn from([r, g, b, a]: [u8; 4]) -> Self {
+        Color::from_rgba_u8(r, g, b, a)
+    }
+}
+
+impl From<[u8; 3]> for Color {
+    fn from([r, g, b]: [u8; 3]) -> Self {
+        Color::from_rgb_u8(r, g, b)
+    }
+}
+
 /// Convert rust-rgb's `RGB<f64>` type into `Color`.
 #[cfg(feature = "rust-rgb")]
 impl From<RGB<f64>> for Color {

@@ -4,7 +4,6 @@ use csscolorparser::{parse, Color};
 fn parser() {
     let test_data = vec![
         ("transparent", (0, 0, 0, 0)),
-        ("rebeccapurple", (102, 51, 153, 255)),
         ("#ff00ff64", (255, 0, 255, 100)),
         ("ff00ff64", (255, 0, 255, 100)),
         ("rgb(247,179,99)", (247, 179, 99, 255)),
@@ -26,11 +25,13 @@ fn parser() {
     }
 }
 
+#[cfg(feature = "named-colors")]
 #[test]
 fn named_colors() {
     let test_data = vec![
         ("aliceblue", "#f0f8ff"),
         ("bisque", "#ffe4c4"),
+        ("black", "#000000"),
         ("chartreuse", "#7fff00"),
         ("coral", "#ff7f50"),
         ("crimson", "#dc143c"),
@@ -40,7 +41,9 @@ fn named_colors() {
         ("hotpink", "#ff69b4"),
         ("indigo", "#4b0082"),
         ("lavender", "#e6e6fa"),
+        ("lime", "#00ff00"),
         ("plum", "#dda0dd"),
+        ("red", "#ff0000"),
         ("salmon", "#fa8072"),
         ("skyblue", "#87ceeb"),
         ("tomato", "#ff6347"),
@@ -56,7 +59,6 @@ fn named_colors() {
 #[test]
 fn black() {
     let data = vec![
-        "black",
         "#000",
         "#000f",
         "#000000",
@@ -83,7 +85,6 @@ fn black() {
 #[test]
 fn red() {
     let data = vec![
-        "red",
         "#f00",
         "#f00f",
         "#ff0000",
@@ -116,7 +117,6 @@ fn red() {
 #[test]
 fn lime() {
     let data = vec![
-        "lime",
         "#0f0",
         "#0f0f",
         "#00ff00",

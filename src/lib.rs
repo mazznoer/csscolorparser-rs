@@ -96,7 +96,7 @@
 //! # use std::error::Error;
 //! # fn main() -> Result<(), Box<dyn Error>> {
 //!
-//! let c = Color::from_html("skyblue")?;
+//! let c = Color::from_html("rgb(135,206,235)")?;
 //!
 //! assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
 //! assert_eq!(c.to_hex_string(), "#87ceeb");
@@ -107,7 +107,6 @@
 
 #![allow(clippy::many_single_char_names)]
 
-use phf::phf_map;
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
 use std::convert::TryFrom;
@@ -315,7 +314,7 @@ impl Color {
     /// # use std::error::Error;
     /// # fn main() -> Result<(), Box<dyn Error>> {
     ///
-    /// let c = Color::from_html("red")?;
+    /// let c = Color::from_html("rgb(255,0,0)")?;
     ///
     /// assert_eq!(c.rgba(), (1., 0., 0., 1.));
     /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
@@ -620,6 +619,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
     }
 
     // Named colors
+    #[cfg(feature = "named-colors")]
     if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
         return Ok(Color::from_rgb_u8(*r, *g, *b));
     }
@@ -944,7 +944,8 @@ fn modulo(x: f64, n: f64) -> f64 {
 
 // https://www.w3.org/TR/css-color-4/#named-colors
 
-static NAMED_COLORS: phf::Map<&'static str, [u8; 3]> = phf_map! {
+#[cfg(feature = "named-colors")]
+static NAMED_COLORS: phf::Map<&'static str, [u8; 3]> = phf::phf_map! {
     "aliceblue" => [240, 248, 255],
     "antiquewhite" => [250, 235, 215],
     "aqua" => [0, 255, 255],

@@ -5,8 +5,10 @@
 [![Build Status](https://github.com/mazznoer/csscolorparser-rs/workflows/Rust/badge.svg)](https://github.com/mazznoer/csscolorparser-rs/actions)
 [![Build Status](https://travis-ci.org/mazznoer/csscolorparser-rs.svg?branch=master)](https://travis-ci.org/mazznoer/csscolorparser-rs)
 [![codecov](https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser-rs)
+[![Total Downloads](https://img.shields.io/crates/d/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
+![Lines of Code](https://tokei.rs/b1/github/mazznoer/csscolorparser-rs?category=code)
 
-Rust library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
+[Rust](https://www.rust-lang.org/) library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 
 ## Supported Color Format
 
@@ -54,10 +56,9 @@ hsv(120deg 100% 100% / 100%)
 
 ## Usage
 
-Add `csscolorparser` to your `Cargo.toml`
+Add this to your `Cargo.toml`
 
 ```toml
-[dependencies]
 csscolorparser = "0.4.0"
 ```
 
@@ -85,18 +86,7 @@ assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
 assert_eq!(c.to_hex_string(), "#ff00007f");
 ```
 
-Using `Color::from_html()`.
-
-```rust
-use csscolorparser::Color;
-
-let c = Color::from_html("skyblue")?;
-
-assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
-assert_eq!(c.to_hex_string(), "#87ceeb");
-assert_eq!(c.to_rgb_string(), "rgb(135,206,235)");
-```
-
 ## Links
 
 * [csscolorparser](https://github.com/mazznoer/csscolorparser) - Go version of this library.
+

@@ -1,4 +1,5 @@
 use csscolorparser::Color;
+use std::convert::TryFrom;
 
 #[test]
 fn basic() {
@@ -44,6 +45,22 @@ fn basic() {
     assert_eq!(c.to_hsva(), (0., 0., 0.5, 1.));
     assert_eq!(c.to_hsla(), (0., 0., 0.5, 1.));
     assert_eq!(c.to_hwba(), (0., 0.5, 0.5, 1.));
+
+    assert_eq!(Color::default().rgba_u8(), (0, 0, 0, 255));
+
+    assert_eq!(Color::try_from("#f00").unwrap().rgba_u8(), (255, 0, 0, 255));
+
+    assert_eq!(Color::from((1., 0., 0., 0.5)).rgba_u8(), (255, 0, 0, 128));
+    assert_eq!(Color::from((1., 0., 0.)).rgba_u8(), (255, 0, 0, 255));
+
+    assert_eq!(Color::from((255, 0, 0, 128)).rgba_u8(), (255, 0, 0, 128));
+    assert_eq!(Color::from((255, 0, 0)).rgba_u8(), (255, 0, 0, 255));
+
+    assert_eq!(Color::from([1., 0., 0., 0.5]).rgba_u8(), (255, 0, 0, 128));
+    assert_eq!(Color::from([1., 0., 0.]).rgba_u8(), (255, 0, 0, 255));
+
+    assert_eq!(Color::from([255, 0, 0, 128]).rgba_u8(), (255, 0, 0, 128));
+    assert_eq!(Color::from([255, 0, 0]).rgba_u8(), (255, 0, 0, 255));
 }
 
 #[test]

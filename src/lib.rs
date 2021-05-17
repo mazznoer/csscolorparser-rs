@@ -109,6 +109,8 @@
 
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
 use std::convert::TryFrom;
 use std::error::Error as StdError;
 use std::fmt;
@@ -602,6 +604,23 @@ impl From<RGB<f64>> for Color {
 impl From<RGBA<f64>> for Color {
     fn from(item: RGBA<f64>) -> Self {
         Color::from_rgba(item.r, item.g, item.b, item.a)
+    }
+}
+
+/// Implement Serde serialization into HEX string
+#[cfg(feature = "serde")]
+impl Serialize for Color {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.to_hex_string())
+    }
+}
+
+/// Implement Serde deserialization from string
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Color {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error>  {
+        let string = String::deserialize(deserializer)?;
+        Self::from_str(&string).map_err(serde::de::Error::custom)
     }
 }
 
@@ -1200,7 +1219,7 @@ mod tests {
 
     #[cfg(feature = "rust-rgb")]
     #[test]
-    fn convert_rust_rgb_to_color() {
+    fn test_convert_rust_rgb_to_color() {
         let rgb = RGB::new(0.0, 0.5, 1.0);
 
         assert_eq!(Color::from_rgb(0.0, 0.5, 1.0), Color::from(rgb));
@@ -1208,5 +1227,25 @@ mod tests {
         let rgba = RGBA::new(1.0, 0.5, 0.0, 0.5);
 
         assert_eq!(Color::from_rgba(1.0, 0.5, 0.0, 0.5), Color::from(rgba));
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serde_serialize_to_hex() {
+        let color = Color::from_rgba(1.0, 1.0, 0.5, 0.5);
+        serde_test::assert_ser_tokens(&color, &[serde_test::Token::Str("#ffff8080")]);
+    }
+
+    #[cfg(all(feature = "serde", feature = "named-colors"))]
+    #[test]
+    fn test_serde_deserialize_from_string() {
+        let named = Color::from_rgb(1.0, 1.0, 0.0);
+        serde_test::assert_de_tokens(&named, &[serde_test::Token::Str("yellow")]);
+
+        let hex = Color::from_rgba(0.0, 1.0, 0.0, 1.0);
+        serde_test::assert_de_tokens(&hex, &[serde_test::Token::Str("#00ff00ff")]);
+
+        let rgb = Color::from_rgba(0.0, 1.0, 0.0, 1.0);
+        serde_test::assert_de_tokens(&rgb, &[serde_test::Token::Str("rgba(0,255,0,1)")]);
     }
 }

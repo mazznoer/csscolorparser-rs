@@ -25,6 +25,11 @@
 
 Not yet supported: `lab()`, `lch()`.
 
+## Optional Features
+
+* `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
+* `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
+
 ### Example Color Format
 
 ```text

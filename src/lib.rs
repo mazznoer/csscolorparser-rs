@@ -520,6 +520,104 @@ impl Default for Color {
     }
 }
 
+#[cfg(feature = "cint")]
+mod impl_cint {
+    use super::*;
+    use cint::{Alpha, ColorInterop, EncodedSrgb};
+
+    impl ColorInterop for Color {
+        type CintTy = Alpha<EncodedSrgb<f64>>;
+    }
+
+    impl From<Color> for EncodedSrgb<f64> {
+        fn from(c: Color) -> Self {
+            let (r, g, b, _) = c.rgba();
+            EncodedSrgb { r, g, b }
+        }
+    }
+
+    impl From<EncodedSrgb<f64>> for Color {
+        fn from(c: EncodedSrgb<f64>) -> Self {
+            let EncodedSrgb { r, g, b } = c;
+            Color::from_rgb(r, g, b)
+        }
+    }
+
+    impl From<Color> for EncodedSrgb<f32> {
+        fn from(c: Color) -> Self {
+            let (r, g, b, _) = c.rgba();
+            let (r, g, b) = (r as f32, g as f32, b as f32);
+            EncodedSrgb { r, g, b }
+        }
+    }
+
+    impl From<EncodedSrgb<f32>> for Color {
+        fn from(c: EncodedSrgb<f32>) -> Self {
+            let EncodedSrgb { r, g, b } = c;
+            let (r, g, b) = (r as f64, g as f64, b as f64);
+            Color::from_rgb(r, g, b)
+        }
+    }
+
+    impl From<Color> for Alpha<EncodedSrgb<f64>> {
+        fn from(c: Color) -> Self {
+            let (r, g, b, alpha) = c.rgba();
+            Alpha { color: EncodedSrgb { r, g, b }, alpha }
+        }
+    }
+
+    impl From<Alpha<EncodedSrgb<f64>>> for Color {
+        fn from(c: Alpha<EncodedSrgb<f64>>) -> Self {
+            let Alpha { color: EncodedSrgb { r, g, b }, alpha } = c;
+            Color::from_rgba(r, g, b, alpha)
+        }
+    }
+
+    impl From<Color> for Alpha<EncodedSrgb<f32>> {
+        fn from(c: Color) -> Self {
+            let (r, g, b, alpha) = c.rgba();
+            let (r, g, b, alpha) = (r as f32, g as f32, b as f32, alpha as f32);
+            Alpha { color: EncodedSrgb { r, g, b }, alpha }
+        }
+    }
+
+    impl From<Alpha<EncodedSrgb<f32>>> for Color {
+        fn from(c: Alpha<EncodedSrgb<f32>>) -> Self {
+            let Alpha { color: EncodedSrgb { r, g, b }, alpha } = c;
+            let (r, g, b, alpha) = (r as f64, g as f64, b as f64, alpha as f64);
+            Color::from_rgba(r, g, b, alpha)
+        }
+    }
+
+    impl From<Color> for EncodedSrgb<u8> {
+        fn from(c: Color) -> Self {
+            let (r, g, b, _) = c.rgba_u8();
+            EncodedSrgb { r, g, b }
+        }
+    }
+
+    impl From<EncodedSrgb<u8>> for Color {
+        fn from(c: EncodedSrgb<u8>) -> Self {
+            let EncodedSrgb { r, g, b, } = c;
+            Color::from_rgb_u8(r, g, b)
+        }
+    }
+
+    impl From<Color> for Alpha<EncodedSrgb<u8>> {
+        fn from(c: Color) -> Self {
+            let (r, g, b, alpha) = c.rgba_u8();
+            Alpha { color: EncodedSrgb { r, g, b }, alpha }
+        }
+    }
+
+    impl From<Alpha<EncodedSrgb<u8>>> for Color {
+        fn from(c: Alpha<EncodedSrgb<u8>>) -> Self {
+            let Alpha { color: EncodedSrgb { r, g, b, }, alpha } = c;
+            Color::from_rgba_u8(r, g, b, alpha)
+        }
+    }
+}
+
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let (r, g, b, a) = self.rgba();

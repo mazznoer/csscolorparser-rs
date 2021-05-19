@@ -104,6 +104,12 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! ## Optional Features
+//!
+//! * `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
+//! * `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
+//! * `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
 
 #![allow(clippy::many_single_char_names)]
 

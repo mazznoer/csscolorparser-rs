@@ -354,21 +354,25 @@ impl Color {
         )
     }
 
+    #[deprecated]
     /// Get the red value [0..1].
     pub fn red(&self) -> f64 {
         self.r
     }
 
+    #[deprecated]
     /// Get the green value [0..1].
     pub fn green(&self) -> f64 {
         self.g
     }
 
+    #[deprecated]
     /// Get the blue value [0..1].
     pub fn blue(&self) -> f64 {
         self.b
     }
 
+    #[deprecated]
     /// Get the alpha value [0..1].
     pub fn alpha(&self) -> f64 {
         self.a

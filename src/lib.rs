@@ -116,18 +116,22 @@
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
 #[cfg(feature = "serde")]
-use serde::{Serialize, Deserialize, Serializer, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::convert::TryFrom;
 use std::error::Error as StdError;
 use std::fmt;
 use std::str::FromStr;
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 /// The color
-#[derive(Debug, Clone, PartialEq)]
 pub struct Color {
+    /// Red
     pub r: f64,
+    /// Green
     pub g: f64,
+    /// Blue
     pub b: f64,
+    /// Alpha
     pub a: f64,
 }
 
@@ -308,9 +312,11 @@ impl Color {
         let l_ = (l + 0.3963377774 * a + 0.2158037573 * b).powi(3);
         let m_ = (l - 0.1055613458 * a - 0.0638541728 * b).powi(3);
         let s_ = (l - 0.0894841775 * a - 1.2914855480 * b).powi(3);
+
         let r = 4.0767245293 * l_ - 3.3072168827 * m_ + 0.2307590544 * s_;
         let g = -1.2681437731 * l_ + 2.6093323231 * m_ - 0.3411344290 * s_;
         let b = -0.0041119885 * l_ - 0.7034763098 * m_ + 1.7068625689 * s_;
+
         Color::from_lrgba(r, g, b, alpha)
     }
 
@@ -457,18 +463,22 @@ impl Color {
     /// Get the RGB hexadecimal color string.
     pub fn to_hex_string(&self) -> String {
         let (r, g, b, a) = self.rgba_u8();
+
         if a < 255 {
             return format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a);
         }
+
         format!("#{:02x}{:02x}{:02x}", r, g, b)
     }
 
     /// Get the CSS `rgb()` format string.
     pub fn to_rgb_string(&self) -> String {
         let (r, g, b, _) = self.rgba_u8();
+
         if self.a < 1. {
             return format!("rgba({},{},{},{})", r, g, b, self.a);
         }
+
         format!("rgb({},{},{})", r, g, b)
     }
 
@@ -572,13 +582,19 @@ mod impl_cint {
     impl From<Color> for Alpha<EncodedSrgb<f64>> {
         fn from(c: Color) -> Self {
             let (r, g, b, alpha) = c.rgba();
-            Alpha { color: EncodedSrgb { r, g, b }, alpha }
+            Alpha {
+                color: EncodedSrgb { r, g, b },
+                alpha,
+            }
         }
     }
 
     impl From<Alpha<EncodedSrgb<f64>>> for Color {
         fn from(c: Alpha<EncodedSrgb<f64>>) -> Self {
-            let Alpha { color: EncodedSrgb { r, g, b }, alpha } = c;
+            let Alpha {
+                color: EncodedSrgb { r, g, b },
+                alpha,
+            } = c;
             Color::from_rgba(r, g, b, alpha)
         }
     }
@@ -587,13 +603,19 @@ mod impl_cint {
         fn from(c: Color) -> Self {
             let (r, g, b, alpha) = c.rgba();
             let (r, g, b, alpha) = (r as f32, g as f32, b as f32, alpha as f32);
-            Alpha { color: EncodedSrgb { r, g, b }, alpha }
+            Alpha {
+                color: EncodedSrgb { r, g, b },
+                alpha,
+            }
         }
     }
 
     impl From<Alpha<EncodedSrgb<f32>>> for Color {
         fn from(c: Alpha<EncodedSrgb<f32>>) -> Self {
-            let Alpha { color: EncodedSrgb { r, g, b }, alpha } = c;
+            let Alpha {
+                color: EncodedSrgb { r, g, b },
+                alpha,
+            } = c;
             let (r, g, b, alpha) = (r as f64, g as f64, b as f64, alpha as f64);
             Color::from_rgba(r, g, b, alpha)
         }
@@ -608,7 +630,7 @@ mod impl_cint {
 
     impl From<EncodedSrgb<u8>> for Color {
         fn from(c: EncodedSrgb<u8>) -> Self {
-            let EncodedSrgb { r, g, b, } = c;
+            let EncodedSrgb { r, g, b } = c;
             Color::from_rgb_u8(r, g, b)
         }
     }
@@ -616,13 +638,19 @@ mod impl_cint {
     impl From<Color> for Alpha<EncodedSrgb<u8>> {
         fn from(c: Color) -> Self {
             let (r, g, b, alpha) = c.rgba_u8();
-            Alpha { color: EncodedSrgb { r, g, b }, alpha }
+            Alpha {
+                color: EncodedSrgb { r, g, b },
+                alpha,
+            }
         }
     }
 
     impl From<Alpha<EncodedSrgb<u8>>> for Color {
         fn from(c: Alpha<EncodedSrgb<u8>>) -> Self {
-            let Alpha { color: EncodedSrgb { r, g, b, }, alpha } = c;
+            let Alpha {
+                color: EncodedSrgb { r, g, b },
+                alpha,
+            } = c;
             Color::from_rgba_u8(r, g, b, alpha)
         }
     }
@@ -726,13 +754,13 @@ impl Serialize for Color {
 /// Implement Serde deserialization from string
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Color {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error>  {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let string = String::deserialize(deserializer)?;
         Self::from_str(&string).map_err(serde::de::Error::custom)
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParseError {
     InvalidHex,
     InvalidRgb,
@@ -819,12 +847,15 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidRgb);
             }
+
             let r = parse_percent_or_255(params[0]);
             let g = parse_percent_or_255(params[1]);
             let b = parse_percent_or_255(params[2]);
+
             if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
+
             if let (Some(r), Some(g), Some(b), Some(a)) = (r, g, b, a) {
                 return Ok(Color {
                     r: clamp0_1(r),
@@ -833,48 +864,61 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
                     a: clamp0_1(a),
                 });
             }
+
             return Err(ParseError::InvalidRgb);
         } else if *fname == "hsl" || *fname == "hsla" {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHsl);
             }
+
             let h = parse_angle(params[0]);
             let s = parse_percent_or_float(params[1]);
             let l = parse_percent_or_float(params[2]);
+
             if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
+
             if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
                 return Ok(Color::from_hsla(h, s, l, a));
             }
+
             return Err(ParseError::InvalidHsl);
         } else if *fname == "hwb" || *fname == "hwba" {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHwb);
             }
+
             let h = parse_angle(params[0]);
             let w = parse_percent_or_float(params[1]);
             let b = parse_percent_or_float(params[2]);
+
             if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
+
             if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
                 return Ok(Color::from_hwba(h, w, b, a));
             }
+
             return Err(ParseError::InvalidHwb);
         } else if *fname == "hsv" || *fname == "hsva" {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidHsv);
             }
+
             let h = parse_angle(params[0]);
             let s = parse_percent_or_float(params[1]);
             let v = parse_percent_or_float(params[2]);
+
             if p_len == 4 {
                 a = parse_percent_or_float(params[3]);
             }
+
             if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
                 return Ok(Color::from_hsva(h, s, v, a));
             }
+
             return Err(ParseError::InvalidHsv);
         }
     }
@@ -889,39 +933,53 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
 
 fn parse_hex(s: &str) -> Result<Color, Box<dyn StdError>> {
     let n = s.len();
-    let (r, g, b);
-    let mut a = 255;
-    if n == 3 || n == 4 {
-        r = u8::from_str_radix(&s[0..1].repeat(2), 16)?;
-        g = u8::from_str_radix(&s[1..2].repeat(2), 16)?;
-        b = u8::from_str_radix(&s[2..3].repeat(2), 16)?;
-        if n == 4 {
-            a = u8::from_str_radix(&s[3..4].repeat(2), 16)?;
-        }
+
+    let (r, g, b, a) = if n == 3 || n == 4 {
+        let r = u8::from_str_radix(&s[0..1].repeat(2), 16)?;
+        let g = u8::from_str_radix(&s[1..2].repeat(2), 16)?;
+        let b = u8::from_str_radix(&s[2..3].repeat(2), 16)?;
+
+        let a = if n == 4 {
+            u8::from_str_radix(&s[3..4].repeat(2), 16)?
+        } else {
+            255
+        };
+
+        (r, g, b, a)
     } else if n == 6 || n == 8 {
-        r = u8::from_str_radix(&s[0..2], 16)?;
-        g = u8::from_str_radix(&s[2..4], 16)?;
-        b = u8::from_str_radix(&s[4..6], 16)?;
-        if n == 8 {
-            a = u8::from_str_radix(&s[6..8], 16)?;
-        }
+        let r = u8::from_str_radix(&s[0..2], 16)?;
+        let g = u8::from_str_radix(&s[2..4], 16)?;
+        let b = u8::from_str_radix(&s[4..6], 16)?;
+
+        let a = if n == 8 {
+            u8::from_str_radix(&s[6..8], 16)?
+        } else {
+            255
+        };
+
+        (r, g, b, a)
     } else {
         return Err(Box::new(ParseError::InvalidHex));
-    }
+    };
+
     Ok(Color::from_rgba_u8(r, g, b, a))
 }
 
 fn hue_to_rgb(n1: f64, n2: f64, h: f64) -> f64 {
     let h = modulo(h, 6.);
+
     if h < 1. {
         return n1 + ((n2 - n1) * h);
     }
+
     if h < 3. {
         return n2;
     }
+
     if h < 4. {
         return n1 + ((n2 - n1) * (4. - h));
     }
+
     n1
 }
 
@@ -932,12 +990,13 @@ fn hsl_to_rgb(h: f64, s: f64, l: f64) -> (f64, f64, f64) {
     if s == 0. {
         return (l, l, l);
     }
-    let n2;
-    if l < 0.5 {
-        n2 = l * (1. + s);
+
+    let n2 = if l < 0.5 {
+        l * (1. + s)
     } else {
-        n2 = l + s - (l * s);
-    }
+        l + s - (l * s)
+    };
+
     let n1 = 2. * l - n2;
     let h = h / 60.;
     let r = hue_to_rgb(n1, n2, h + 2.);
@@ -951,6 +1010,7 @@ fn hwb_to_rgb(hue: f64, white: f64, black: f64) -> (f64, f64, f64) {
         let l = white / (white + black);
         return (l, l, l);
     }
+
     let (r, g, b) = hsl_to_rgb(hue, 1., 0.5);
     let r = r * (1. - white - black) + white;
     let g = g * (1. - white - black) + white;
@@ -960,17 +1020,20 @@ fn hwb_to_rgb(hue: f64, white: f64, black: f64) -> (f64, f64, f64) {
 
 #[allow(clippy::float_cmp)]
 fn hsv_to_hsl(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
-    let mut s = s;
     let l = (2. - s) * v / 2.;
-    if l != 0. {
+
+    let s = if l != 0. {
         if l == 1. {
-            s = 0.;
+            0.
         } else if l < 0.5 {
-            s = s * v / (l * 2.);
+            s * v / (l * 2.)
         } else {
-            s = s * v / (2. - l * 2.);
+            s * v / (2. - l * 2.)
         }
-    }
+    } else {
+        s
+    };
+
     (h, s, l)
 }
 
@@ -983,22 +1046,25 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
 fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let v = r.max(g.max(b));
     let d = v - r.min(g.min(b));
+
     if d == 0. {
         return (0., 0., v);
     }
+
     let s = d / v;
     let dr = (v - r) / d;
     let dg = (v - g) / d;
     let db = (v - b) / d;
-    let mut h;
-    if r == v {
-        h = db - dg;
+
+    let h = if r == v {
+        db - dg
     } else if g == v {
-        h = 2. + dr - db;
+        2. + dr - db
     } else {
-        h = 4. + dg - dr;
-    }
-    h = (h * 60.) % 360.;
+        4. + dg - dr
+    };
+
+    let h = (h * 60.) % 360.;
     (normalize_angle(h), s, v)
 }
 
@@ -1007,28 +1073,32 @@ fn rgb_to_hsl(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let min = r.min(g.min(b));
     let max = r.max(g.max(b));
     let l = (max + min) / 2.;
+
     if min == max {
         return (0., 0., l);
     }
+
     let d = max - min;
-    let s;
-    if l < 0.5 {
-        s = d / (max + min);
+
+    let s = if l < 0.5 {
+        d / (max + min)
     } else {
-        s = d / (2. - max - min);
-    }
+        d / (2. - max - min)
+    };
+
     let dr = (max - r) / d;
     let dg = (max - g) / d;
     let db = (max - b) / d;
-    let mut h;
-    if r == max {
-        h = db - dg;
+
+    let h = if r == max {
+        db - dg
     } else if g == max {
-        h = 2. + dr - db;
+        2. + dr - db
     } else {
-        h = 4. + dg - dr;
-    }
-    h = (h * 60.) % 360.;
+        4. + dg - dr
+    };
+
+    let h = (h * 60.) % 360.;
     (normalize_angle(h), s, l)
 }
 
@@ -1046,9 +1116,11 @@ fn parse_percent_or_float(s: &str) -> Option<f64> {
         }
         return None;
     }
+
     if let Ok(t) = s.parse::<f64>() {
         return Some(t);
     }
+
     None
 }
 
@@ -1059,9 +1131,11 @@ fn parse_percent_or_255(s: &str) -> Option<f64> {
         }
         return None;
     }
+
     if let Ok(t) = s.parse::<f64>() {
         return Some(t / 255.);
     }
+
     None
 }
 
@@ -1072,30 +1146,36 @@ fn parse_angle(s: &str) -> Option<f64> {
         }
         return None;
     }
+
     if let Some(s) = s.strip_suffix("grad") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t * 360. / 400.);
         }
         return None;
     }
+
     if let Some(s) = s.strip_suffix("rad") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t.to_degrees());
         }
         return None;
     }
+
     if let Some(s) = s.strip_suffix("turn") {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t * 360.);
         }
         return None;
     }
+
     if let Ok(t) = s.parse::<f64>() {
         return Some(t);
     }
+
     None
 }
 
+#[inline]
 fn normalize_angle(t: f64) -> f64 {
     let mut t = t % 360.;
     if t < 0. {
@@ -1104,15 +1184,18 @@ fn normalize_angle(t: f64) -> f64 {
     t
 }
 
+#[inline]
 fn interp_angle(a0: f64, a1: f64, t: f64) -> f64 {
     let delta = (((a1 - a0) % 360.) + 540.) % 360. - 180.;
     (a0 + t * delta + 360.) % 360.
 }
 
+#[inline]
 fn clamp0_1(t: f64) -> f64 {
     t.clamp(0., 1.)
 }
 
+#[inline]
 fn modulo(x: f64, n: f64) -> f64 {
     (x % n + n) % n
 }

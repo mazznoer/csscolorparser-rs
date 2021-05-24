@@ -189,8 +189,18 @@ impl Color {
     /// * `r`: Red value [0..1]
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
+    pub fn from_linear_rgb(r: f64, g: f64, b: f64) -> Color {
+        Color::from_linear_rgba(r, g, b, 1.)
+    }
+
+    #[deprecated]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
     pub fn from_lrgb(r: f64, g: f64, b: f64) -> Color {
-        Color::from_lrgba(r, g, b, 1.)
+        Color::from_linear_rgba(r, g, b, 1.)
     }
 
     /// Arguments:
@@ -199,7 +209,7 @@ impl Color {
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
     /// * `a`: Alpha value [0..1]
-    pub fn from_lrgba(r: f64, g: f64, b: f64, a: f64) -> Color {
+    pub fn from_linear_rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
         fn from_linear(x: f64) -> f64 {
             if x >= 0.0031308 {
                 return 1.055 * x.powf(1. / 2.4) - 0.055;
@@ -209,13 +219,34 @@ impl Color {
         Color::from_rgba(from_linear(r), from_linear(g), from_linear(b), a)
     }
 
+    #[deprecated]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
+    /// * `a`: Alpha value [0..1]
+    pub fn from_lrgba(r: f64, g: f64, b: f64, a: f64) -> Color {
+        Color::from_linear_rgba(r, g, b, a)
+    }
+
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    pub fn from_linear_rgb_u8(r: u8, g: u8, b: u8) -> Color {
+        Color::from_linear_rgba(r as f64 / 255., g as f64 / 255., b as f64 / 255., 1.)
+    }
+
+    #[deprecated]
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     pub fn from_lrgb_u8(r: u8, g: u8, b: u8) -> Color {
-        Color::from_lrgba(r as f64 / 255., g as f64 / 255., b as f64 / 255., 1.)
+        Color::from_linear_rgba(r as f64 / 255., g as f64 / 255., b as f64 / 255., 1.)
     }
 
     /// Arguments:
@@ -224,8 +255,24 @@ impl Color {
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
+    pub fn from_linear_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
+        Color::from_linear_rgba(
+            r as f64 / 255.,
+            g as f64 / 255.,
+            b as f64 / 255.,
+            a as f64 / 255.,
+        )
+    }
+
+    #[deprecated]
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    /// * `a`: Alpha value [0..255]
     pub fn from_lrgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color::from_lrgba(
+        Color::from_linear_rgba(
             r as f64 / 255.,
             g as f64 / 255.,
             b as f64 / 255.,
@@ -317,7 +364,7 @@ impl Color {
         let g = -1.2681437731 * l_ + 2.6093323231 * m_ - 0.3411344290 * s_;
         let b = -0.0041119885 * l_ - 0.7034763098 * m_ + 1.7068625689 * s_;
 
-        Color::from_lrgba(r, g, b, alpha)
+        Color::from_linear_rgba(r, g, b, alpha)
     }
 
     /// Create color from CSS color string.
@@ -337,7 +384,7 @@ impl Color {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_html(s: &str) -> Result<Color, ParseError> {
+    pub fn from_html<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
         parse(s)
     }
 
@@ -420,7 +467,7 @@ impl Color {
     /// Returns: `(r, g, b, a)`
     ///
     /// * Red, green, blue and alpha in the range [0..1]
-    pub fn to_lrgba(&self) -> (f64, f64, f64, f64) {
+    pub fn to_linear_rgba(&self) -> (f64, f64, f64, f64) {
         fn to_linear(x: f64) -> f64 {
             if x >= 0.04045 {
                 return ((x + 0.055) / 1.055).powf(2.4);
@@ -435,11 +482,19 @@ impl Color {
         )
     }
 
+    #[deprecated]
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
+    pub fn to_lrgba(&self) -> (f64, f64, f64, f64) {
+        self.to_linear_rgba()
+    }
+
     /// Returns: `(r, g, b, a)`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
-    pub fn to_lrgba_u8(&self) -> (u8, u8, u8, u8) {
-        let (r, g, b, a) = self.to_lrgba();
+    pub fn to_linear_rgba_u8(&self) -> (u8, u8, u8, u8) {
+        let (r, g, b, a) = self.to_linear_rgba();
         (
             (r * 255.).round() as u8,
             (g * 255.).round() as u8,
@@ -448,9 +503,17 @@ impl Color {
         )
     }
 
+    #[deprecated]
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
+    pub fn to_lrgba_u8(&self) -> (u8, u8, u8, u8) {
+        self.to_linear_rgba_u8()
+    }
+
     /// Returns: `(l, a, b, alpha)`
     pub fn to_oklaba(&self) -> (f64, f64, f64, f64) {
-        let (r, g, b, _) = self.to_lrgba();
+        let (r, g, b, _) = self.to_linear_rgba();
         let l_ = (0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b).cbrt();
         let m_ = (0.2118591070 * r + 0.6807189584 * g + 0.1074065790 * b).cbrt();
         let s_ = (0.0883097947 * r + 0.2818474174 * g + 0.6302613616 * b).cbrt();
@@ -493,15 +556,21 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
-    pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
-        let (r1, g1, b1, a1) = self.to_lrgba();
-        let (r2, g2, b2, a2) = other.to_lrgba();
-        Color::from_lrgba(
+    pub fn interpolate_linear_rgb(&self, other: &Color, t: f64) -> Color {
+        let (r1, g1, b1, a1) = self.to_linear_rgba();
+        let (r2, g2, b2, a2) = other.to_linear_rgba();
+        Color::from_linear_rgba(
             r1 + t * (r2 - r1),
             g1 + t * (g2 - g1),
             b1 + t * (b2 - b1),
             a1 + t * (a2 - a1),
         )
+    }
+
+    #[deprecated]
+    /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
+    pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
+        self.interpolate_linear_rgb(&other, t)
     }
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].

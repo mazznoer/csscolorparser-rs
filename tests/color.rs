@@ -12,8 +12,8 @@ fn basic() {
     assert_eq!(c.to_hsva(), (0., 1., 1., 1.));
     assert_eq!(c.to_hsla(), (0., 1., 0.5, 1.));
     assert_eq!(c.to_hwba(), (0., 0., 0., 1.));
-    assert_eq!(c.to_lrgba(), (1., 0., 0., 1.));
-    assert_eq!(c.to_lrgba_u8(), (255, 0, 0, 255));
+    assert_eq!(c.to_linear_rgba(), (1., 0., 0., 1.));
+    assert_eq!(c.to_linear_rgba_u8(), (255, 0, 0, 255));
 
     let c = Color::from_rgba(1., 0., 0., 0.5);
     assert_eq!(c.rgba(), (1., 0., 0., 0.5));
@@ -66,9 +66,9 @@ fn red() {
         Color::from_rgba(1., 0., 0., 1.),
         Color::from_rgb_u8(255, 0, 0),
         Color::from_rgba_u8(255, 0, 0, 255),
-        Color::from_lrgb(1., 0., 0.),
-        Color::from_lrgb_u8(255, 0, 0),
-        Color::from_lrgba_u8(255, 0, 0, 255),
+        Color::from_linear_rgb(1., 0., 0.),
+        Color::from_linear_rgb_u8(255, 0, 0),
+        Color::from_linear_rgba_u8(255, 0, 0, 255),
         Color::from_hsv(0., 1., 1.),
         Color::from_hsl(360., 1., 0.5),
         Color::from_hwb(0., 0., 0.),
@@ -94,9 +94,9 @@ fn interpolate() {
     assert_eq!(b.interpolate_rgb(&a, 0.5).rgba_u8(), (0, 128, 128, 255));
     assert_eq!(b.interpolate_rgb(&a, 1.0).rgba_u8(), (0, 255, 0, 255));
 
-    assert_eq!(a.interpolate_lrgb(&b, 0.0).rgba_u8(), (0, 255, 0, 255));
-    assert_eq!(a.interpolate_lrgb(&b, 0.5).rgba_u8(), (0, 188, 188, 255));
-    assert_eq!(a.interpolate_lrgb(&b, 1.0).rgba_u8(), (0, 0, 255, 255));
+    assert_eq!(a.interpolate_linear_rgb(&b, 0.0).rgba_u8(), (0, 255, 0, 255));
+    assert_eq!(a.interpolate_linear_rgb(&b, 0.5).rgba_u8(), (0, 188, 188, 255));
+    assert_eq!(a.interpolate_linear_rgb(&b, 1.0).rgba_u8(), (0, 0, 255, 255));
 
     assert_eq!(a.interpolate_hsv(&b, 0.0).rgba_u8(), (0, 255, 0, 255));
     assert_eq!(a.interpolate_hsv(&b, 0.5).rgba_u8(), (0, 255, 255, 255));

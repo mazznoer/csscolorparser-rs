@@ -841,8 +841,6 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
         let params = s.split_whitespace().collect::<Vec<&str>>();
         let p_len = params.len();
 
-        let mut a = Some(1.);
-
         if *fname == "rgb" || *fname == "rgba" {
             if p_len != 3 && p_len != 4 {
                 return Err(ParseError::InvalidRgb);
@@ -852,9 +850,11 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
             let g = parse_percent_or_255(params[1]);
             let b = parse_percent_or_255(params[2]);
 
-            if p_len == 4 {
-                a = parse_percent_or_float(params[3]);
-            }
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
 
             if let (Some(r), Some(g), Some(b), Some(a)) = (r, g, b, a) {
                 return Ok(Color {
@@ -875,9 +875,11 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
             let s = parse_percent_or_float(params[1]);
             let l = parse_percent_or_float(params[2]);
 
-            if p_len == 4 {
-                a = parse_percent_or_float(params[3]);
-            }
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
 
             if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
                 return Ok(Color::from_hsla(h, s, l, a));
@@ -893,9 +895,11 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
             let w = parse_percent_or_float(params[1]);
             let b = parse_percent_or_float(params[2]);
 
-            if p_len == 4 {
-                a = parse_percent_or_float(params[3]);
-            }
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
 
             if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
                 return Ok(Color::from_hwba(h, w, b, a));
@@ -911,9 +915,11 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
             let s = parse_percent_or_float(params[1]);
             let v = parse_percent_or_float(params[2]);
 
-            if p_len == 4 {
-                a = parse_percent_or_float(params[3]);
-            }
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
 
             if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
                 return Ok(Color::from_hsva(h, s, v, a));

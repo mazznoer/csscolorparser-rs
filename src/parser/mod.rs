@@ -1,0 +1,310 @@
+use std::{error, fmt};
+
+use crate::Color;
+
+#[cfg(feature = "named-colors")]
+mod named_colors;
+
+#[cfg(feature = "named-colors")]
+use named_colors::NAMED_COLORS;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ParseError {
+    InvalidHex,
+    InvalidRgb,
+    InvalidHsl,
+    InvalidHwb,
+    InvalidHsv,
+    InvalidUnknown,
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            ParseError::InvalidHex => f.write_str("Invalid hex format."),
+            ParseError::InvalidRgb => f.write_str("Invalid rgb format."),
+            ParseError::InvalidHsl => f.write_str("Invalid hsl format."),
+            ParseError::InvalidHwb => f.write_str("Invalid hwb format."),
+            ParseError::InvalidHsv => f.write_str("Invalid hsv format."),
+            ParseError::InvalidUnknown => f.write_str("Invalid unknown format."),
+        }
+    }
+}
+
+impl error::Error for ParseError {}
+
+/// Parse CSS color string
+///
+/// # Examples
+///
+/// ```
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// let c = csscolorparser::parse("#ff0")?;
+///
+/// assert_eq!(c.rgba(), (1., 1., 0., 1.));
+/// assert_eq!(c.rgba_u8(), (255, 255, 0, 255));
+/// assert_eq!(c.to_hex_string(), "#ffff00");
+/// assert_eq!(c.to_rgb_string(), "rgb(255,255,0)");
+/// # Ok(())
+/// # }
+/// ```
+///
+/// ```
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// let c = csscolorparser::parse("hsl(360deg,100%,50%)")?;
+///
+/// assert_eq!(c.rgba(), (1., 0., 0., 1.));
+/// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+/// assert_eq!(c.to_hex_string(), "#ff0000");
+/// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+/// # Ok(())
+/// # }
+/// ```
+pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
+    let s = s.as_ref().trim().to_lowercase();
+
+    if s == "transparent" {
+        return Ok(Color::from_rgba(0., 0., 0., 0.));
+    }
+
+    // Named colors
+    #[cfg(feature = "named-colors")]
+    if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
+        return Ok(Color::from_rgb_u8(*r, *g, *b));
+    }
+
+    // Hex format
+    if let Some(s) = s.strip_prefix("#") {
+        if let Ok(c) = parse_hex(s) {
+            return Ok(c);
+        }
+        return Err(ParseError::InvalidHex);
+    }
+
+    if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(")")) {
+        let fname = &s[..i].trim_end();
+        let s = &s[i + 1..].replace(",", " ").replace("/", " ");
+        let params = s.split_whitespace().collect::<Vec<&str>>();
+        let p_len = params.len();
+
+        if *fname == "rgb" || *fname == "rgba" {
+            if p_len != 3 && p_len != 4 {
+                return Err(ParseError::InvalidRgb);
+            }
+
+            let r = parse_percent_or_255(params[0]);
+            let g = parse_percent_or_255(params[1]);
+            let b = parse_percent_or_255(params[2]);
+
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
+
+            if let (Some(r), Some(g), Some(b), Some(a)) = (r, g, b, a) {
+                return Ok(Color {
+                    r: r.clamp(0.0, 1.0),
+                    g: g.clamp(0.0, 1.0),
+                    b: b.clamp(0.0, 1.0),
+                    a: a.clamp(0.0, 1.0),
+                });
+            }
+
+            return Err(ParseError::InvalidRgb);
+        } else if *fname == "hsl" || *fname == "hsla" {
+            if p_len != 3 && p_len != 4 {
+                return Err(ParseError::InvalidHsl);
+            }
+
+            let h = parse_angle(params[0]);
+            let s = parse_percent_or_float(params[1]);
+            let l = parse_percent_or_float(params[2]);
+
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
+
+            if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
+                return Ok(Color::from_hsla(h, s, l, a));
+            }
+
+            return Err(ParseError::InvalidHsl);
+        } else if *fname == "hwb" || *fname == "hwba" {
+            if p_len != 3 && p_len != 4 {
+                return Err(ParseError::InvalidHwb);
+            }
+
+            let h = parse_angle(params[0]);
+            let w = parse_percent_or_float(params[1]);
+            let b = parse_percent_or_float(params[2]);
+
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
+
+            if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
+                return Ok(Color::from_hwba(h, w, b, a));
+            }
+
+            return Err(ParseError::InvalidHwb);
+        } else if *fname == "hsv" || *fname == "hsva" {
+            if p_len != 3 && p_len != 4 {
+                return Err(ParseError::InvalidHsv);
+            }
+
+            let h = parse_angle(params[0]);
+            let s = parse_percent_or_float(params[1]);
+            let v = parse_percent_or_float(params[2]);
+
+            let a = if p_len == 4 {
+                parse_percent_or_float(params[3])
+            } else {
+                Some(1.)
+            };
+
+            if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
+                return Ok(Color::from_hsva(h, s, v, a));
+            }
+
+            return Err(ParseError::InvalidHsv);
+        }
+    }
+
+    // Hex format without prefix '#'
+    if let Ok(c) = parse_hex(&s) {
+        return Ok(c);
+    }
+
+    Err(ParseError::InvalidUnknown)
+}
+
+fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
+    let n = s.len();
+
+    let (r, g, b, a) = if n == 3 || n == 4 {
+        let r = u8::from_str_radix(&s[0..1].repeat(2), 16)?;
+        let g = u8::from_str_radix(&s[1..2].repeat(2), 16)?;
+        let b = u8::from_str_radix(&s[2..3].repeat(2), 16)?;
+
+        let a = if n == 4 {
+            u8::from_str_radix(&s[3..4].repeat(2), 16)?
+        } else {
+            255
+        };
+
+        (r, g, b, a)
+    } else if n == 6 || n == 8 {
+        let r = u8::from_str_radix(&s[0..2], 16)?;
+        let g = u8::from_str_radix(&s[2..4], 16)?;
+        let b = u8::from_str_radix(&s[4..6], 16)?;
+
+        let a = if n == 8 {
+            u8::from_str_radix(&s[6..8], 16)?
+        } else {
+            255
+        };
+
+        (r, g, b, a)
+    } else {
+        return Err(Box::new(ParseError::InvalidHex));
+    };
+
+    Ok(Color::from_rgba_u8(r, g, b, a))
+}
+
+fn parse_percent_or_float(s: &str) -> Option<f64> {
+    if let Some(s) = s.strip_suffix("%") {
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t / 100.);
+        }
+        return None;
+    }
+
+    if let Ok(t) = s.parse::<f64>() {
+        return Some(t);
+    }
+
+    None
+}
+
+fn parse_percent_or_255(s: &str) -> Option<f64> {
+    if let Some(s) = s.strip_suffix("%") {
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t / 100.);
+        }
+        return None;
+    }
+
+    if let Ok(t) = s.parse::<f64>() {
+        return Some(t / 255.);
+    }
+
+    None
+}
+
+fn parse_angle(s: &str) -> Option<f64> {
+    if let Some(s) = s.strip_suffix("deg") {
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t);
+        }
+        return None;
+    }
+
+    if let Some(s) = s.strip_suffix("grad") {
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t * 360. / 400.);
+        }
+        return None;
+    }
+
+    if let Some(s) = s.strip_suffix("rad") {
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t.to_degrees());
+        }
+        return None;
+    }
+
+    if let Some(s) = s.strip_suffix("turn") {
+        if let Ok(t) = s.parse::<f64>() {
+            return Some(t * 360.);
+        }
+        return None;
+    }
+
+    if let Ok(t) = s.parse::<f64>() {
+        return Some(t);
+    }
+
+    None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_angle() {
+        let data = vec![
+            ("360", 360.),
+            ("127.356", 127.356),
+            ("+120deg", 120.),
+            ("90deg", 90.),
+            ("-127deg", -127.),
+            ("100grad", 90.),
+            ("1.5707963267948966rad", 90.),
+            ("0.25turn", 90.),
+            ("-0.25turn", -90.),
+        ];
+        for (s, expected) in data {
+            let c = parse_angle(s);
+            assert_eq!(Some(expected), c);
+        }
+    }
+}

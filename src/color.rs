@@ -8,7 +8,7 @@ use std::convert::TryFrom;
 use std::fmt;
 use std::str::FromStr;
 
-use crate::{parse, ParseError};
+use crate::{parse, ParseColorError};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 /// The color
@@ -272,7 +272,7 @@ impl Color {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_html<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
+    pub fn from_html<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
         parse(s)
     }
 
@@ -621,7 +621,7 @@ impl fmt::Display for Color {
 }
 
 impl FromStr for Color {
-    type Err = ParseError;
+    type Err = ParseColorError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         parse(s)
@@ -629,7 +629,7 @@ impl FromStr for Color {
 }
 
 impl TryFrom<&str> for Color {
-    type Error = ParseError;
+    type Error = ParseColorError;
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         parse(s)

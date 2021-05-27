@@ -115,4 +115,4 @@ mod color;
 mod parser;
 
 pub use color::Color;
-pub use parser::{parse, ParseError};
+pub use parser::{parse, ParseColorError};

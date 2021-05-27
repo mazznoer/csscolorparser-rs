@@ -11,7 +11,7 @@ mod named_colors;
 use named_colors::NAMED_COLORS;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum ParseError {
+pub enum ParseColorError {
     InvalidHex,
     InvalidRgb,
     InvalidHsl,
@@ -20,20 +20,20 @@ pub enum ParseError {
     InvalidUnknown,
 }
 
-impl fmt::Display for ParseError {
+impl fmt::Display for ParseColorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::InvalidHex => f.write_str("Invalid hex format."),
-            ParseError::InvalidRgb => f.write_str("Invalid rgb format."),
-            ParseError::InvalidHsl => f.write_str("Invalid hsl format."),
-            ParseError::InvalidHwb => f.write_str("Invalid hwb format."),
-            ParseError::InvalidHsv => f.write_str("Invalid hsv format."),
-            ParseError::InvalidUnknown => f.write_str("Invalid unknown format."),
+            ParseColorError::InvalidHex => f.write_str("Invalid hex format."),
+            ParseColorError::InvalidRgb => f.write_str("Invalid rgb format."),
+            ParseColorError::InvalidHsl => f.write_str("Invalid hsl format."),
+            ParseColorError::InvalidHwb => f.write_str("Invalid hwb format."),
+            ParseColorError::InvalidHsv => f.write_str("Invalid hsv format."),
+            ParseColorError::InvalidUnknown => f.write_str("Invalid unknown format."),
         }
     }
 }
 
-impl error::Error for ParseError {}
+impl error::Error for ParseColorError {}
 
 /// Parse CSS color string
 ///
@@ -64,7 +64,7 @@ impl error::Error for ParseError {}
 /// # Ok(())
 /// # }
 /// ```
-pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
+pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
     let s = s.as_ref().trim().to_lowercase();
 
     if s == "transparent" {
@@ -82,7 +82,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
         if let Ok(c) = parse_hex(s) {
             return Ok(c);
         }
-        return Err(ParseError::InvalidHex);
+        return Err(ParseColorError::InvalidHex);
     }
 
     if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(")")) {
@@ -93,7 +93,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
 
         if *fname == "rgb" || *fname == "rgba" {
             if p_len != 3 && p_len != 4 {
-                return Err(ParseError::InvalidRgb);
+                return Err(ParseColorError::InvalidRgb);
             }
 
             let r = parse_percent_or_255(params[0]);
@@ -115,10 +115,10 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
                 });
             }
 
-            return Err(ParseError::InvalidRgb);
+            return Err(ParseColorError::InvalidRgb);
         } else if *fname == "hsl" || *fname == "hsla" {
             if p_len != 3 && p_len != 4 {
-                return Err(ParseError::InvalidHsl);
+                return Err(ParseColorError::InvalidHsl);
             }
 
             let h = parse_angle(params[0]);
@@ -135,10 +135,10 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
                 return Ok(Color::from_hsla(h, s, l, a));
             }
 
-            return Err(ParseError::InvalidHsl);
+            return Err(ParseColorError::InvalidHsl);
         } else if *fname == "hwb" || *fname == "hwba" {
             if p_len != 3 && p_len != 4 {
-                return Err(ParseError::InvalidHwb);
+                return Err(ParseColorError::InvalidHwb);
             }
 
             let h = parse_angle(params[0]);
@@ -155,10 +155,10 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
                 return Ok(Color::from_hwba(h, w, b, a));
             }
 
-            return Err(ParseError::InvalidHwb);
+            return Err(ParseColorError::InvalidHwb);
         } else if *fname == "hsv" || *fname == "hsva" {
             if p_len != 3 && p_len != 4 {
-                return Err(ParseError::InvalidHsv);
+                return Err(ParseColorError::InvalidHsv);
             }
 
             let h = parse_angle(params[0]);
@@ -175,7 +175,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
                 return Ok(Color::from_hsva(h, s, v, a));
             }
 
-            return Err(ParseError::InvalidHsv);
+            return Err(ParseColorError::InvalidHsv);
         }
     }
 
@@ -184,7 +184,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseError> {
         return Ok(c);
     }
 
-    Err(ParseError::InvalidUnknown)
+    Err(ParseColorError::InvalidUnknown)
 }
 
 fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
@@ -215,7 +215,7 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
 
         (r, g, b, a)
     } else {
-        return Err(Box::new(ParseError::InvalidHex));
+        return Err(Box::new(ParseColorError::InvalidHex));
     };
 
     Ok(Color::from_rgba_u8(r, g, b, a))

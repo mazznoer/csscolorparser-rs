@@ -44,7 +44,7 @@ impl error::Error for ParseColorError {}
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let c = csscolorparser::parse("#ff0")?;
 ///
-/// assert_eq!(c.rgba(), (1., 1., 0., 1.));
+/// assert_eq!(c.rgba(), (1.0, 1.0, 0.0, 1.0));
 /// assert_eq!(c.rgba_u8(), (255, 255, 0, 255));
 /// assert_eq!(c.to_hex_string(), "#ffff00");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,255,0)");
@@ -57,7 +57,7 @@ impl error::Error for ParseColorError {}
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let c = csscolorparser::parse("hsl(360deg,100%,50%)")?;
 ///
-/// assert_eq!(c.rgba(), (1., 0., 0., 1.));
+/// assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
 /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
 /// assert_eq!(c.to_hex_string(), "#ff0000");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
@@ -68,7 +68,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
     let s = s.as_ref().trim().to_lowercase();
 
     if s == "transparent" {
-        return Ok(Color::from_rgba(0., 0., 0., 0.));
+        return Ok(Color::from_rgba(0.0, 0.0, 0.0, 0.0));
     }
 
     // Named colors
@@ -103,7 +103,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
             let a = if p_len == 4 {
                 parse_percent_or_float(params[3])
             } else {
-                Some(1.)
+                Some(1.0)
             };
 
             if let (Some(r), Some(g), Some(b), Some(a)) = (r, g, b, a) {
@@ -128,7 +128,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
             let a = if p_len == 4 {
                 parse_percent_or_float(params[3])
             } else {
-                Some(1.)
+                Some(1.0)
             };
 
             if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
@@ -148,7 +148,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
             let a = if p_len == 4 {
                 parse_percent_or_float(params[3])
             } else {
-                Some(1.)
+                Some(1.0)
             };
 
             if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
@@ -168,7 +168,7 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
             let a = if p_len == 4 {
                 parse_percent_or_float(params[3])
             } else {
-                Some(1.)
+                Some(1.0)
             };
 
             if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
@@ -224,7 +224,7 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
 fn parse_percent_or_float(s: &str) -> Option<f64> {
     if let Some(s) = s.strip_suffix("%") {
         if let Ok(t) = s.parse::<f64>() {
-            return Some(t / 100.);
+            return Some(t / 100.0);
         }
         return None;
     }
@@ -239,13 +239,13 @@ fn parse_percent_or_float(s: &str) -> Option<f64> {
 fn parse_percent_or_255(s: &str) -> Option<f64> {
     if let Some(s) = s.strip_suffix("%") {
         if let Ok(t) = s.parse::<f64>() {
-            return Some(t / 100.);
+            return Some(t / 100.0);
         }
         return None;
     }
 
     if let Ok(t) = s.parse::<f64>() {
-        return Some(t / 255.);
+        return Some(t / 255.0);
     }
 
     None
@@ -261,7 +261,7 @@ fn parse_angle(s: &str) -> Option<f64> {
 
     if let Some(s) = s.strip_suffix("grad") {
         if let Ok(t) = s.parse::<f64>() {
-            return Some(t * 360. / 400.);
+            return Some(t * 360.0 / 400.0);
         }
         return None;
     }
@@ -275,7 +275,7 @@ fn parse_angle(s: &str) -> Option<f64> {
 
     if let Some(s) = s.strip_suffix("turn") {
         if let Ok(t) = s.parse::<f64>() {
-            return Some(t * 360.);
+            return Some(t * 360.0);
         }
         return None;
     }
@@ -294,15 +294,15 @@ mod tests {
     #[test]
     fn test_parse_angle() {
         let data = vec![
-            ("360", 360.),
+            ("360", 360.0),
             ("127.356", 127.356),
-            ("+120deg", 120.),
-            ("90deg", 90.),
-            ("-127deg", -127.),
-            ("100grad", 90.),
-            ("1.5707963267948966rad", 90.),
-            ("0.25turn", 90.),
-            ("-0.25turn", -90.),
+            ("+120deg", 120.0),
+            ("90deg", 90.0),
+            ("-127deg", -127.0),
+            ("100grad", 90.0),
+            ("1.5707963267948966rad", 90.0),
+            ("0.25turn", 90.0),
+            ("-0.25turn", -90.0),
         ];
         for (s, expected) in data {
             let c = parse_angle(s);

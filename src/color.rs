@@ -30,7 +30,7 @@ impl Color {
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
     pub fn from_rgb(r: f64, g: f64, b: f64) -> Color {
-        Color { r, g, b, a: 1. }
+        Color { r, g, b, a: 1.0 }
     }
 
     /// Arguments:
@@ -50,10 +50,10 @@ impl Color {
     /// * `b`: Blue value [0..255]
     pub fn from_rgb_u8(r: u8, g: u8, b: u8) -> Color {
         Color {
-            r: r as f64 / 255.,
-            g: g as f64 / 255.,
-            b: b as f64 / 255.,
-            a: 1.,
+            r: r as f64 / 255.0,
+            g: g as f64 / 255.0,
+            b: b as f64 / 255.0,
+            a: 1.0,
         }
     }
 
@@ -65,10 +65,10 @@ impl Color {
     /// * `a`: Alpha value [0..255]
     pub fn from_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color {
-            r: r as f64 / 255.,
-            g: g as f64 / 255.,
-            b: b as f64 / 255.,
-            a: a as f64 / 255.,
+            r: r as f64 / 255.0,
+            g: g as f64 / 255.0,
+            b: b as f64 / 255.0,
+            a: a as f64 / 255.0,
         }
     }
 
@@ -78,7 +78,7 @@ impl Color {
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
     pub fn from_linear_rgb(r: f64, g: f64, b: f64) -> Color {
-        Color::from_linear_rgba(r, g, b, 1.)
+        Color::from_linear_rgba(r, g, b, 1.0)
     }
 
     #[deprecated]
@@ -88,7 +88,7 @@ impl Color {
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
     pub fn from_lrgb(r: f64, g: f64, b: f64) -> Color {
-        Color::from_linear_rgba(r, g, b, 1.)
+        Color::from_linear_rgba(r, g, b, 1.0)
     }
 
     /// Arguments:
@@ -100,7 +100,7 @@ impl Color {
     pub fn from_linear_rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
         fn from_linear(x: f64) -> f64 {
             if x >= 0.0031308 {
-                return 1.055 * x.powf(1. / 2.4) - 0.055;
+                return 1.055 * x.powf(1.0 / 2.4) - 0.055;
             }
             12.92 * x
         }
@@ -124,7 +124,7 @@ impl Color {
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     pub fn from_linear_rgb_u8(r: u8, g: u8, b: u8) -> Color {
-        Color::from_linear_rgba(r as f64 / 255., g as f64 / 255., b as f64 / 255., 1.)
+        Color::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
     }
 
     #[deprecated]
@@ -134,7 +134,7 @@ impl Color {
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     pub fn from_lrgb_u8(r: u8, g: u8, b: u8) -> Color {
-        Color::from_linear_rgba(r as f64 / 255., g as f64 / 255., b as f64 / 255., 1.)
+        Color::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
     }
 
     /// Arguments:
@@ -145,10 +145,10 @@ impl Color {
     /// * `a`: Alpha value [0..255]
     pub fn from_linear_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color::from_linear_rgba(
-            r as f64 / 255.,
-            g as f64 / 255.,
-            b as f64 / 255.,
-            a as f64 / 255.,
+            r as f64 / 255.0,
+            g as f64 / 255.0,
+            b as f64 / 255.0,
+            a as f64 / 255.0,
         )
     }
 
@@ -161,10 +161,10 @@ impl Color {
     /// * `a`: Alpha value [0..255]
     pub fn from_lrgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color::from_linear_rgba(
-            r as f64 / 255.,
-            g as f64 / 255.,
-            b as f64 / 255.,
-            a as f64 / 255.,
+            r as f64 / 255.0,
+            g as f64 / 255.0,
+            b as f64 / 255.0,
+            a as f64 / 255.0,
         )
     }
 
@@ -174,7 +174,7 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
     pub fn from_hsv(h: f64, s: f64, v: f64) -> Color {
-        Color::from_hsva(h, s, v, 1.)
+        Color::from_hsva(h, s, v, 1.0)
     }
 
     /// Arguments:
@@ -194,7 +194,7 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `l`: Lightness [0..1]
     pub fn from_hsl(h: f64, s: f64, l: f64) -> Color {
-        Color::from_hsla(h, s, l, 1.)
+        Color::from_hsla(h, s, l, 1.0)
     }
 
     /// Arguments:
@@ -214,7 +214,7 @@ impl Color {
     /// * `w`: Whiteness [0..1]
     /// * `b`: Blackness [0..1]
     pub fn from_hwb(h: f64, w: f64, b: f64) -> Color {
-        Color::from_hwba(h, w, b, 1.)
+        Color::from_hwba(h, w, b, 1.0)
     }
 
     /// Arguments:
@@ -234,7 +234,7 @@ impl Color {
     /// * `a`: How green/red the color is
     /// * `b`: How blue/yellow the color is
     pub fn from_oklab(l: f64, a: f64, b: f64) -> Color {
-        Color::from_oklaba(l, a, b, 1.)
+        Color::from_oklaba(l, a, b, 1.0)
     }
 
     /// Arguments:
@@ -265,7 +265,7 @@ impl Color {
     ///
     /// let c = Color::from_html("rgb(255,0,0)")?;
     ///
-    /// assert_eq!(c.rgba(), (1., 0., 0., 1.));
+    /// assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
     /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
     /// assert_eq!(c.to_hex_string(), "#ff0000");
     /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
@@ -288,10 +288,10 @@ impl Color {
     /// * Red, green, blue and alpha in the range [0..255]
     pub fn rgba_u8(&self) -> (u8, u8, u8, u8) {
         (
-            (self.r * 255.).round() as u8,
-            (self.g * 255.).round() as u8,
-            (self.b * 255.).round() as u8,
-            (self.a * 255.).round() as u8,
+            (self.r * 255.0).round() as u8,
+            (self.g * 255.0).round() as u8,
+            (self.b * 255.0).round() as u8,
+            (self.a * 255.0).round() as u8,
         )
     }
 
@@ -384,10 +384,10 @@ impl Color {
     pub fn to_linear_rgba_u8(&self) -> (u8, u8, u8, u8) {
         let (r, g, b, a) = self.to_linear_rgba();
         (
-            (r * 255.).round() as u8,
-            (g * 255.).round() as u8,
-            (b * 255.).round() as u8,
-            (a * 255.).round() as u8,
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
+            (a * 255.0).round() as u8,
         )
     }
 
@@ -426,7 +426,7 @@ impl Color {
     pub fn to_rgb_string(&self) -> String {
         let (r, g, b, _) = self.rgba_u8();
 
-        if self.a < 1. {
+        if self.a < 1.0 {
             return format!("rgba({},{},{},{})", r, g, b, self.a);
         }
 
@@ -489,10 +489,10 @@ impl Color {
 impl Default for Color {
     fn default() -> Self {
         Color {
-            r: 0.,
-            g: 0.,
-            b: 0.,
-            a: 1.,
+            r: 0.0,
+            g: 0.0,
+            b: 0.0,
+            a: 1.0,
         }
     }
 }
@@ -644,7 +644,7 @@ impl From<(f64, f64, f64, f64)> for Color {
 
 impl From<(f64, f64, f64)> for Color {
     fn from((r, g, b): (f64, f64, f64)) -> Self {
-        Color { r, g, b, a: 1. }
+        Color { r, g, b, a: 1.0 }
     }
 }
 
@@ -656,7 +656,7 @@ impl From<[f64; 4]> for Color {
 
 impl From<[f64; 3]> for Color {
     fn from([r, g, b]: [f64; 3]) -> Self {
-        Color { r, g, b, a: 1. }
+        Color { r, g, b, a: 1.0 }
     }
 }
 
@@ -718,18 +718,18 @@ impl<'de> Deserialize<'de> for Color {
 }
 
 fn hue_to_rgb(n1: f64, n2: f64, h: f64) -> f64 {
-    let h = modulo(h, 6.);
+    let h = modulo(h, 6.0);
 
-    if h < 1. {
+    if h < 1.0 {
         return n1 + ((n2 - n1) * h);
     }
 
-    if h < 3. {
+    if h < 3.0 {
         return n2;
     }
 
-    if h < 4. {
-        return n1 + ((n2 - n1) * (4. - h));
+    if h < 4.0 {
+        return n1 + ((n2 - n1) * (4.0 - h));
     }
 
     n1
@@ -739,48 +739,48 @@ fn hue_to_rgb(n1: f64, n2: f64, h: f64) -> f64 {
 // s, l = 0..1
 // r, g, b = 0..1
 fn hsl_to_rgb(h: f64, s: f64, l: f64) -> (f64, f64, f64) {
-    if s == 0. {
+    if s == 0.0 {
         return (l, l, l);
     }
 
     let n2 = if l < 0.5 {
-        l * (1. + s)
+        l * (1.0 + s)
     } else {
         l + s - (l * s)
     };
 
-    let n1 = 2. * l - n2;
-    let h = h / 60.;
-    let r = hue_to_rgb(n1, n2, h + 2.);
+    let n1 = 2.0 * l - n2;
+    let h = h / 60.0;
+    let r = hue_to_rgb(n1, n2, h + 2.0);
     let g = hue_to_rgb(n1, n2, h);
-    let b = hue_to_rgb(n1, n2, h - 2.);
+    let b = hue_to_rgb(n1, n2, h - 2.0);
     (r, g, b)
 }
 
 fn hwb_to_rgb(hue: f64, white: f64, black: f64) -> (f64, f64, f64) {
-    if white + black >= 1. {
+    if white + black >= 1.0 {
         let l = white / (white + black);
         return (l, l, l);
     }
 
-    let (r, g, b) = hsl_to_rgb(hue, 1., 0.5);
-    let r = r * (1. - white - black) + white;
-    let g = g * (1. - white - black) + white;
-    let b = b * (1. - white - black) + white;
+    let (r, g, b) = hsl_to_rgb(hue, 1.0, 0.5);
+    let r = r * (1.0 - white - black) + white;
+    let g = g * (1.0 - white - black) + white;
+    let b = b * (1.0 - white - black) + white;
     (r, g, b)
 }
 
 #[allow(clippy::float_cmp)]
 fn hsv_to_hsl(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
-    let l = (2. - s) * v / 2.;
+    let l = (2.0 - s) * v / 2.0;
 
-    let s = if l != 0. {
-        if l == 1. {
-            0.
+    let s = if l != 0.0 {
+        if l == 1.0 {
+            0.0
         } else if l < 0.5 {
-            s * v / (l * 2.)
+            s * v / (l * 2.0)
         } else {
-            s * v / (2. - l * 2.)
+            s * v / (2.0 - l * 2.0)
         }
     } else {
         s
@@ -799,8 +799,8 @@ fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let v = r.max(g.max(b));
     let d = v - r.min(g.min(b));
 
-    if d == 0. {
-        return (0., 0., v);
+    if d == 0.0 {
+        return (0.0, 0.0, v);
     }
 
     let s = d / v;
@@ -811,12 +811,12 @@ fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let h = if r == v {
         db - dg
     } else if g == v {
-        2. + dr - db
+        2.0 + dr - db
     } else {
-        4. + dg - dr
+        4.0 + dg - dr
     };
 
-    let h = (h * 60.) % 360.;
+    let h = (h * 60.0) % 360.0;
     (normalize_angle(h), s, v)
 }
 
@@ -824,10 +824,10 @@ fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
 fn rgb_to_hsl(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let min = r.min(g.min(b));
     let max = r.max(g.max(b));
-    let l = (max + min) / 2.;
+    let l = (max + min) / 2.0;
 
     if min == max {
-        return (0., 0., l);
+        return (0.0, 0.0, l);
     }
 
     let d = max - min;
@@ -835,7 +835,7 @@ fn rgb_to_hsl(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let s = if l < 0.5 {
         d / (max + min)
     } else {
-        d / (2. - max - min)
+        d / (2.0 - max - min)
     };
 
     let dr = (max - r) / d;
@@ -845,40 +845,40 @@ fn rgb_to_hsl(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let h = if r == max {
         db - dg
     } else if g == max {
-        2. + dr - db
+        2.0 + dr - db
     } else {
-        4. + dg - dr
+        4.0 + dg - dr
     };
 
-    let h = (h * 60.) % 360.;
+    let h = (h * 60.0) % 360.0;
     (normalize_angle(h), s, l)
 }
 
 fn rgb_to_hwb(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let (hue, _, _) = rgb_to_hsl(r, g, b);
     let white = r.min(g.min(b));
-    let black = 1. - r.max(g.max(b));
+    let black = 1.0 - r.max(g.max(b));
     (hue, white, black)
 }
 
 #[inline]
 fn normalize_angle(t: f64) -> f64 {
-    let mut t = t % 360.;
-    if t < 0. {
-        t += 360.;
+    let mut t = t % 360.0;
+    if t < 0.0 {
+        t += 360.0;
     }
     t
 }
 
 #[inline]
 fn interp_angle(a0: f64, a1: f64, t: f64) -> f64 {
-    let delta = (((a1 - a0) % 360.) + 540.) % 360. - 180.;
-    (a0 + t * delta + 360.) % 360.
+    let delta = (((a1 - a0) % 360.0) + 540.0) % 360.0 - 180.0;
+    (a0 + t * delta + 360.0) % 360.0
 }
 
 #[inline]
 fn clamp0_1(t: f64) -> f64 {
-    t.clamp(0., 1.)
+    t.clamp(0.0, 1.0)
 }
 
 #[inline]
@@ -893,13 +893,13 @@ mod tests {
     #[test]
     fn test_normalize_angle() {
         let data = vec![
-            (0., 0.),
-            (360., 0.),
-            (400., 40.),
-            (1155., 75.),
-            (-360., 0.),
-            (-90., 270.),
-            (-765., 315.),
+            (0.0, 0.0),
+            (360.0, 0.0),
+            (400.0, 40.0),
+            (1155.0, 75.0),
+            (-360.0, 0.0),
+            (-90.0, 270.0),
+            (-765.0, 315.0),
         ];
         for (x, expected) in data {
             let c = normalize_angle(x);
@@ -910,10 +910,10 @@ mod tests {
     #[test]
     fn test_interp_angle() {
         let data = vec![
-            ((0., 360., 0.5), 0.),
-            ((360., 90., 0.), 0.),
-            ((360., 90., 0.5), 45.),
-            ((360., 90., 1.), 90.),
+            ((0.0, 360.0, 0.5), 0.0),
+            ((360.0, 90.0, 0.0), 0.0),
+            ((360.0, 90.0, 0.5), 45.0),
+            ((360.0, 90.0, 1.0), 90.0),
         ];
         for ((a, b, t), expected) in data {
             let v = interp_angle(a, b, t);
@@ -925,11 +925,9 @@ mod tests {
     #[test]
     fn test_convert_rust_rgb_to_color() {
         let rgb = RGB::new(0.0, 0.5, 1.0);
-
         assert_eq!(Color::from_rgb(0.0, 0.5, 1.0), Color::from(rgb));
 
         let rgba = RGBA::new(1.0, 0.5, 0.0, 0.5);
-
         assert_eq!(Color::from_rgba(1.0, 0.5, 0.0, 0.5), Color::from(rgba));
     }
 

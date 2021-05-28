@@ -17,6 +17,7 @@ pub enum ParseColorError {
     InvalidHsl,
     InvalidHwb,
     InvalidHsv,
+    InvalidFunction,
     InvalidUnknown,
 }
 
@@ -28,6 +29,7 @@ impl fmt::Display for ParseColorError {
             ParseColorError::InvalidHsl => f.write_str("Invalid hsl format."),
             ParseColorError::InvalidHwb => f.write_str("Invalid hwb format."),
             ParseColorError::InvalidHsv => f.write_str("Invalid hsv format."),
+            ParseColorError::InvalidFunction => f.write_str("Invalid color function."),
             ParseColorError::InvalidUnknown => f.write_str("Invalid unknown format."),
         }
     }
@@ -176,6 +178,8 @@ pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
             }
 
             return Err(ParseColorError::InvalidHsv);
+        } else {
+            return Err(ParseColorError::InvalidFunction);
         }
     }
 

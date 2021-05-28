@@ -15,6 +15,7 @@ fn parser() {
         ("hsv(0 0% 100%)", (255, 255, 255, 255)),
         ("hsv(0 0% 19%)", (48, 48, 48, 255)),
     ];
+
     for (s, expected) in test_data {
         let a = parse(s).unwrap().rgba_u8();
         let b = s.parse::<Color>().unwrap().rgba_u8();
@@ -50,6 +51,7 @@ fn named_colors() {
         ("violet", "#ee82ee"),
         ("yellowgreen", "#9acd32"),
     ];
+
     for (s, hex) in test_data {
         let c = parse(s).unwrap();
         assert_eq!(hex, c.to_hex_string());
@@ -75,7 +77,9 @@ fn black() {
         "hwb(120deg 0% 100% 100%)",
         "hsv(120 100% 0%)",
     ];
+
     let black = (0, 0, 0, 255);
+
     for s in data {
         let c = parse(s).unwrap().rgba_u8();
         assert_eq!(black, c);
@@ -107,7 +111,9 @@ fn red() {
         "hwb(360deg 0% 0% 100%)",
         "hsv(0 100% 100%)",
     ];
+
     let red = (255, 0, 0, 255);
+
     for s in data {
         let c = parse(s).unwrap().rgba_u8();
         assert_eq!(red, c);
@@ -141,7 +147,9 @@ fn lime() {
         "hwb(480deg 0% 0% / 100%)",
         "hsv(120 100% 100%)",
     ];
+
     let lime = (0, 255, 0, 255);
+
     for s in data {
         let c = parse(s).unwrap().rgba_u8();
         assert_eq!(lime, c);
@@ -162,13 +170,16 @@ fn lime_alpha() {
         "hwb(120 0% 0% / 50%)",
         "hsv(120 100% 100% / 50%)",
     ];
+
     let lime_alpha = (0, 255, 0, 128);
+
     for s in data {
         let c = parse(s).unwrap().rgba_u8();
         assert_eq!(lime_alpha, c);
     }
 }
 
+#[cfg(feature = "named-colors")]
 #[test]
 fn invalid_format() {
     let test_data = vec![
@@ -192,19 +203,23 @@ fn invalid_format() {
         "hsv(120 100% 100% 1 50%)",
         "hsv(120 XXX 100%)",
     ];
+
     for s in test_data {
         let c = parse(s);
         assert!(c.is_err());
     }
+
     let test_data = vec![
         ("#78afzd", "Invalid hex format."),
         ("rgb(255,0)", "Invalid rgb format."),
         ("hsl(360,100%,50%,100%,100%)", "Invalid hsl format."),
         ("hsv(360)", "Invalid hsv format."),
         ("hwb(270,0%,0%,x)", "Invalid hwb format."),
+        ("cmyk(0,0,0,0)", "Invalid color function."),
         ("blood", "Invalid unknown format."),
-        ("cmyk(0,0,0,0)", "Invalid unknown format."),
+        ("rgb(255,0,0", "Invalid unknown format."),
     ];
+
     for (s, err_msg) in test_data {
         let c = parse(s);
         assert_eq!(c.unwrap_err().to_string(), err_msg);

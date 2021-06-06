@@ -273,7 +273,7 @@ impl Color {
     /// # }
     /// ```
     pub fn from_html<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
-        parse(s)
+        parse(s.as_ref())
     }
 
     /// Returns: `(r, g, b, a)`

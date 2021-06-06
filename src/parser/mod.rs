@@ -66,8 +66,8 @@ impl error::Error for ParseColorError {}
 /// # Ok(())
 /// # }
 /// ```
-pub fn parse<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
-    let s = s.as_ref().trim().to_lowercase();
+pub fn parse(s: &str) -> Result<Color, ParseColorError> {
+    let s = s.trim().to_lowercase();
 
     if s == "transparent" {
         return Ok(Color::from_rgba(0.0, 0.0, 0.0, 0.0));

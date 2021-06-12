@@ -1,6 +1,3 @@
-//! [![github](https://img.shields.io/static/v1?logo=github&label=github&message=mazznoer/csscolorparser-rs&color=8da0cb)](https://github.com/mazznoer/csscolorparser-rs/)
-//! [![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
-//!
 //! # Overview
 //!
 //! Rust library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
@@ -8,7 +5,7 @@
 //! ## Supported Color Format
 //!
 //! * [Named colors](https://www.w3.org/TR/css-color-4/#named-colors)
-//! * RGB hexadecimal
+//! * RGB hexadecimal (with and without `#` prefix)
 //!      + Short format `#rgb`
 //!      + Short format with alpha `#rgba`
 //!      + Long format `#rrggbb`
@@ -16,7 +13,7 @@
 //! * `rgb()` and `rgba()`
 //! * `hsl()` and `hsla()`
 //! * `hwb()`
-//! * `hsv()` - not in CSS standard.
+//! * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 //!
 //! Not yet supported: `lab()`, `lch()`.
 //!
@@ -54,7 +51,7 @@
 //! Add this to your `Cargo.toml`
 //!
 //! ```toml
-//! csscolorparser = "0.4.0"
+//! csscolorparser = "0.5.0"
 //! ```
 //!
 //! ## Examples
@@ -74,7 +71,7 @@
 //! # }
 //! ```
 //!
-//! Using `parse()` method on string.
+//! Using `parse()` method on `&str`.
 //!
 //! ```rust
 //! use csscolorparser::Color;
@@ -89,21 +86,9 @@
 //! # }
 //! ```
 //!
-//! Using [`Color::from_html()`](struct.Color.html#method.from_html).
+//! ## Default Feature
 //!
-//! ```rust
-//! use csscolorparser::Color;
-//! # use std::error::Error;
-//! # fn main() -> Result<(), Box<dyn Error>> {
-//!
-//! let c = Color::from_html("rgb(135,206,235)")?;
-//!
-//! assert_eq!(c.rgba_u8(), (135, 206, 235, 255));
-//! assert_eq!(c.to_hex_string(), "#87ceeb");
-//! assert_eq!(c.to_rgb_string(), "rgb(135,206,235)");
-//! # Ok(())
-//! # }
-//! ```
+//! * `named-colors`: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf).
 //!
 //! ## Optional Features
 //!

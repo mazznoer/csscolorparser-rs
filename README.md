@@ -1,4 +1,4 @@
-# Rust CSS Color Parser
+# Rust CSS Color Parser Library
 
 [![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
 [![Documentation](https://docs.rs/csscolorparser/badge.svg)](https://docs.rs/csscolorparser)
@@ -6,14 +6,14 @@
 [![Build Status](https://travis-ci.org/mazznoer/csscolorparser-rs.svg?branch=master)](https://travis-ci.org/mazznoer/csscolorparser-rs)
 [![codecov](https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser-rs)
 [![Total Downloads](https://img.shields.io/crates/d/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
-![Lines of Code](https://tokei.rs/b1/github/mazznoer/csscolorparser-rs?category=code)
+[![Lines of Code](https://tokei.rs/b1/github/mazznoer/csscolorparser-rs?category=code)](https://github.com/mazznoer/csscolorparser-rs)
 
 [Rust](https://www.rust-lang.org/) library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 
 ## Supported Color Format
 
 * [Named colors](https://www.w3.org/TR/css-color-4/#named-colors)
-* RGB hexadecimal
+* RGB hexadecimal (with and without `#` prefix)
      + Short format `#rgb`
      + Short format with alpha `#rgba`
      + Long format `#rrggbb`
@@ -21,15 +21,9 @@
 * `rgb()` and `rgba()`
 * `hsl()` and `hsla()`
 * `hwb()`
-* `hsv()` - not in CSS standard.
+* `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 
 Not yet supported: `lab()`, `lch()`.
-
-## Optional Features
-
-* `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
-* `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
-* `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
 
 ### Example Color Format
 
@@ -65,7 +59,7 @@ hsv(120deg 100% 100% / 100%)
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.4.0"
+csscolorparser = "0.5.0"
 ```
 
 ## Examples
@@ -81,7 +75,7 @@ assert_eq!(c.to_hex_string(), "#ff0000");
 assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
 ```
 
-Using `parse()` method on string.
+Using `parse()` method on `&str`.
 
 ```rust
 use csscolorparser::Color;
@@ -92,7 +86,18 @@ assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
 assert_eq!(c.to_hex_string(), "#ff00007f");
 ```
 
-## Links
+## Default Feature
 
-* [csscolorparser](https://github.com/mazznoer/csscolorparser) - Go version of this library.
+* `named-colors`: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf).
+
+## Optional Features
+
+* `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
+* `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
+* `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
+
+## Similar Projects
+
+* [csscolorparser](https://github.com/mazznoer/csscolorparser) (Go)
+* [csscolorparser](https://github.com/deanm/css-color-parser-js) (Javascript)
 

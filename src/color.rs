@@ -5,10 +5,15 @@ use rgb::{RGB, RGBA};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::convert::TryFrom;
+#[cfg(feature = "lab")]
+use std::f64::consts::{PI, TAU};
 use std::fmt;
 use std::str::FromStr;
 
 use crate::{parse, ParseColorError};
+
+#[cfg(feature = "lab")]
+const PI_3: f64 = PI * 3.0;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 /// The color
@@ -253,6 +258,85 @@ impl Color {
         let b = -0.0041119885 * l_ - 0.7034763098 * m_ + 1.7068625689 * s_;
 
         Color::from_linear_rgba(r, g, b, alpha)
+    }
+
+    #[cfg(feature = "lab")]
+    /// Arguments:
+    ///
+    /// * `l`: Lightness
+    /// * `a`: Distance along the `a` axis
+    /// * `b`: Distance along the `b` axis
+    /// * `alpha`: Alpha [0..1]
+    pub fn from_lab(l: f64, a: f64, b: f64, alpha: f64) -> Color {
+        let x = lab::Lab {
+            l: l as f32,
+            a: a as f32,
+            b: b as f32,
+        }
+        .to_rgb_normalized();
+        Color::from_rgba(x[0] as f64, x[1] as f64, x[2] as f64, alpha)
+    }
+
+    #[cfg(feature = "lab")]
+    /// Returns: `(l, a, b, alpha)`
+    pub fn to_lab(&self) -> (f64, f64, f64, f64) {
+        let lab = lab::Lab::from_rgb_normalized(&[self.r as f32, self.g as f32, self.b as f32]);
+        (lab.l as f64, lab.a as f64, lab.b as f64, self.a)
+    }
+
+    #[cfg(feature = "lab")]
+    /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
+    pub fn interpolate_lab(&self, other: &Color, t: f64) -> Color {
+        let (l1, a1, b1, alpha1) = self.to_lab();
+        let (l2, a2, b2, alpha2) = other.to_lab();
+        Color::from_lab(
+            l1 + t * (l2 - l1),
+            a1 + t * (a2 - a1),
+            b1 + t * (b2 - b1),
+            alpha1 + t * (alpha2 - alpha1),
+        )
+    }
+
+    #[cfg(feature = "lab")]
+    /// Arguments:
+    ///
+    /// * `l`: Lightness
+    /// * `c`: Chroma
+    /// * `h`: Hue angle in radians
+    /// * `alpha`: Alpha [0..1]
+    pub fn from_lch(l: f64, c: f64, h: f64, alpha: f64) -> Color {
+        let x = lab::LCh {
+            l: l as f32,
+            c: c as f32,
+            h: h as f32,
+        }
+        .to_lab()
+        .to_rgb_normalized();
+        Color::from_rgba(x[0] as f64, x[1] as f64, x[2] as f64, alpha)
+    }
+
+    #[cfg(feature = "lab")]
+    /// Returns: `(l, c, h, alpha)`
+    pub fn to_lch(&self) -> (f64, f64, f64, f64) {
+        let x = lab::LCh::from_lab(lab::Lab::from_rgb_normalized(&[
+            self.r as f32,
+            self.g as f32,
+            self.b as f32,
+        ]));
+        (x.l as f64, x.c as f64, x.h as f64, self.a)
+    }
+
+    #[cfg(feature = "lab")]
+    /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
+    pub fn interpolate_lch(&self, other: &Color, t: f64) -> Color {
+        let (l1, c1, h1, alpha1) = self.to_lch();
+        let (l2, c2, h2, alpha2) = other.to_lch();
+        Color::from_lch(
+            l1 + t * (l2 - l1),
+            c1 + t * (c2 - c1),
+            interp_angle_rad(h1, h2, t),
+            alpha1 + t * (alpha2 - alpha1),
+        )
     }
 
     /// Create color from CSS color string.
@@ -874,6 +958,13 @@ fn normalize_angle(t: f64) -> f64 {
 fn interp_angle(a0: f64, a1: f64, t: f64) -> f64 {
     let delta = (((a1 - a0) % 360.0) + 540.0) % 360.0 - 180.0;
     (a0 + t * delta + 360.0) % 360.0
+}
+
+#[cfg(feature = "lab")]
+#[inline]
+fn interp_angle_rad(a0: f64, a1: f64, t: f64) -> f64 {
+    let delta = (((a1 - a0) % TAU) + PI_3) % TAU - PI;
+    (a0 + t * delta + TAU) % TAU
 }
 
 #[inline]

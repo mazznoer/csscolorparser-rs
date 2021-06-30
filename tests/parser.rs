@@ -24,6 +24,22 @@ fn parser() {
         assert_eq!(expected, b);
         assert_eq!(expected, c);
     }
+
+    #[cfg(feature = "lab")]
+    {
+        let test_data = vec![
+            ("lab(0% 0 0)", (0, 0, 0, 255)),
+            ("lab(100% 0 0)", (255, 255, 255, 255)),
+            ("lab(0% 0 0 / 0.5)", (0, 0, 0, 128)),
+            ("lch(0% 0 0)", (0, 0, 0, 255)),
+            ("lch(100% 0 0)", (255, 255, 255, 255)),
+            ("lch(0% 0 0 / 0.5)", (0, 0, 0, 128)),
+        ];
+
+        for (s, expected) in test_data {
+            assert_eq!(expected, parse(s).unwrap().rgba_u8());
+        }
+    }
 }
 
 #[cfg(feature = "named-colors")]
@@ -179,7 +195,7 @@ fn lime_alpha() {
     }
 }
 
-#[cfg(feature = "named-colors")]
+#[cfg(all(feature = "named-colors", features = "lab"))]
 #[test]
 fn invalid_format() {
     let test_data = vec![
@@ -202,6 +218,10 @@ fn invalid_format() {
         "hwb(270 0% 0% 0% 0%)",
         "hsv(120 100% 100% 1 50%)",
         "hsv(120 XXX 100%)",
+        "lab(100%,0)",
+        "lab(100% 0 X)",
+        "lch(100%,0)",
+        "lch(100% 0 X)",
     ];
 
     for s in test_data {
@@ -215,6 +235,8 @@ fn invalid_format() {
         ("hsl(360,100%,50%,100%,100%)", "Invalid hsl format."),
         ("hsv(360)", "Invalid hsv format."),
         ("hwb(270,0%,0%,x)", "Invalid hwb format."),
+        ("lab(0%)", "Invalid lab format."),
+        ("lch(0%)", "Invalid lch format."),
         ("cmyk(0,0,0,0)", "Invalid color function."),
         ("blood", "Invalid unknown format."),
         ("rgb(255,0,0", "Invalid unknown format."),

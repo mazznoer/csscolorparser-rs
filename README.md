@@ -8,7 +8,7 @@
 [![Total Downloads](https://img.shields.io/crates/d/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
 [![Lines of Code](https://tokei.rs/b1/github/mazznoer/csscolorparser-rs?category=code)](https://github.com/mazznoer/csscolorparser-rs)
 
-[Rust](https://www.rust-lang.org/) library to parse CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
+[Rust](https://www.rust-lang.org/) library for parsing CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 
 ## Supported Color Format
 
@@ -21,9 +21,9 @@
 * `rgb()` and `rgba()`
 * `hsl()` and `hsla()`
 * `hwb()`
+* `lab()`
+* `lch()`
 * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
-
-Not yet supported: `lab()`, `lch()`.
 
 ### Example Color Format
 
@@ -59,7 +59,7 @@ hsv(120deg 100% 100% / 100%)
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.5.0"
+csscolorparser = "0.6.0"
 ```
 
 ## Examples
@@ -92,6 +92,7 @@ assert_eq!(c.to_hex_string(), "#ff00007f");
 
 ## Optional Features
 
+* `lab`: Enables parsing `lab()` and `lch()` color format.
 * `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
 * `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
 * `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.

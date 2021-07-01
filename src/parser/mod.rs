@@ -208,8 +208,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 };
 
                 if let (Some(l), Some(a), Some(b), Some(alpha)) = (l, a, b, alpha) {
-                    let l = if l < 0.0 { 0.0 } else { l };
-                    return Ok(Color::from_lab(l * 100.0, a, b, alpha));
+                    return Ok(Color::from_lab(l.max(0.0) * 100.0, a, b, alpha));
                 }
 
                 return Err(ParseColorError::InvalidLab);

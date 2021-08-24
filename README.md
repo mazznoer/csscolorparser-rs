@@ -1,12 +1,11 @@
 # Rust CSS Color Parser Library
 
+[![License](https://img.shields.io/crates/l/csscolorparser)](https://github.com/mazznoer/csscolorparser-rs)
 [![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
 [![Documentation](https://docs.rs/csscolorparser/badge.svg)](https://docs.rs/csscolorparser)
 [![Build Status](https://github.com/mazznoer/csscolorparser-rs/workflows/Rust/badge.svg)](https://github.com/mazznoer/csscolorparser-rs/actions)
-[![Build Status](https://travis-ci.org/mazznoer/csscolorparser-rs.svg?branch=master)](https://travis-ci.org/mazznoer/csscolorparser-rs)
 [![codecov](https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser-rs)
 [![Total Downloads](https://img.shields.io/crates/d/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
-[![Lines of Code](https://tokei.rs/b1/github/mazznoer/csscolorparser-rs?category=code)](https://github.com/mazznoer/csscolorparser-rs)
 
 [Rust](https://www.rust-lang.org/) library for parsing CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 
@@ -26,6 +25,9 @@
 * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 
 ### Example Color Format
+
+<details>
+<summary>Click to expand!</summary>
 
 ```text
 transparent
@@ -53,6 +55,7 @@ hwb(480deg 0% 0% / 100%)
 hsv(120,100%,100%)
 hsv(120deg 100% 100% / 100%)
 ```
+</details>
 
 ## Usage
 
@@ -69,7 +72,7 @@ Using `csscolorparser::parse()` function.
 ```rust
 let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 
-assert_eq!(c.rgba(), (1., 0., 0., 1.));
+assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
 assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
 assert_eq!(c.to_hex_string(), "#ff0000");
 assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
@@ -88,14 +91,14 @@ assert_eq!(c.to_hex_string(), "#ff00007f");
 
 ## Default Feature
 
-* `named-colors`: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf).
+* __named-colors__: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf). Can be disabled using `default-features = false`.
 
 ## Optional Features
 
-* `lab`: Enables parsing `lab()` and `lch()` color format.
-* `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
-* `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
-* `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
+* __lab__: Enables parsing `lab()` and `lch()` color format.
+* __rust-rgb__: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
+* __cint__: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
+* __serde__: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
 
 ## Similar Projects
 

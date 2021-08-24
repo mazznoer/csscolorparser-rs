@@ -19,6 +19,9 @@
 //!
 //! ### Example Color Format
 //!
+//! <details>
+//! <summary>Click to expand!</summary>
+//!
 //! ```text
 //! transparent
 //! gold
@@ -45,6 +48,7 @@
 //! hsv(120,100%,100%)
 //! hsv(120deg 100% 100% / 100%)
 //! ```
+//! </details>
 //!
 //! ## Usage
 //!
@@ -59,8 +63,7 @@
 //! Using [`csscolorparser::parse()`](fn.parse.html) function.
 //!
 //! ```rust
-//! # use std::error::Error;
-//! # fn main() -> Result<(), Box<dyn Error>> {
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 //!
 //! assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
@@ -75,8 +78,7 @@
 //!
 //! ```rust
 //! use csscolorparser::Color;
-//! # use std::error::Error;
-//! # fn main() -> Result<(), Box<dyn Error>> {
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!
 //! let c = "#ff00007f".parse::<Color>()?;
 //!

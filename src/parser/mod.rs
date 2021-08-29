@@ -88,14 +88,14 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     }
 
     // Hex format
-    if let Some(s) = s.strip_prefix("#") {
+    if let Some(s) = s.strip_prefix('#') {
         if let Ok(c) = parse_hex(s) {
             return Ok(c);
         }
         return Err(ParseColorError::InvalidHex);
     }
 
-    if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(")")) {
+    if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(')')) {
         let fname = &s[..i].trim_end();
         let s = &s[i + 1..].replace(",", " ").replace("/", " ");
         let params = s.split_whitespace().collect::<Vec<&str>>();
@@ -289,7 +289,7 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
 }
 
 fn parse_percent_or_float(s: &str) -> Option<f64> {
-    if let Some(s) = s.strip_suffix("%") {
+    if let Some(s) = s.strip_suffix('%') {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t / 100.0);
         }
@@ -304,7 +304,7 @@ fn parse_percent_or_float(s: &str) -> Option<f64> {
 }
 
 fn parse_percent_or_255(s: &str) -> Option<f64> {
-    if let Some(s) = s.strip_suffix("%") {
+    if let Some(s) = s.strip_suffix('%') {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t / 100.0);
         }

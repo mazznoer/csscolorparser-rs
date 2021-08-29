@@ -542,7 +542,7 @@ impl Color {
     #[deprecated]
     /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
     pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
-        self.interpolate_linear_rgb(&other, t)
+        self.interpolate_linear_rgb(other, t)
     }
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].

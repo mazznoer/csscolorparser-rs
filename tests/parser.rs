@@ -1,4 +1,4 @@
-use csscolorparser::{parse, Color};
+use csscolorparser::{parse, Color, ParseColorError};
 
 #[test]
 fn parser() {
@@ -39,6 +39,24 @@ fn parser() {
         for (s, expected) in test_data {
             assert_eq!(expected, parse(s).unwrap().rgba_u8());
         }
+    }
+}
+
+#[test]
+fn parser_invalid_syntax() {
+    let test_data: Vec<(&str,  ParseColorError)> =
+        vec![("hsl(270deg 0 0.5)", ParseColorError::InvalidHsl)];
+
+    for (s, expected) in test_data {
+        let a = parse(s);
+        let b = s.parse::<Color>();
+        let c = Color::from_html(s);
+        assert!(a.is_err());
+        assert!(b.is_err());
+        assert!(c.is_err());
+        assert_eq!(a.unwrap_err(), expected);
+        assert_eq!(b.unwrap_err(), expected);
+        assert_eq!(c.unwrap_err(), expected);
     }
 }
 

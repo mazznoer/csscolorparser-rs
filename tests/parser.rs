@@ -48,6 +48,7 @@ fn parser_invalid_syntax() {
         vec![
             ("hsl(270deg 0 0.5)", ParseColorError::InvalidHsl),
             ("hwb(270deg 0 0.5)", ParseColorError::InvalidHwb),
+            ("hsv(270deg 0 0.5)", ParseColorError::InvalidHsv),
         ];
 
     for (s, expected) in test_data {

@@ -44,12 +44,15 @@ fn parser() {
 
 #[test]
 fn parser_invalid_syntax() {
-    let test_data: Vec<(&str,  ParseColorError)> =
-        vec![
-            ("hsl(270deg 0 0.5)", ParseColorError::InvalidHsl),
-            ("hwb(270deg 0 0.5)", ParseColorError::InvalidHwb),
-            ("hsv(270deg 0 0.5)", ParseColorError::InvalidHsv),
-        ];
+    let test_data = vec![
+        // Spec only allows percentage for second and third parameter.
+        ("hsl(270deg 0 50%)", ParseColorError::InvalidHsl),
+        ("hsl(270deg 0% 0.5)", ParseColorError::InvalidHsl),
+        ("hwb(270deg 0 50%)", ParseColorError::InvalidHwb),
+        ("hwb(270deg 0% 0.5)", ParseColorError::InvalidHwb),
+        ("hsv(270deg 0 50%)", ParseColorError::InvalidHsv),
+        ("hsv(270deg 0% 0.5)", ParseColorError::InvalidHsv),
+    ];
 
     for (s, expected) in test_data {
         let a = parse(s);

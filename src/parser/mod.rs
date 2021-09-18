@@ -288,12 +288,18 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
     Ok(Color::from_rgba_u8(r, g, b, a))
 }
 
-fn parse_percent_or_float(s: &str) -> Option<f64> {
+fn parse_percent(s: &str) -> Option<f64> {
     if let Some(s) = s.strip_suffix('%') {
         if let Ok(t) = s.parse::<f64>() {
             return Some(t / 100.0);
         }
-        return None;
+    }
+    None
+}
+
+fn parse_percent_or_float(s: &str) -> Option<f64> {
+    if let Some(percent) = parse_percent(s) {
+        return Some(percent);
     }
 
     if let Ok(t) = s.parse::<f64>() {
@@ -304,11 +310,8 @@ fn parse_percent_or_float(s: &str) -> Option<f64> {
 }
 
 fn parse_percent_or_255(s: &str) -> Option<f64> {
-    if let Some(s) = s.strip_suffix('%') {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t / 100.0);
-        }
-        return None;
+    if let Some(percent) = parse_percent(s) {
+        return Some(percent);
     }
 
     if let Ok(t) = s.parse::<f64>() {

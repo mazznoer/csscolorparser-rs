@@ -155,8 +155,8 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 }
 
                 let h = parse_angle(params[0]);
-                let w = parse_percent_or_float(params[1]);
-                let b = parse_percent_or_float(params[2]);
+                let w = parse_percent(params[1]);
+                let b = parse_percent(params[2]);
 
                 let a = if p_len == 4 {
                     parse_percent_or_float(params[3])

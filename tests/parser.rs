@@ -45,7 +45,10 @@ fn parser() {
 #[test]
 fn parser_invalid_syntax() {
     let test_data: Vec<(&str,  ParseColorError)> =
-        vec![("hsl(270deg 0 0.5)", ParseColorError::InvalidHsl)];
+        vec![
+            ("hsl(270deg 0 0.5)", ParseColorError::InvalidHsl),
+            ("hwb(270deg 0 0.5)", ParseColorError::InvalidHwb),
+        ];
 
     for (s, expected) in test_data {
         let a = parse(s);

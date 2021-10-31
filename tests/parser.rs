@@ -195,7 +195,7 @@ fn lime_alpha() {
     }
 }
 
-#[cfg(all(feature = "named-colors", features = "lab"))]
+#[cfg(all(feature = "named-colors", feature = "lab"))]
 #[test]
 fn invalid_format() {
     let test_data = vec![
@@ -240,6 +240,10 @@ fn invalid_format() {
         ("cmyk(0,0,0,0)", "Invalid color function."),
         ("blood", "Invalid unknown format."),
         ("rgb(255,0,0", "Invalid unknown format."),
+        ("x£", "Invalid unknown format."),
+        ("x£x", "Invalid unknown format."),
+        ("xxx£x", "Invalid unknown format."),
+        ("xxxxx£x", "Invalid unknown format."),
     ];
 
     for (s, err_msg) in test_data {

@@ -255,6 +255,10 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 }
 
 fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
+    if !s.is_ascii() {
+        return Err(Box::new(ParseColorError::InvalidHex));
+    }
+
     let n = s.len();
 
     let (r, g, b, a) = if n == 3 || n == 4 {

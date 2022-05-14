@@ -97,7 +97,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 
     if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(')')) {
         let fname = &s[..i].trim_end();
-        let s = &s[i + 1..].replace(",", " ").replace("/", " ");
+        let s = &s[i + 1..].replace(',', " ").replace('/', " ");
         let params = s.split_whitespace().collect::<Vec<&str>>();
         let p_len = params.len();
 

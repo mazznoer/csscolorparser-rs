@@ -86,16 +86,6 @@ impl Color {
         Color::from_linear_rgba(r, g, b, 1.0)
     }
 
-    #[deprecated]
-    /// Arguments:
-    ///
-    /// * `r`: Red value [0..1]
-    /// * `g`: Green value [0..1]
-    /// * `b`: Blue value [0..1]
-    pub fn from_lrgb(r: f64, g: f64, b: f64) -> Color {
-        Color::from_linear_rgba(r, g, b, 1.0)
-    }
-
     /// Arguments:
     ///
     /// * `r`: Red value [0..1]
@@ -112,33 +102,12 @@ impl Color {
         Color::from_rgba(from_linear(r), from_linear(g), from_linear(b), a)
     }
 
-    #[deprecated]
-    /// Arguments:
-    ///
-    /// * `r`: Red value [0..1]
-    /// * `g`: Green value [0..1]
-    /// * `b`: Blue value [0..1]
-    /// * `a`: Alpha value [0..1]
-    pub fn from_lrgba(r: f64, g: f64, b: f64, a: f64) -> Color {
-        Color::from_linear_rgba(r, g, b, a)
-    }
-
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     pub fn from_linear_rgb_u8(r: u8, g: u8, b: u8) -> Color {
-        Color::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
-    }
-
-    #[deprecated]
-    /// Arguments:
-    ///
-    /// * `r`: Red value [0..255]
-    /// * `g`: Green value [0..255]
-    /// * `b`: Blue value [0..255]
-    pub fn from_lrgb_u8(r: u8, g: u8, b: u8) -> Color {
         Color::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
     }
 
@@ -149,22 +118,6 @@ impl Color {
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
     pub fn from_linear_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color::from_linear_rgba(
-            r as f64 / 255.0,
-            g as f64 / 255.0,
-            b as f64 / 255.0,
-            a as f64 / 255.0,
-        )
-    }
-
-    #[deprecated]
-    /// Arguments:
-    ///
-    /// * `r`: Red value [0..255]
-    /// * `g`: Green value [0..255]
-    /// * `b`: Blue value [0..255]
-    /// * `a`: Alpha value [0..255]
-    pub fn from_lrgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color::from_linear_rgba(
             r as f64 / 255.0,
             g as f64 / 255.0,
@@ -379,30 +332,6 @@ impl Color {
         )
     }
 
-    #[deprecated]
-    /// Get the red value [0..1].
-    pub fn red(&self) -> f64 {
-        self.r
-    }
-
-    #[deprecated]
-    /// Get the green value [0..1].
-    pub fn green(&self) -> f64 {
-        self.g
-    }
-
-    #[deprecated]
-    /// Get the blue value [0..1].
-    pub fn blue(&self) -> f64 {
-        self.b
-    }
-
-    #[deprecated]
-    /// Get the alpha value [0..1].
-    pub fn alpha(&self) -> f64 {
-        self.a
-    }
-
     /// Returns: `(h, s, v, a)`
     ///
     /// * `h`: Hue angle [0..360]
@@ -454,14 +383,6 @@ impl Color {
         )
     }
 
-    #[deprecated]
-    /// Returns: `(r, g, b, a)`
-    ///
-    /// * Red, green, blue and alpha in the range [0..1]
-    pub fn to_lrgba(&self) -> (f64, f64, f64, f64) {
-        self.to_linear_rgba()
-    }
-
     /// Returns: `(r, g, b, a)`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
@@ -473,14 +394,6 @@ impl Color {
             (b * 255.0).round() as u8,
             (a * 255.0).round() as u8,
         )
-    }
-
-    #[deprecated]
-    /// Returns: `(r, g, b, a)`
-    ///
-    /// * Red, green, blue and alpha in the range [0..255]
-    pub fn to_lrgba_u8(&self) -> (u8, u8, u8, u8) {
-        self.to_linear_rgba_u8()
     }
 
     /// Returns: `(l, a, b, alpha)`
@@ -537,12 +450,6 @@ impl Color {
             b1 + t * (b2 - b1),
             a1 + t * (a2 - a1),
         )
-    }
-
-    #[deprecated]
-    /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
-    pub fn interpolate_lrgb(&self, other: &Color, t: f64) -> Color {
-        self.interpolate_linear_rgb(other, t)
     }
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].

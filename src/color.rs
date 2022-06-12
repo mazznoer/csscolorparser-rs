@@ -1,14 +1,13 @@
-#![allow(clippy::many_single_char_names)]
-
-#[cfg(feature = "rust-rgb")]
-use rgb::{RGB, RGBA};
-#[cfg(feature = "serde")]
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::convert::TryFrom;
 #[cfg(feature = "lab")]
 use std::f64::consts::{PI, TAU};
 use std::fmt;
 use std::str::FromStr;
+
+#[cfg(feature = "rust-rgb")]
+use rgb::{RGB, RGBA};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{parse, ParseColorError};
 
@@ -221,13 +220,13 @@ impl Color {
     /// * `b`: Distance along the `b` axis
     /// * `alpha`: Alpha [0..1]
     pub fn from_lab(l: f64, a: f64, b: f64, alpha: f64) -> Color {
-        let x = lab::Lab {
+        let [r, g, b] = lab::Lab {
             l: l as f32,
             a: a as f32,
             b: b as f32,
         }
         .to_rgb_normalized();
-        Color::from_rgba(x[0] as f64, x[1] as f64, x[2] as f64, alpha)
+        Color::from_rgba(r as f64, g as f64, b as f64, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -258,25 +257,25 @@ impl Color {
     /// * `h`: Hue angle in radians
     /// * `alpha`: Alpha [0..1]
     pub fn from_lch(l: f64, c: f64, h: f64, alpha: f64) -> Color {
-        let x = lab::LCh {
+        let [r, g, b] = lab::LCh {
             l: l as f32,
             c: c as f32,
             h: h as f32,
         }
         .to_lab()
         .to_rgb_normalized();
-        Color::from_rgba(x[0] as f64, x[1] as f64, x[2] as f64, alpha)
+        Color::from_rgba(r as f64, g as f64, b as f64, alpha)
     }
 
     #[cfg(feature = "lab")]
     /// Returns: `(l, c, h, alpha)`
     pub fn to_lch(&self) -> (f64, f64, f64, f64) {
-        let x = lab::LCh::from_lab(lab::Lab::from_rgb_normalized(&[
+        let lch = lab::LCh::from_lab(lab::Lab::from_rgb_normalized(&[
             self.r as f32,
             self.g as f32,
             self.b as f32,
         ]));
-        (x.l as f64, x.c as f64, x.h as f64, self.a)
+        (lch.l as f64, lch.c as f64, lch.h as f64, self.a)
     }
 
     #[cfg(feature = "lab")]

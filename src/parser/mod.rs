@@ -1,5 +1,3 @@
-#![allow(clippy::many_single_char_names)]
-
 use std::{error, fmt};
 
 use crate::Color;

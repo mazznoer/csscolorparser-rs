@@ -2,7 +2,7 @@ use csscolorparser::{parse, Color};
 
 #[test]
 fn parser() {
-    let test_data = vec![
+    let test_data = [
         ("transparent", (0, 0, 0, 0)),
         ("#ff00ff64", (255, 0, 255, 100)),
         ("ff00ff64", (255, 0, 255, 100)),
@@ -27,7 +27,7 @@ fn parser() {
 
     #[cfg(feature = "lab")]
     {
-        let test_data = vec![
+        let test_data = [
             ("lab(0% 0 0)", (0, 0, 0, 255)),
             ("lab(100% 0 0)", (255, 255, 255, 255)),
             ("lab(0% 0 0 / 0.5)", (0, 0, 0, 128)),
@@ -45,26 +45,27 @@ fn parser() {
 #[cfg(feature = "named-colors")]
 #[test]
 fn named_colors() {
-    let test_data = vec![
-        ("aliceblue", "#f0f8ff"),
-        ("bisque", "#ffe4c4"),
-        ("black", "#000000"),
-        ("chartreuse", "#7fff00"),
-        ("coral", "#ff7f50"),
-        ("crimson", "#dc143c"),
-        ("dodgerblue", "#1e90ff"),
-        ("firebrick", "#b22222"),
-        ("gold", "#ffd700"),
-        ("hotpink", "#ff69b4"),
-        ("indigo", "#4b0082"),
-        ("lavender", "#e6e6fa"),
-        ("lime", "#00ff00"),
-        ("plum", "#dda0dd"),
-        ("red", "#ff0000"),
-        ("salmon", "#fa8072"),
-        ("skyblue", "#87ceeb"),
-        ("tomato", "#ff6347"),
-        ("violet", "#ee82ee"),
+    #[rustfmt::skip]
+    let test_data = [
+        ("aliceblue",   "#f0f8ff"),
+        ("bisque",      "#ffe4c4"),
+        ("black",       "#000000"),
+        ("chartreuse",  "#7fff00"),
+        ("coral",       "#ff7f50"),
+        ("crimson",     "#dc143c"),
+        ("dodgerblue",  "#1e90ff"),
+        ("firebrick",   "#b22222"),
+        ("gold",        "#ffd700"),
+        ("hotpink",     "#ff69b4"),
+        ("indigo",      "#4b0082"),
+        ("lavender",    "#e6e6fa"),
+        ("lime",        "#00ff00"),
+        ("plum",        "#dda0dd"),
+        ("red",         "#ff0000"),
+        ("salmon",      "#fa8072"),
+        ("skyblue",     "#87ceeb"),
+        ("tomato",      "#ff6347"),
+        ("violet",      "#ee82ee"),
         ("yellowgreen", "#9acd32"),
     ];
 
@@ -76,7 +77,7 @@ fn named_colors() {
 
 #[test]
 fn black() {
-    let data = vec![
+    let data = [
         "#000",
         "#000f",
         "#000000",
@@ -104,7 +105,7 @@ fn black() {
 
 #[test]
 fn red() {
-    let data = vec![
+    let data = [
         "#f00",
         "#f00f",
         "#ff0000",
@@ -138,7 +139,7 @@ fn red() {
 
 #[test]
 fn lime() {
-    let data = vec![
+    let data = [
         "#0f0",
         "#0f0f",
         "#00ff00",
@@ -174,7 +175,7 @@ fn lime() {
 
 #[test]
 fn lime_alpha() {
-    let data = vec![
+    let data = [
         "#00ff0080",
         "00ff0080",
         "rgb(0,255,0,50%)",
@@ -198,7 +199,7 @@ fn lime_alpha() {
 #[cfg(all(feature = "named-colors", feature = "lab"))]
 #[test]
 fn invalid_format() {
-    let test_data = vec![
+    let test_data = [
         "",
         "bloodred",
         "#78afzd",
@@ -209,6 +210,7 @@ fn invalid_format() {
         "cmyk(1 0 0)",
         "rgba(0 0)",
         "hsl(90',100%,50%)",
+        "hsl(360,70%,50%,90%,100%)",
         "hsl(deg 100% 50%)",
         "hsl(Xturn 100% 50%)",
         "hsl(Zgrad 100% 50%)",
@@ -229,21 +231,23 @@ fn invalid_format() {
         assert!(c.is_err());
     }
 
-    let test_data = vec![
-        ("#78afzd", "Invalid hex format."),
-        ("rgb(255,0)", "Invalid rgb format."),
-        ("hsl(360,100%,50%,100%,100%)", "Invalid hsl format."),
-        ("hsv(360)", "Invalid hsv format."),
-        ("hwb(270,0%,0%,x)", "Invalid hwb format."),
-        ("lab(0%)", "Invalid lab format."),
-        ("lch(0%)", "Invalid lch format."),
-        ("cmyk(0,0,0,0)", "Invalid color function."),
-        ("blood", "Invalid unknown format."),
-        ("rgb(255,0,0", "Invalid unknown format."),
-        ("x£", "Invalid unknown format."),
-        ("x£x", "Invalid unknown format."),
-        ("xxx£x", "Invalid unknown format."),
-        ("xxxxx£x", "Invalid unknown format."),
+    #[rustfmt::skip]
+    let test_data = [
+        ("#78afzd",          "invalid hex format"),
+        ("rgb(255,0)",       "invalid rgb format"),
+        ("hsl(0,100%,2o%)",  "invalid hsl format"),
+        ("hsv(360)",         "invalid hsv format"),
+        ("hwb(270,0%,0%,x)", "invalid hwb format"),
+        ("lab(0%)",          "invalid lab format"),
+        ("lch(0%)",          "invalid lch format"),
+        ("cmyk(0,0,0,0)",    "invalid color function"),
+        ("blood",            "invalid unknown format"),
+        ("rgb(255,0,0",      "invalid unknown format"),
+        ("x£",               "invalid unknown format"),
+        ("x£x",              "invalid unknown format"),
+        ("xxx£x",            "invalid unknown format"),
+        ("xxxxx£x",          "invalid unknown format"),
+        ("\u{1F602}",        "invalid unknown format"),
     ];
 
     for (s, err_msg) in test_data {

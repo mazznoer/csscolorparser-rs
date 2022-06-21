@@ -26,17 +26,17 @@ pub enum ParseColorError {
 impl fmt::Display for ParseColorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseColorError::InvalidHex => f.write_str("Invalid hex format."),
-            ParseColorError::InvalidRgb => f.write_str("Invalid rgb format."),
-            ParseColorError::InvalidHsl => f.write_str("Invalid hsl format."),
-            ParseColorError::InvalidHwb => f.write_str("Invalid hwb format."),
-            ParseColorError::InvalidHsv => f.write_str("Invalid hsv format."),
+            ParseColorError::InvalidHex => f.write_str("invalid hex format"),
+            ParseColorError::InvalidRgb => f.write_str("invalid rgb format"),
+            ParseColorError::InvalidHsl => f.write_str("invalid hsl format"),
+            ParseColorError::InvalidHwb => f.write_str("invalid hwb format"),
+            ParseColorError::InvalidHsv => f.write_str("invalid hsv format"),
             #[cfg(feature = "lab")]
-            ParseColorError::InvalidLab => f.write_str("Invalid lab format."),
+            ParseColorError::InvalidLab => f.write_str("invalid lab format"),
             #[cfg(feature = "lab")]
-            ParseColorError::InvalidLch => f.write_str("Invalid lch format."),
-            ParseColorError::InvalidFunction => f.write_str("Invalid color function."),
-            ParseColorError::InvalidUnknown => f.write_str("Invalid unknown format."),
+            ParseColorError::InvalidLch => f.write_str("invalid lch format"),
+            ParseColorError::InvalidFunction => f.write_str("invalid color function"),
+            ParseColorError::InvalidUnknown => f.write_str("invalid unknown format"),
         }
     }
 }

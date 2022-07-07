@@ -69,6 +69,7 @@ impl Color {
         }
     }
 
+    #[deprecated = "Use [new](#method.new) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..1]
@@ -78,6 +79,7 @@ impl Color {
         Color { r, g, b, a: 1.0 }
     }
 
+    #[deprecated = "Use [new](#method.new) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..1]
@@ -88,6 +90,7 @@ impl Color {
         Color { r, g, b, a }
     }
 
+    #[deprecated = "Use [from_rgba8](#method.from_rgba8) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
@@ -102,6 +105,7 @@ impl Color {
         }
     }
 
+    #[deprecated = "Use [from_rgba8](#method.from_rgba8) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
@@ -132,6 +136,7 @@ impl Color {
         }
     }
 
+    #[deprecated = "Use [from_linear_rgba](#method.from_linear_rgba) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..1]
@@ -154,9 +159,10 @@ impl Color {
             }
             12.92 * x
         }
-        Color::from_rgba(from_linear(r), from_linear(g), from_linear(b), a)
+        Color::new(from_linear(r), from_linear(g), from_linear(b), a)
     }
 
+    #[deprecated = "Use [from_linear_rgba8](#method.from_linear_rgba8) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
@@ -166,6 +172,7 @@ impl Color {
         Color::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
     }
 
+    #[deprecated = "Use [from_linear_rgba8](#method.from_linear_rgba8) instead."]
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
@@ -196,6 +203,7 @@ impl Color {
         )
     }
 
+    #[deprecated = "Use [from_hsva](#method.from_hsva) instead."]
     /// Arguments:
     ///
     /// * `h`: Hue angle [0..360]
@@ -213,9 +221,10 @@ impl Color {
     /// * `a`: Alpha [0..1]
     pub fn from_hsva(h: f64, s: f64, v: f64, a: f64) -> Color {
         let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
-        Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+        Color::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
     }
 
+    #[deprecated = "Use [from_hsla](#method.from_hsla) instead."]
     /// Arguments:
     ///
     /// * `h`: Hue angle [0..360]
@@ -233,9 +242,10 @@ impl Color {
     /// * `a`: Alpha [0..1]
     pub fn from_hsla(h: f64, s: f64, l: f64, a: f64) -> Color {
         let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
-        Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+        Color::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
     }
 
+    #[deprecated = "Use [from_hwba](#method.from_hwba) instead."]
     /// Arguments:
     ///
     /// * `h`: Hue angle [0..360]
@@ -253,9 +263,10 @@ impl Color {
     /// * `a`: Alpha [0..1]
     pub fn from_hwba(h: f64, w: f64, b: f64, a: f64) -> Color {
         let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
-        Color::from_rgba(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
+        Color::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
     }
 
+    #[deprecated = "Use [from_oklaba](#method.from_oklaba) instead."]
     /// Arguments:
     ///
     /// * `l`: Perceived lightness
@@ -297,7 +308,7 @@ impl Color {
             b: b as f32,
         }
         .to_rgb_normalized();
-        Color::from_rgba(r as f64, g as f64, b as f64, alpha)
+        Color::new(r as f64, g as f64, b as f64, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -335,7 +346,7 @@ impl Color {
         }
         .to_lab()
         .to_rgb_normalized();
-        Color::from_rgba(r as f64, g as f64, b as f64, alpha)
+        Color::new(r as f64, g as f64, b as f64, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -383,6 +394,7 @@ impl Color {
         parse(s.as_ref())
     }
 
+    #[deprecated]
     /// Returns: `(r, g, b, a)`
     ///
     /// * Red, green, blue and alpha in the range [0..1]
@@ -390,6 +402,7 @@ impl Color {
         (self.r, self.g, self.b, self.a)
     }
 
+    #[deprecated = "Use [to_rgba8](#method.to_rgba8) instead."]
     /// Returns: `(r, g, b, a)`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
@@ -480,7 +493,7 @@ impl Color {
 
     /// Get the RGB hexadecimal color string.
     pub fn to_hex_string(&self) -> String {
-        let (r, g, b, a) = self.rgba_u8();
+        let [r, g, b, a] = self.to_rgba8();
 
         if a < 255 {
             return format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a);
@@ -491,7 +504,7 @@ impl Color {
 
     /// Get the CSS `rgb()` format string.
     pub fn to_rgb_string(&self) -> String {
-        let (r, g, b, _) = self.rgba_u8();
+        let [r, g, b, _] = self.to_rgba8();
 
         if self.a < 1.0 {
             return format!("rgba({},{},{},{})", r, g, b, self.a);
@@ -569,7 +582,7 @@ mod impl_cint {
 
     impl From<Color> for EncodedSrgb<f64> {
         fn from(c: Color) -> Self {
-            let (r, g, b, _) = c.rgba();
+            let Color { r, g, b, a: _ } = c;
             EncodedSrgb { r, g, b }
         }
     }
@@ -577,13 +590,13 @@ mod impl_cint {
     impl From<EncodedSrgb<f64>> for Color {
         fn from(c: EncodedSrgb<f64>) -> Self {
             let EncodedSrgb { r, g, b } = c;
-            Color::from_rgb(r, g, b)
+            Color::new(r, g, b, 1.0)
         }
     }
 
     impl From<Color> for EncodedSrgb<f32> {
         fn from(c: Color) -> Self {
-            let (r, g, b, _) = c.rgba();
+            let Color { r, g, b, a: _ } = c;
             let (r, g, b) = (r as f32, g as f32, b as f32);
             EncodedSrgb { r, g, b }
         }
@@ -593,16 +606,16 @@ mod impl_cint {
         fn from(c: EncodedSrgb<f32>) -> Self {
             let EncodedSrgb { r, g, b } = c;
             let (r, g, b) = (r as f64, g as f64, b as f64);
-            Color::from_rgb(r, g, b)
+            Color::new(r, g, b, 1.0)
         }
     }
 
     impl From<Color> for Alpha<EncodedSrgb<f64>> {
         fn from(c: Color) -> Self {
-            let (r, g, b, alpha) = c.rgba();
+            let Color { r, g, b, a } = c;
             Alpha {
                 color: EncodedSrgb { r, g, b },
-                alpha,
+                alpha: a,
             }
         }
     }
@@ -613,14 +626,14 @@ mod impl_cint {
                 color: EncodedSrgb { r, g, b },
                 alpha,
             } = c;
-            Color::from_rgba(r, g, b, alpha)
+            Color::new(r, g, b, alpha)
         }
     }
 
     impl From<Color> for Alpha<EncodedSrgb<f32>> {
         fn from(c: Color) -> Self {
-            let (r, g, b, alpha) = c.rgba();
-            let (r, g, b, alpha) = (r as f32, g as f32, b as f32, alpha as f32);
+            let Color { r, g, b, a } = c;
+            let (r, g, b, alpha) = (r as f32, g as f32, b as f32, a as f32);
             Alpha {
                 color: EncodedSrgb { r, g, b },
                 alpha,
@@ -635,13 +648,13 @@ mod impl_cint {
                 alpha,
             } = c;
             let (r, g, b, alpha) = (r as f64, g as f64, b as f64, alpha as f64);
-            Color::from_rgba(r, g, b, alpha)
+            Color::new(r, g, b, alpha)
         }
     }
 
     impl From<Color> for EncodedSrgb<u8> {
         fn from(c: Color) -> Self {
-            let (r, g, b, _) = c.rgba_u8();
+            let [r, g, b, _] = c.to_rgba8();
             EncodedSrgb { r, g, b }
         }
     }
@@ -649,13 +662,13 @@ mod impl_cint {
     impl From<EncodedSrgb<u8>> for Color {
         fn from(c: EncodedSrgb<u8>) -> Self {
             let EncodedSrgb { r, g, b } = c;
-            Color::from_rgb_u8(r, g, b)
+            Color::from_rgba8(r, g, b, 255)
         }
     }
 
     impl From<Color> for Alpha<EncodedSrgb<u8>> {
         fn from(c: Color) -> Self {
-            let (r, g, b, alpha) = c.rgba_u8();
+            let [r, g, b, alpha] = c.to_rgba8();
             Alpha {
                 color: EncodedSrgb { r, g, b },
                 alpha,
@@ -669,15 +682,14 @@ mod impl_cint {
                 color: EncodedSrgb { r, g, b },
                 alpha,
             } = c;
-            Color::from_rgba_u8(r, g, b, alpha)
+            Color::from_rgba8(r, g, b, alpha)
         }
     }
 }
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let (r, g, b, a) = self.rgba();
-        write!(f, "RGBA({},{},{},{})", r, g, b, a)
+        write!(f, "RGBA({},{},{},{})", self.r, self.g, self.b, self.a)
     }
 }
 
@@ -745,25 +757,25 @@ impl From<[f32; 3]> for Color {
 
 impl From<(u8, u8, u8, u8)> for Color {
     fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self {
-        Color::from_rgba_u8(r, g, b, a)
+        Color::from_rgba8(r, g, b, a)
     }
 }
 
 impl From<(u8, u8, u8)> for Color {
     fn from((r, g, b): (u8, u8, u8)) -> Self {
-        Color::from_rgb_u8(r, g, b)
+        Color::from_rgba8(r, g, b, 255)
     }
 }
 
 impl From<[u8; 4]> for Color {
     fn from([r, g, b, a]: [u8; 4]) -> Self {
-        Color::from_rgba_u8(r, g, b, a)
+        Color::from_rgba8(r, g, b, a)
     }
 }
 
 impl From<[u8; 3]> for Color {
     fn from([r, g, b]: [u8; 3]) -> Self {
-        Color::from_rgb_u8(r, g, b)
+        Color::from_rgba8(r, g, b, 255)
     }
 }
 
@@ -771,7 +783,7 @@ impl From<[u8; 3]> for Color {
 #[cfg(feature = "rust-rgb")]
 impl From<RGB<f64>> for Color {
     fn from(item: RGB<f64>) -> Self {
-        Color::from_rgb(item.r, item.g, item.b)
+        Color::new(item.r, item.g, item.b, 1.0)
     }
 }
 
@@ -779,7 +791,7 @@ impl From<RGB<f64>> for Color {
 #[cfg(feature = "rust-rgb")]
 impl From<RGBA<f64>> for Color {
     fn from(item: RGBA<f64>) -> Self {
-        Color::from_rgba(item.r, item.g, item.b, item.a)
+        Color::new(item.r, item.g, item.b, item.a)
     }
 }
 
@@ -1015,29 +1027,29 @@ mod tests {
     #[test]
     fn test_convert_rust_rgb_to_color() {
         let rgb = RGB::new(0.0, 0.5, 1.0);
-        assert_eq!(Color::from_rgb(0.0, 0.5, 1.0), Color::from(rgb));
+        assert_eq!(Color::new(0.0, 0.5, 1.0, 1.0), Color::from(rgb));
 
         let rgba = RGBA::new(1.0, 0.5, 0.0, 0.5);
-        assert_eq!(Color::from_rgba(1.0, 0.5, 0.0, 0.5), Color::from(rgba));
+        assert_eq!(Color::new(1.0, 0.5, 0.0, 0.5), Color::from(rgba));
     }
 
     #[cfg(feature = "serde")]
     #[test]
     fn test_serde_serialize_to_hex() {
-        let color = Color::from_rgba(1.0, 1.0, 0.5, 0.5);
+        let color = Color::new(1.0, 1.0, 0.5, 0.5);
         serde_test::assert_ser_tokens(&color, &[serde_test::Token::Str("#ffff8080")]);
     }
 
     #[cfg(all(feature = "serde", feature = "named-colors"))]
     #[test]
     fn test_serde_deserialize_from_string() {
-        let named = Color::from_rgb(1.0, 1.0, 0.0);
+        let named = Color::new(1.0, 1.0, 0.0, 1.0);
         serde_test::assert_de_tokens(&named, &[serde_test::Token::Str("yellow")]);
 
-        let hex = Color::from_rgba(0.0, 1.0, 0.0, 1.0);
+        let hex = Color::new(0.0, 1.0, 0.0, 1.0);
         serde_test::assert_de_tokens(&hex, &[serde_test::Token::Str("#00ff00ff")]);
 
-        let rgb = Color::from_rgba(0.0, 1.0, 0.0, 1.0);
+        let rgb = Color::new(0.0, 1.0, 0.0, 1.0);
         serde_test::assert_de_tokens(&rgb, &[serde_test::Token::Str("rgba(0,255,0,1)")]);
     }
 }

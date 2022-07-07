@@ -76,13 +76,13 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     let s = s.trim().to_lowercase();
 
     if s == "transparent" {
-        return Ok(Color::from_rgba(0.0, 0.0, 0.0, 0.0));
+        return Ok(Color::new(0.0, 0.0, 0.0, 0.0));
     }
 
     // Named colors
     #[cfg(feature = "named-colors")]
     if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
-        return Ok(Color::from_rgb_u8(*r, *g, *b));
+        return Ok(Color::from_rgba8(*r, *g, *b, 255));
     }
 
     // Hex format
@@ -287,7 +287,7 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
         return Err(Box::new(ParseColorError::InvalidHex));
     };
 
-    Ok(Color::from_rgba_u8(r, g, b, a))
+    Ok(Color::from_rgba8(r, g, b, a))
 }
 
 fn parse_percent_or_float(s: &str) -> Option<f64> {

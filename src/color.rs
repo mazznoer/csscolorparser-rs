@@ -33,6 +33,47 @@ impl Color {
     /// * `r`: Red value [0..1]
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
+    /// * `a`: Alpha value [0..1]
+    pub const fn new(r: f64, g: f64, b: f64, a: f64) -> Self {
+        Self { r, g, b, a }
+    }
+
+    pub fn to_array(&self) -> [f64; 4] {
+        [self.r, self.g, self.b, self.a]
+    }
+
+    pub fn to_rgba8(&self) -> [u8; 4] {
+        [
+            (self.r * 255.0).round() as u8,
+            (self.g * 255.0).round() as u8,
+            (self.b * 255.0).round() as u8,
+            (self.a * 255.0).round() as u8,
+        ]
+    }
+
+    pub fn to_rgba16(&self) -> [u16; 4] {
+        [
+            (self.r * 65535.0).round() as u16,
+            (self.g * 65535.0).round() as u16,
+            (self.b * 65535.0).round() as u16,
+            (self.a * 65535.0).round() as u16,
+        ]
+    }
+
+    pub fn clamp(&self) -> Self {
+        Self {
+            r: self.r.clamp(0.0, 1.0),
+            g: self.g.clamp(0.0, 1.0),
+            b: self.b.clamp(0.0, 1.0),
+            a: self.a.clamp(0.0, 1.0),
+        }
+    }
+
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..1]
+    /// * `g`: Green value [0..1]
+    /// * `b`: Blue value [0..1]
     pub fn from_rgb(r: f64, g: f64, b: f64) -> Color {
         Color { r, g, b, a: 1.0 }
     }
@@ -69,6 +110,21 @@ impl Color {
     /// * `a`: Alpha value [0..255]
     pub fn from_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
         Color {
+            r: r as f64 / 255.0,
+            g: g as f64 / 255.0,
+            b: b as f64 / 255.0,
+            a: a as f64 / 255.0,
+        }
+    }
+
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    /// * `a`: Alpha value [0..255]
+    pub fn from_rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self {
             r: r as f64 / 255.0,
             g: g as f64 / 255.0,
             b: b as f64 / 255.0,
@@ -117,6 +173,21 @@ impl Color {
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
     pub fn from_linear_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
+        Color::from_linear_rgba(
+            r as f64 / 255.0,
+            g as f64 / 255.0,
+            b as f64 / 255.0,
+            a as f64 / 255.0,
+        )
+    }
+
+    /// Arguments:
+    ///
+    /// * `r`: Red value [0..255]
+    /// * `g`: Green value [0..255]
+    /// * `b`: Blue value [0..255]
+    /// * `a`: Alpha value [0..255]
+    pub fn from_linear_rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
         Color::from_linear_rgba(
             r as f64 / 255.0,
             g as f64 / 255.0,
@@ -478,7 +549,7 @@ impl Color {
 
 impl Default for Color {
     fn default() -> Self {
-        Color {
+        Self {
             r: 0.0,
             g: 0.0,
             b: 0.0,
@@ -640,13 +711,35 @@ impl From<(f64, f64, f64)> for Color {
 
 impl From<[f64; 4]> for Color {
     fn from([r, g, b, a]: [f64; 4]) -> Self {
-        Color { r, g, b, a }
+        Self { r, g, b, a }
     }
 }
 
 impl From<[f64; 3]> for Color {
     fn from([r, g, b]: [f64; 3]) -> Self {
-        Color { r, g, b, a: 1.0 }
+        Self { r, g, b, a: 1.0 }
+    }
+}
+
+impl From<[f32; 4]> for Color {
+    fn from([r, g, b, a]: [f32; 4]) -> Self {
+        Self {
+            r: r as f64,
+            g: g as f64,
+            b: b as f64,
+            a: a as f64,
+        }
+    }
+}
+
+impl From<[f32; 3]> for Color {
+    fn from([r, g, b]: [f32; 3]) -> Self {
+        Self {
+            r: r as f64,
+            g: g as f64,
+            b: b as f64,
+            a: 1.0,
+        }
     }
 }
 

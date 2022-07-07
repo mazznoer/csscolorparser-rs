@@ -3,6 +3,11 @@ use std::convert::TryFrom;
 
 #[test]
 fn basic() {
+    let c = Color::new(1.0, 0.0, 0.0, 1.0);
+    assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
+    assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
+    assert_eq!(c.to_rgba16(), [65535, 0, 0, 65535]);
+
     let c = Color::from_rgb(1., 0., 0.);
     assert_eq!(c.rgba(), (1., 0., 0., 1.));
     assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
@@ -72,6 +77,26 @@ fn basic() {
 
     assert_eq!(Color::from([255, 0, 0, 128]).rgba_u8(), (255, 0, 0, 128));
     assert_eq!(Color::from([255, 0, 0]).rgba_u8(), (255, 0, 0, 255));
+
+    assert_eq!(
+        Color::from([0.0_f32, 1.0, 0.5, 1.0]).to_rgba8(),
+        [0, 255, 128, 255]
+    );
+    assert_eq!(
+        Color::from([0.0_f32, 1.0, 0.5]).to_rgba8(),
+        [0, 255, 128, 255]
+    );
+
+    // clamp
+    let c = Color::new(1.23, 0.5, -0.01, 1.01);
+    assert_eq!(c.to_array(), [1.23, 0.5, -0.01, 1.01]);
+    assert_eq!(c.to_rgba8(), [255, 128, 0, 255]);
+    assert_eq!(c.to_rgba16(), [65535, 32768, 0, 65535]);
+
+    let c = Color::new(1.23, 0.5, -0.01, 1.01).clamp();
+    assert_eq!(c.to_array(), [1.0, 0.5, 0.0, 1.0]);
+    assert_eq!(c.to_rgba8(), [255, 128, 0, 255]);
+    assert_eq!(c.to_rgba16(), [65535, 32768, 0, 65535]);
 }
 
 #[test]

@@ -62,7 +62,7 @@ hsv(120deg 100% 100% / 100%)
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.6.0"
+csscolorparser = "0.6.1"
 ```
 
 ## Examples
@@ -72,8 +72,8 @@ Using `csscolorparser::parse()` function.
 ```rust
 let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 
-assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
-assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
+assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
 assert_eq!(c.to_hex_string(), "#ff0000");
 assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
 ```
@@ -85,7 +85,7 @@ use csscolorparser::Color;
 
 let c = "#ff00007f".parse::<Color>()?;
 
-assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
+assert_eq!(c.to_rgba8(), [255, 0, 0, 127]);
 assert_eq!(c.to_hex_string(), "#ff00007f");
 ```
 

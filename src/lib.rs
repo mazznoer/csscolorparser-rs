@@ -55,7 +55,7 @@
 //! Add this to your `Cargo.toml`
 //!
 //! ```toml
-//! csscolorparser = "0.6.0"
+//! csscolorparser = "0.6.1"
 //! ```
 //!
 //! ## Examples
@@ -66,8 +66,8 @@
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 //!
-//! assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
-//! assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+//! assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
+//! assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
 //! assert_eq!(c.to_hex_string(), "#ff0000");
 //! assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
 //! # Ok(())
@@ -82,7 +82,7 @@
 //!
 //! let c = "#ff00007f".parse::<Color>()?;
 //!
-//! assert_eq!(c.rgba_u8(), (255, 0, 0, 127));
+//! assert_eq!(c.to_rgba8(), [255, 0, 0, 127]);
 //! assert_eq!(c.to_hex_string(), "#ff00007f");
 //! # Ok(())
 //! # }

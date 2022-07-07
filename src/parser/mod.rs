@@ -26,17 +26,17 @@ pub enum ParseColorError {
 impl fmt::Display for ParseColorError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseColorError::InvalidHex => f.write_str("invalid hex format"),
-            ParseColorError::InvalidRgb => f.write_str("invalid rgb format"),
-            ParseColorError::InvalidHsl => f.write_str("invalid hsl format"),
-            ParseColorError::InvalidHwb => f.write_str("invalid hwb format"),
-            ParseColorError::InvalidHsv => f.write_str("invalid hsv format"),
+            Self::InvalidHex => f.write_str("invalid hex format"),
+            Self::InvalidRgb => f.write_str("invalid rgb format"),
+            Self::InvalidHsl => f.write_str("invalid hsl format"),
+            Self::InvalidHwb => f.write_str("invalid hwb format"),
+            Self::InvalidHsv => f.write_str("invalid hsv format"),
             #[cfg(feature = "lab")]
-            ParseColorError::InvalidLab => f.write_str("invalid lab format"),
+            Self::InvalidLab => f.write_str("invalid lab format"),
             #[cfg(feature = "lab")]
-            ParseColorError::InvalidLch => f.write_str("invalid lch format"),
-            ParseColorError::InvalidFunction => f.write_str("invalid color function"),
-            ParseColorError::InvalidUnknown => f.write_str("invalid unknown format"),
+            Self::InvalidLch => f.write_str("invalid lch format"),
+            Self::InvalidFunction => f.write_str("invalid color function"),
+            Self::InvalidUnknown => f.write_str("invalid unknown format"),
         }
     }
 }
@@ -52,8 +52,8 @@ impl error::Error for ParseColorError {}
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let c = csscolorparser::parse("#ff0")?;
 ///
-/// assert_eq!(c.rgba(), (1.0, 1.0, 0.0, 1.0));
-/// assert_eq!(c.rgba_u8(), (255, 255, 0, 255));
+/// assert_eq!(c.to_array(), [1.0, 1.0, 0.0, 1.0]);
+/// assert_eq!(c.to_rgba8(), [255, 255, 0, 255]);
 /// assert_eq!(c.to_hex_string(), "#ffff00");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,255,0)");
 /// # Ok(())
@@ -65,8 +65,8 @@ impl error::Error for ParseColorError {}
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let c = csscolorparser::parse("hsl(360deg,100%,50%)")?;
 ///
-/// assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
-/// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+/// assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
+/// assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
 /// assert_eq!(c.to_hex_string(), "#ff0000");
 /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
 /// # Ok(())

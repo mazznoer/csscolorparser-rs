@@ -383,8 +383,8 @@ impl Color {
     ///
     /// let c = Color::from_html("rgb(255,0,0)")?;
     ///
-    /// assert_eq!(c.rgba(), (1.0, 0.0, 0.0, 1.0));
-    /// assert_eq!(c.rgba_u8(), (255, 0, 0, 255));
+    /// assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
+    /// assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
     /// assert_eq!(c.to_hex_string(), "#ff0000");
     /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
     /// # Ok(())

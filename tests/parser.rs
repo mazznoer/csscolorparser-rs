@@ -3,23 +3,23 @@ use csscolorparser::{parse, Color};
 #[test]
 fn parser() {
     let test_data = [
-        ("transparent", (0, 0, 0, 0)),
-        ("#ff00ff64", (255, 0, 255, 100)),
-        ("ff00ff64", (255, 0, 255, 100)),
-        ("rgb(247,179,99)", (247, 179, 99, 255)),
-        ("rgb(50% 50% 50%)", (128, 128, 128, 255)),
-        ("rgb(247,179,99,0.37)", (247, 179, 99, 94)),
-        ("hsl(270 0% 50%)", (128, 128, 128, 255)),
-        ("hwb(0 50% 50%)", (128, 128, 128, 255)),
-        ("hsv(0 0% 50%)", (128, 128, 128, 255)),
-        ("hsv(0 0% 100%)", (255, 255, 255, 255)),
-        ("hsv(0 0% 19%)", (48, 48, 48, 255)),
+        ("transparent", [0, 0, 0, 0]),
+        ("#ff00ff64", [255, 0, 255, 100]),
+        ("ff00ff64", [255, 0, 255, 100]),
+        ("rgb(247,179,99)", [247, 179, 99, 255]),
+        ("rgb(50% 50% 50%)", [128, 128, 128, 255]),
+        ("rgb(247,179,99,0.37)", [247, 179, 99, 94]),
+        ("hsl(270 0% 50%)", [128, 128, 128, 255]),
+        ("hwb(0 50% 50%)", [128, 128, 128, 255]),
+        ("hsv(0 0% 50%)", [128, 128, 128, 255]),
+        ("hsv(0 0% 100%)", [255, 255, 255, 255]),
+        ("hsv(0 0% 19%)", [48, 48, 48, 255]),
     ];
 
     for (s, expected) in test_data {
-        let a = parse(s).unwrap().rgba_u8();
-        let b = s.parse::<Color>().unwrap().rgba_u8();
-        let c = Color::from_html(s).unwrap().rgba_u8();
+        let a = parse(s).unwrap().to_rgba8();
+        let b = s.parse::<Color>().unwrap().to_rgba8();
+        let c = Color::from_html(s).unwrap().to_rgba8();
         assert_eq!(expected, a);
         assert_eq!(expected, b);
         assert_eq!(expected, c);
@@ -28,16 +28,16 @@ fn parser() {
     #[cfg(feature = "lab")]
     {
         let test_data = [
-            ("lab(0% 0 0)", (0, 0, 0, 255)),
-            ("lab(100% 0 0)", (255, 255, 255, 255)),
-            ("lab(0% 0 0 / 0.5)", (0, 0, 0, 128)),
-            ("lch(0% 0 0)", (0, 0, 0, 255)),
-            ("lch(100% 0 0)", (255, 255, 255, 255)),
-            ("lch(0% 0 0 / 0.5)", (0, 0, 0, 128)),
+            ("lab(0% 0 0)", [0, 0, 0, 255]),
+            ("lab(100% 0 0)", [255, 255, 255, 255]),
+            ("lab(0% 0 0 / 0.5)", [0, 0, 0, 128]),
+            ("lch(0% 0 0)", [0, 0, 0, 255]),
+            ("lch(100% 0 0)", [255, 255, 255, 255]),
+            ("lch(0% 0 0 / 0.5)", [0, 0, 0, 128]),
         ];
 
         for (s, expected) in test_data {
-            assert_eq!(expected, parse(s).unwrap().rgba_u8());
+            assert_eq!(expected, parse(s).unwrap().to_rgba8());
         }
     }
 }
@@ -95,10 +95,10 @@ fn black() {
         "hsv(120 100% 0%)",
     ];
 
-    let black = (0, 0, 0, 255);
+    let black = [0, 0, 0, 255];
 
     for s in data {
-        let c = parse(s).unwrap().rgba_u8();
+        let c = parse(s).unwrap().to_rgba8();
         assert_eq!(black, c);
     }
 }
@@ -129,10 +129,10 @@ fn red() {
         "hsv(0 100% 100%)",
     ];
 
-    let red = (255, 0, 0, 255);
+    let red = [255, 0, 0, 255];
 
     for s in data {
-        let c = parse(s).unwrap().rgba_u8();
+        let c = parse(s).unwrap().to_rgba8();
         assert_eq!(red, c);
     }
 }
@@ -165,10 +165,10 @@ fn lime() {
         "hsv(120 100% 100%)",
     ];
 
-    let lime = (0, 255, 0, 255);
+    let lime = [0, 255, 0, 255];
 
     for s in data {
-        let c = parse(s).unwrap().rgba_u8();
+        let c = parse(s).unwrap().to_rgba8();
         assert_eq!(lime, c);
     }
 }
@@ -188,10 +188,10 @@ fn lime_alpha() {
         "hsv(120 100% 100% / 50%)",
     ];
 
-    let lime_alpha = (0, 255, 0, 128);
+    let lime_alpha = [0, 255, 0, 128];
 
     for s in data {
-        let c = parse(s).unwrap().rgba_u8();
+        let c = parse(s).unwrap().to_rgba8();
         assert_eq!(lime_alpha, c);
     }
 }

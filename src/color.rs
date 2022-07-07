@@ -75,8 +75,8 @@ impl Color {
     /// * `r`: Red value [0..1]
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
-    pub fn from_rgb(r: f64, g: f64, b: f64) -> Color {
-        Color { r, g, b, a: 1.0 }
+    pub fn from_rgb(r: f64, g: f64, b: f64) -> Self {
+        Self { r, g, b, a: 1.0 }
     }
 
     #[deprecated = "Use [new](#method.new) instead."]
@@ -86,8 +86,8 @@ impl Color {
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
     /// * `a`: Alpha value [0..1]
-    pub fn from_rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
-        Color { r, g, b, a }
+    pub fn from_rgba(r: f64, g: f64, b: f64, a: f64) -> Self {
+        Self { r, g, b, a }
     }
 
     #[deprecated = "Use [from_rgba8](#method.from_rgba8) instead."]
@@ -96,8 +96,8 @@ impl Color {
     /// * `r`: Red value [0..255]
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
-    pub fn from_rgb_u8(r: u8, g: u8, b: u8) -> Color {
-        Color {
+    pub fn from_rgb_u8(r: u8, g: u8, b: u8) -> Self {
+        Self {
             r: r as f64 / 255.0,
             g: g as f64 / 255.0,
             b: b as f64 / 255.0,
@@ -112,8 +112,8 @@ impl Color {
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
-    pub fn from_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color {
+    pub fn from_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self {
             r: r as f64 / 255.0,
             g: g as f64 / 255.0,
             b: b as f64 / 255.0,
@@ -142,8 +142,8 @@ impl Color {
     /// * `r`: Red value [0..1]
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
-    pub fn from_linear_rgb(r: f64, g: f64, b: f64) -> Color {
-        Color::from_linear_rgba(r, g, b, 1.0)
+    pub fn from_linear_rgb(r: f64, g: f64, b: f64) -> Self {
+        Self::from_linear_rgba(r, g, b, 1.0)
     }
 
     /// Arguments:
@@ -152,14 +152,14 @@ impl Color {
     /// * `g`: Green value [0..1]
     /// * `b`: Blue value [0..1]
     /// * `a`: Alpha value [0..1]
-    pub fn from_linear_rgba(r: f64, g: f64, b: f64, a: f64) -> Color {
+    pub fn from_linear_rgba(r: f64, g: f64, b: f64, a: f64) -> Self {
         fn from_linear(x: f64) -> f64 {
             if x >= 0.0031308 {
                 return 1.055 * x.powf(1.0 / 2.4) - 0.055;
             }
             12.92 * x
         }
-        Color::new(from_linear(r), from_linear(g), from_linear(b), a)
+        Self::new(from_linear(r), from_linear(g), from_linear(b), a)
     }
 
     #[deprecated = "Use [from_linear_rgba8](#method.from_linear_rgba8) instead."]
@@ -168,8 +168,8 @@ impl Color {
     /// * `r`: Red value [0..255]
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
-    pub fn from_linear_rgb_u8(r: u8, g: u8, b: u8) -> Color {
-        Color::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
+    pub fn from_linear_rgb_u8(r: u8, g: u8, b: u8) -> Self {
+        Self::from_linear_rgba(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0, 1.0)
     }
 
     #[deprecated = "Use [from_linear_rgba8](#method.from_linear_rgba8) instead."]
@@ -179,8 +179,8 @@ impl Color {
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
-    pub fn from_linear_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Color {
-        Color::from_linear_rgba(
+    pub fn from_linear_rgba_u8(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self::from_linear_rgba(
             r as f64 / 255.0,
             g as f64 / 255.0,
             b as f64 / 255.0,
@@ -195,7 +195,7 @@ impl Color {
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
     pub fn from_linear_rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
-        Color::from_linear_rgba(
+        Self::from_linear_rgba(
             r as f64 / 255.0,
             g as f64 / 255.0,
             b as f64 / 255.0,
@@ -209,8 +209,8 @@ impl Color {
     /// * `h`: Hue angle [0..360]
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
-    pub fn from_hsv(h: f64, s: f64, v: f64) -> Color {
-        Color::from_hsva(h, s, v, 1.0)
+    pub fn from_hsv(h: f64, s: f64, v: f64) -> Self {
+        Self::from_hsva(h, s, v, 1.0)
     }
 
     /// Arguments:
@@ -219,9 +219,9 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn from_hsva(h: f64, s: f64, v: f64, a: f64) -> Color {
+    pub fn from_hsva(h: f64, s: f64, v: f64, a: f64) -> Self {
         let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
-        Color::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+        Self::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
     }
 
     #[deprecated = "Use [from_hsla](#method.from_hsla) instead."]
@@ -230,8 +230,8 @@ impl Color {
     /// * `h`: Hue angle [0..360]
     /// * `s`: Saturation [0..1]
     /// * `l`: Lightness [0..1]
-    pub fn from_hsl(h: f64, s: f64, l: f64) -> Color {
-        Color::from_hsla(h, s, l, 1.0)
+    pub fn from_hsl(h: f64, s: f64, l: f64) -> Self {
+        Self::from_hsla(h, s, l, 1.0)
     }
 
     /// Arguments:
@@ -240,9 +240,9 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn from_hsla(h: f64, s: f64, l: f64, a: f64) -> Color {
+    pub fn from_hsla(h: f64, s: f64, l: f64, a: f64) -> Self {
         let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
-        Color::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+        Self::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
     }
 
     #[deprecated = "Use [from_hwba](#method.from_hwba) instead."]
@@ -251,8 +251,8 @@ impl Color {
     /// * `h`: Hue angle [0..360]
     /// * `w`: Whiteness [0..1]
     /// * `b`: Blackness [0..1]
-    pub fn from_hwb(h: f64, w: f64, b: f64) -> Color {
-        Color::from_hwba(h, w, b, 1.0)
+    pub fn from_hwb(h: f64, w: f64, b: f64) -> Self {
+        Self::from_hwba(h, w, b, 1.0)
     }
 
     /// Arguments:
@@ -261,9 +261,9 @@ impl Color {
     /// * `w`: Whiteness [0..1]
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn from_hwba(h: f64, w: f64, b: f64, a: f64) -> Color {
+    pub fn from_hwba(h: f64, w: f64, b: f64, a: f64) -> Self {
         let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
-        Color::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
+        Self::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
     }
 
     #[deprecated = "Use [from_oklaba](#method.from_oklaba) instead."]
@@ -272,8 +272,8 @@ impl Color {
     /// * `l`: Perceived lightness
     /// * `a`: How green/red the color is
     /// * `b`: How blue/yellow the color is
-    pub fn from_oklab(l: f64, a: f64, b: f64) -> Color {
-        Color::from_oklaba(l, a, b, 1.0)
+    pub fn from_oklab(l: f64, a: f64, b: f64) -> Self {
+        Self::from_oklaba(l, a, b, 1.0)
     }
 
     /// Arguments:
@@ -282,7 +282,7 @@ impl Color {
     /// * `a`: How green/red the color is
     /// * `b`: How blue/yellow the color is
     /// * `alpha`: Alpha [0..1]
-    pub fn from_oklaba(l: f64, a: f64, b: f64, alpha: f64) -> Color {
+    pub fn from_oklaba(l: f64, a: f64, b: f64, alpha: f64) -> Self {
         let l_ = (l + 0.3963377774 * a + 0.2158037573 * b).powi(3);
         let m_ = (l - 0.1055613458 * a - 0.0638541728 * b).powi(3);
         let s_ = (l - 0.0894841775 * a - 1.2914855480 * b).powi(3);
@@ -291,7 +291,7 @@ impl Color {
         let g = -1.2681437731 * l_ + 2.6093323231 * m_ - 0.3411344290 * s_;
         let b = -0.0041119885 * l_ - 0.7034763098 * m_ + 1.7068625689 * s_;
 
-        Color::from_linear_rgba(r, g, b, alpha)
+        Self::from_linear_rgba(r, g, b, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -301,14 +301,14 @@ impl Color {
     /// * `a`: Distance along the `a` axis
     /// * `b`: Distance along the `b` axis
     /// * `alpha`: Alpha [0..1]
-    pub fn from_lab(l: f64, a: f64, b: f64, alpha: f64) -> Color {
+    pub fn from_lab(l: f64, a: f64, b: f64, alpha: f64) -> Self {
         let [r, g, b] = lab::Lab {
             l: l as f32,
             a: a as f32,
             b: b as f32,
         }
         .to_rgb_normalized();
-        Color::new(r as f64, g as f64, b as f64, alpha)
+        Self::new(r as f64, g as f64, b as f64, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -320,10 +320,10 @@ impl Color {
 
     #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
-    pub fn interpolate_lab(&self, other: &Color, t: f64) -> Color {
+    pub fn interpolate_lab(&self, other: &Color, t: f64) -> Self {
         let (l1, a1, b1, alpha1) = self.to_lab();
         let (l2, a2, b2, alpha2) = other.to_lab();
-        Color::from_lab(
+        Self::from_lab(
             l1 + t * (l2 - l1),
             a1 + t * (a2 - a1),
             b1 + t * (b2 - b1),
@@ -338,7 +338,7 @@ impl Color {
     /// * `c`: Chroma
     /// * `h`: Hue angle in radians
     /// * `alpha`: Alpha [0..1]
-    pub fn from_lch(l: f64, c: f64, h: f64, alpha: f64) -> Color {
+    pub fn from_lch(l: f64, c: f64, h: f64, alpha: f64) -> Self {
         let [r, g, b] = lab::LCh {
             l: l as f32,
             c: c as f32,
@@ -346,7 +346,7 @@ impl Color {
         }
         .to_lab()
         .to_rgb_normalized();
-        Color::new(r as f64, g as f64, b as f64, alpha)
+        Self::new(r as f64, g as f64, b as f64, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -362,10 +362,10 @@ impl Color {
 
     #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
-    pub fn interpolate_lch(&self, other: &Color, t: f64) -> Color {
+    pub fn interpolate_lch(&self, other: &Color, t: f64) -> Self {
         let (l1, c1, h1, alpha1) = self.to_lch();
         let (l2, c2, h2, alpha2) = other.to_lch();
-        Color::from_lch(
+        Self::from_lch(
             l1 + t * (l2 - l1),
             c1 + t * (c2 - c1),
             interp_angle_rad(h1, h2, t),
@@ -390,7 +390,7 @@ impl Color {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn from_html<S: AsRef<str>>(s: S) -> Result<Color, ParseColorError> {
+    pub fn from_html<S: AsRef<str>>(s: S) -> Result<Self, ParseColorError> {
         parse(s.as_ref())
     }
 
@@ -514,8 +514,8 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
-    pub fn interpolate_rgb(&self, other: &Color, t: f64) -> Color {
-        Color {
+    pub fn interpolate_rgb(&self, other: &Color, t: f64) -> Self {
+        Self {
             r: self.r + t * (other.r - self.r),
             g: self.g + t * (other.g - self.g),
             b: self.b + t * (other.b - self.b),
@@ -524,10 +524,10 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
-    pub fn interpolate_linear_rgb(&self, other: &Color, t: f64) -> Color {
+    pub fn interpolate_linear_rgb(&self, other: &Color, t: f64) -> Self {
         let (r1, g1, b1, a1) = self.to_linear_rgba();
         let (r2, g2, b2, a2) = other.to_linear_rgba();
-        Color::from_linear_rgba(
+        Self::from_linear_rgba(
             r1 + t * (r2 - r1),
             g1 + t * (g2 - g1),
             b1 + t * (b2 - b1),
@@ -536,10 +536,10 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].
-    pub fn interpolate_hsv(&self, other: &Color, t: f64) -> Color {
+    pub fn interpolate_hsv(&self, other: &Color, t: f64) -> Self {
         let (h1, s1, v1, a1) = self.to_hsva();
         let (h2, s2, v2, a2) = other.to_hsva();
-        Color::from_hsva(
+        Self::from_hsva(
             interp_angle(h1, h2, t),
             s1 + t * (s2 - s1),
             v1 + t * (v2 - v1),
@@ -548,10 +548,10 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the [Oklab](https://bottosson.github.io/posts/oklab/) color-space. `t` in the range [0..1].
-    pub fn interpolate_oklab(&self, other: &Color, t: f64) -> Color {
+    pub fn interpolate_oklab(&self, other: &Color, t: f64) -> Self {
         let (l1, a1, b1, alpha1) = self.to_oklaba();
         let (l2, a2, b2, alpha2) = other.to_oklaba();
-        Color::from_oklaba(
+        Self::from_oklaba(
             l1 + t * (l2 - l1),
             a1 + t * (a2 - a1),
             b1 + t * (b2 - b1),
@@ -590,7 +590,7 @@ mod impl_cint {
     impl From<EncodedSrgb<f64>> for Color {
         fn from(c: EncodedSrgb<f64>) -> Self {
             let EncodedSrgb { r, g, b } = c;
-            Color::new(r, g, b, 1.0)
+            Self::new(r, g, b, 1.0)
         }
     }
 
@@ -606,7 +606,7 @@ mod impl_cint {
         fn from(c: EncodedSrgb<f32>) -> Self {
             let EncodedSrgb { r, g, b } = c;
             let (r, g, b) = (r as f64, g as f64, b as f64);
-            Color::new(r, g, b, 1.0)
+            Self::new(r, g, b, 1.0)
         }
     }
 
@@ -626,7 +626,7 @@ mod impl_cint {
                 color: EncodedSrgb { r, g, b },
                 alpha,
             } = c;
-            Color::new(r, g, b, alpha)
+            Self::new(r, g, b, alpha)
         }
     }
 
@@ -648,7 +648,7 @@ mod impl_cint {
                 alpha,
             } = c;
             let (r, g, b, alpha) = (r as f64, g as f64, b as f64, alpha as f64);
-            Color::new(r, g, b, alpha)
+            Self::new(r, g, b, alpha)
         }
     }
 
@@ -662,7 +662,7 @@ mod impl_cint {
     impl From<EncodedSrgb<u8>> for Color {
         fn from(c: EncodedSrgb<u8>) -> Self {
             let EncodedSrgb { r, g, b } = c;
-            Color::from_rgba8(r, g, b, 255)
+            Self::from_rgba8(r, g, b, 255)
         }
     }
 
@@ -682,7 +682,7 @@ mod impl_cint {
                 color: EncodedSrgb { r, g, b },
                 alpha,
             } = c;
-            Color::from_rgba8(r, g, b, alpha)
+            Self::from_rgba8(r, g, b, alpha)
         }
     }
 }
@@ -711,13 +711,13 @@ impl TryFrom<&str> for Color {
 
 impl From<(f64, f64, f64, f64)> for Color {
     fn from((r, g, b, a): (f64, f64, f64, f64)) -> Self {
-        Color { r, g, b, a }
+        Self { r, g, b, a }
     }
 }
 
 impl From<(f64, f64, f64)> for Color {
     fn from((r, g, b): (f64, f64, f64)) -> Self {
-        Color { r, g, b, a: 1.0 }
+        Self { r, g, b, a: 1.0 }
     }
 }
 
@@ -757,25 +757,25 @@ impl From<[f32; 3]> for Color {
 
 impl From<(u8, u8, u8, u8)> for Color {
     fn from((r, g, b, a): (u8, u8, u8, u8)) -> Self {
-        Color::from_rgba8(r, g, b, a)
+        Self::from_rgba8(r, g, b, a)
     }
 }
 
 impl From<(u8, u8, u8)> for Color {
     fn from((r, g, b): (u8, u8, u8)) -> Self {
-        Color::from_rgba8(r, g, b, 255)
+        Self::from_rgba8(r, g, b, 255)
     }
 }
 
 impl From<[u8; 4]> for Color {
     fn from([r, g, b, a]: [u8; 4]) -> Self {
-        Color::from_rgba8(r, g, b, a)
+        Self::from_rgba8(r, g, b, a)
     }
 }
 
 impl From<[u8; 3]> for Color {
     fn from([r, g, b]: [u8; 3]) -> Self {
-        Color::from_rgba8(r, g, b, 255)
+        Self::from_rgba8(r, g, b, 255)
     }
 }
 
@@ -783,7 +783,7 @@ impl From<[u8; 3]> for Color {
 #[cfg(feature = "rust-rgb")]
 impl From<RGB<f64>> for Color {
     fn from(item: RGB<f64>) -> Self {
-        Color::new(item.r, item.g, item.b, 1.0)
+        Self::new(item.r, item.g, item.b, 1.0)
     }
 }
 
@@ -791,7 +791,7 @@ impl From<RGB<f64>> for Color {
 #[cfg(feature = "rust-rgb")]
 impl From<RGBA<f64>> for Color {
     fn from(item: RGBA<f64>) -> Self {
-        Color::new(item.r, item.g, item.b, item.a)
+        Self::new(item.r, item.g, item.b, item.a)
     }
 }
 

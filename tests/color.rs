@@ -128,6 +128,22 @@ fn red() {
     }
 }
 
+#[cfg(feature = "named-colors")]
+#[test]
+fn color_name() {
+    let test_data = [
+        (Color::new(0.0, 0.0, 0.0, 1.0), "black"),
+        (Color::new(1.0, 1.0, 1.0, 1.0), "white"),
+        (Color::new(1.0, 0.0, 0.0, 1.0), "red"),
+        (Color::from_html("gold").unwrap(), "gold"),
+        (Color::from_html("pink").unwrap(), "pink"),
+        (Color::from_html("tomato").unwrap(), "tomato"),
+    ];
+    for (color, name) in test_data {
+        assert_eq!(color.name().unwrap(), name);
+    }
+}
+
 #[test]
 fn interpolate() {
     let a = Color::new(0.0, 1.0, 0.0, 1.0);

@@ -6,7 +6,7 @@ use crate::Color;
 mod named_colors;
 
 #[cfg(feature = "named-colors")]
-use named_colors::NAMED_COLORS;
+pub(crate) use named_colors::NAMED_COLORS;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParseColorError {

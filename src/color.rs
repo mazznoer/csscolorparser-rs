@@ -1,8 +1,8 @@
 use std::convert::TryFrom;
 #[cfg(feature = "lab")]
 use std::f64::consts::{PI, TAU};
+use std::fmt;
 use std::str::FromStr;
-use std::{error, fmt};
 
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
@@ -16,20 +16,6 @@ use crate::parser::NAMED_COLORS;
 
 #[cfg(feature = "lab")]
 const PI_3: f64 = PI * 3.0;
-
-#[cfg(feature = "named-colors")]
-#[derive(Debug, Clone, Copy)]
-pub struct UnnamedColorError;
-
-#[cfg(feature = "named-colors")]
-impl error::Error for UnnamedColorError {}
-
-#[cfg(feature = "named-colors")]
-impl fmt::Display for UnnamedColorError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str("unnamed color")
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 /// The color
@@ -412,14 +398,14 @@ impl Color {
     }
 
     #[cfg(feature = "named-colors")]
-    pub fn name(&self) -> Result<&str, UnnamedColorError> {
+    pub fn name(&self) -> Option<&str> {
         let rgb = &self.to_rgba8()[0..3];
         for (&k, &v) in NAMED_COLORS.entries() {
             if v == rgb {
-                return Ok(k);
+                return Some(k);
             }
         }
-        Err(UnnamedColorError)
+        None
     }
 
     #[deprecated]

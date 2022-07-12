@@ -140,7 +140,16 @@ fn color_name() {
         (Color::from_html("tomato").unwrap(), "tomato"),
     ];
     for (color, name) in test_data {
-        assert_eq!(color.name().unwrap(), name);
+        assert_eq!(color.name(), Some(name));
+    }
+
+    let test_data = [
+        Color::new(0.7, 0.8, 0.9, 1.0),
+        Color::new(1.0, 0.5, 0.0, 1.0),
+        Color::from_rgba8(0, 50, 100, 255),
+    ];
+    for c in test_data {
+        assert!(c.name().is_none());
     }
 }
 

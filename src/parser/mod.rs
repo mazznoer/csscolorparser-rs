@@ -291,69 +291,36 @@ fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
 }
 
 fn parse_percent_or_float(s: &str) -> Option<f64> {
-    if let Some(s) = s.strip_suffix('%') {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t / 100.0);
-        }
-        return None;
-    }
-
-    if let Ok(t) = s.parse::<f64>() {
-        return Some(t);
-    }
-
-    None
+    s.strip_suffix('%')
+        .and_then(|s| s.parse().ok().map(|t: f64| t / 100.0))
+        .or_else(|| s.parse().ok())
 }
 
 fn parse_percent_or_255(s: &str) -> Option<f64> {
-    if let Some(s) = s.strip_suffix('%') {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t / 100.0);
-        }
-        return None;
-    }
-
-    if let Ok(t) = s.parse::<f64>() {
-        return Some(t / 255.0);
-    }
-
-    None
+    s.strip_suffix('%')
+        .and_then(|s| s.parse().ok().map(|t: f64| t / 100.0))
+        .or_else(|| s.parse().ok().map(|t: f64| t / 255.0))
 }
 
 fn parse_angle(s: &str) -> Option<f64> {
-    if let Some(s) = s.strip_suffix("deg") {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t);
-        }
-        return None;
-    }
-
-    if let Some(s) = s.strip_suffix("grad") {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t * 360.0 / 400.0);
-        }
-        return None;
-    }
-
-    if let Some(s) = s.strip_suffix("rad") {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t.to_degrees());
-        }
-        return None;
-    }
-
-    if let Some(s) = s.strip_suffix("turn") {
-        if let Ok(t) = s.parse::<f64>() {
-            return Some(t * 360.0);
-        }
-        return None;
-    }
-
-    if let Ok(t) = s.parse::<f64>() {
-        return Some(t);
-    }
-
-    None
+    s.strip_suffix("deg")
+        .and_then(|s| s.parse().ok())
+        .or_else(|| {
+            s.strip_suffix("grad")
+                .and_then(|s| s.parse().ok())
+                .map(|t: f64| t * 360.0 / 400.0)
+        })
+        .or_else(|| {
+            s.strip_suffix("rad")
+                .and_then(|s| s.parse().ok())
+                .map(|t: f64| t.to_degrees())
+        })
+        .or_else(|| {
+            s.strip_suffix("turn")
+                .and_then(|s| s.parse().ok())
+                .map(|t: f64| t * 360.0)
+        })
+        .or_else(|| s.parse().ok())
 }
 
 #[cfg(test)]

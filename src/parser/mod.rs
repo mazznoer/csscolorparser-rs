@@ -1,6 +1,5 @@
-use std::{error, fmt};
-
 use crate::Color;
+use thiserror::Error;
 
 #[cfg(feature = "named-colors")]
 mod named_colors;
@@ -8,40 +7,29 @@ mod named_colors;
 #[cfg(feature = "named-colors")]
 pub(crate) use named_colors::NAMED_COLORS;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Error)]
 pub enum ParseColorError {
+    #[error("invalid hex format")]
     InvalidHex,
+    #[error("invalid rgb format")]
     InvalidRgb,
+    #[error("invalid hsl format")]
     InvalidHsl,
+    #[error("invalid hwb format")]
     InvalidHwb,
+    #[error("invalid hsv format")]
     InvalidHsv,
     #[cfg(feature = "lab")]
+    #[error("invalid lab format")]
     InvalidLab,
     #[cfg(feature = "lab")]
+    #[error("invalid lch format")]
     InvalidLch,
+    #[error("invalid color function")]
     InvalidFunction,
+    #[error("invalid unknown format")]
     InvalidUnknown,
 }
-
-impl fmt::Display for ParseColorError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::InvalidHex => f.write_str("invalid hex format"),
-            Self::InvalidRgb => f.write_str("invalid rgb format"),
-            Self::InvalidHsl => f.write_str("invalid hsl format"),
-            Self::InvalidHwb => f.write_str("invalid hwb format"),
-            Self::InvalidHsv => f.write_str("invalid hsv format"),
-            #[cfg(feature = "lab")]
-            Self::InvalidLab => f.write_str("invalid lab format"),
-            #[cfg(feature = "lab")]
-            Self::InvalidLch => f.write_str("invalid lch format"),
-            Self::InvalidFunction => f.write_str("invalid color function"),
-            Self::InvalidUnknown => f.write_str("invalid unknown format"),
-        }
-    }
-}
-
-impl error::Error for ParseColorError {}
 
 /// Parse CSS color string
 ///
@@ -87,10 +75,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 
     // Hex format
     if let Some(s) = s.strip_prefix('#') {
-        if let Ok(c) = parse_hex(s) {
-            return Ok(c);
-        }
-        return Err(ParseColorError::InvalidHex);
+        return parse_hex(s);
     }
 
     if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(')')) {
@@ -252,42 +237,39 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     Err(ParseColorError::InvalidUnknown)
 }
 
-fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
-    if !s.is_ascii() {
-        return Err(Box::new(ParseColorError::InvalidHex));
-    }
-
+fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     let n = s.len();
 
-    let (r, g, b, a) = if n == 3 || n == 4 {
-        let r = u8::from_str_radix(&s[0..1].repeat(2), 16)?;
-        let g = u8::from_str_radix(&s[1..2].repeat(2), 16)?;
-        let b = u8::from_str_radix(&s[2..3].repeat(2), 16)?;
+    if n == 3 || n == 4 {
+        let r =
+            u8::from_str_radix(&s[0..1].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let g =
+            u8::from_str_radix(&s[1..2].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let b =
+            u8::from_str_radix(&s[2..3].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
 
         let a = if n == 4 {
-            u8::from_str_radix(&s[3..4].repeat(2), 16)?
+            u8::from_str_radix(&s[3..4].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?
         } else {
             255
         };
 
-        (r, g, b, a)
+        Ok(Color::from_rgba8(r, g, b, a))
     } else if n == 6 || n == 8 {
-        let r = u8::from_str_radix(&s[0..2], 16)?;
-        let g = u8::from_str_radix(&s[2..4], 16)?;
-        let b = u8::from_str_radix(&s[4..6], 16)?;
+        let r = u8::from_str_radix(&s[0..2], 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let g = u8::from_str_radix(&s[2..4], 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let b = u8::from_str_radix(&s[4..6], 16).map_err(|_| ParseColorError::InvalidHex)?;
 
         let a = if n == 8 {
-            u8::from_str_radix(&s[6..8], 16)?
+            u8::from_str_radix(&s[6..8], 16).map_err(|_| ParseColorError::InvalidHex)?
         } else {
             255
         };
 
-        (r, g, b, a)
+        Ok(Color::from_rgba8(r, g, b, a))
     } else {
-        return Err(Box::new(ParseColorError::InvalidHex));
-    };
-
-    Ok(Color::from_rgba8(r, g, b, a))
+        Err(ParseColorError::InvalidHex)
+    }
 }
 
 fn parse_percent_or_float(s: &str) -> Option<f64> {

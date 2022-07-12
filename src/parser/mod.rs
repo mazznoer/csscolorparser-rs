@@ -238,6 +238,10 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 }
 
 fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
+    if !s.is_ascii() {
+        return Err(ParseColorError::InvalidHex);
+    }
+
     let n = s.len();
 
     if n == 3 || n == 4 {

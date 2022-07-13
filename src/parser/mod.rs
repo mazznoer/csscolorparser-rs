@@ -1,5 +1,6 @@
+use std::{error, fmt};
+
 use crate::Color;
-use thiserror::Error;
 
 #[cfg(feature = "named-colors")]
 mod named_colors;
@@ -7,29 +8,40 @@ mod named_colors;
 #[cfg(feature = "named-colors")]
 pub(crate) use named_colors::NAMED_COLORS;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Error)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParseColorError {
-    #[error("invalid hex format")]
     InvalidHex,
-    #[error("invalid rgb format")]
     InvalidRgb,
-    #[error("invalid hsl format")]
     InvalidHsl,
-    #[error("invalid hwb format")]
     InvalidHwb,
-    #[error("invalid hsv format")]
     InvalidHsv,
     #[cfg(feature = "lab")]
-    #[error("invalid lab format")]
     InvalidLab,
     #[cfg(feature = "lab")]
-    #[error("invalid lch format")]
     InvalidLch,
-    #[error("invalid color function")]
     InvalidFunction,
-    #[error("invalid unknown format")]
     InvalidUnknown,
 }
+
+impl fmt::Display for ParseColorError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::InvalidHex => f.write_str("invalid hex format"),
+            Self::InvalidRgb => f.write_str("invalid rgb format"),
+            Self::InvalidHsl => f.write_str("invalid hsl format"),
+            Self::InvalidHwb => f.write_str("invalid hwb format"),
+            Self::InvalidHsv => f.write_str("invalid hsv format"),
+            #[cfg(feature = "lab")]
+            Self::InvalidLab => f.write_str("invalid lab format"),
+            #[cfg(feature = "lab")]
+            Self::InvalidLch => f.write_str("invalid lch format"),
+            Self::InvalidFunction => f.write_str("invalid color function"),
+            Self::InvalidUnknown => f.write_str("invalid unknown format"),
+        }
+    }
+}
+
+impl error::Error for ParseColorError {}
 
 /// Parse CSS color string
 ///

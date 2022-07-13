@@ -87,10 +87,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 
     // Hex format
     if let Some(s) = s.strip_prefix('#') {
-        if let Ok(c) = parse_hex(s) {
-            return Ok(c);
-        }
-        return Err(ParseColorError::InvalidHex);
+        return parse_hex(s);
     }
 
     if let (Some(i), Some(s)) = (s.find('('), s.strip_suffix(')')) {
@@ -252,42 +249,43 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     Err(ParseColorError::InvalidUnknown)
 }
 
-fn parse_hex(s: &str) -> Result<Color, Box<dyn error::Error>> {
+fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     if !s.is_ascii() {
-        return Err(Box::new(ParseColorError::InvalidHex));
+        return Err(ParseColorError::InvalidHex);
     }
 
     let n = s.len();
 
-    let (r, g, b, a) = if n == 3 || n == 4 {
-        let r = u8::from_str_radix(&s[0..1].repeat(2), 16)?;
-        let g = u8::from_str_radix(&s[1..2].repeat(2), 16)?;
-        let b = u8::from_str_radix(&s[2..3].repeat(2), 16)?;
+    if n == 3 || n == 4 {
+        let r =
+            u8::from_str_radix(&s[0..1].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let g =
+            u8::from_str_radix(&s[1..2].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let b =
+            u8::from_str_radix(&s[2..3].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
 
         let a = if n == 4 {
-            u8::from_str_radix(&s[3..4].repeat(2), 16)?
+            u8::from_str_radix(&s[3..4].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?
         } else {
             255
         };
 
-        (r, g, b, a)
+        Ok(Color::from_rgba8(r, g, b, a))
     } else if n == 6 || n == 8 {
-        let r = u8::from_str_radix(&s[0..2], 16)?;
-        let g = u8::from_str_radix(&s[2..4], 16)?;
-        let b = u8::from_str_radix(&s[4..6], 16)?;
+        let r = u8::from_str_radix(&s[0..2], 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let g = u8::from_str_radix(&s[2..4], 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let b = u8::from_str_radix(&s[4..6], 16).map_err(|_| ParseColorError::InvalidHex)?;
 
         let a = if n == 8 {
-            u8::from_str_radix(&s[6..8], 16)?
+            u8::from_str_radix(&s[6..8], 16).map_err(|_| ParseColorError::InvalidHex)?
         } else {
             255
         };
 
-        (r, g, b, a)
+        Ok(Color::from_rgba8(r, g, b, a))
     } else {
-        return Err(Box::new(ParseColorError::InvalidHex));
-    };
-
-    Ok(Color::from_rgba8(r, g, b, a))
+        Err(ParseColorError::InvalidHex)
+    }
 }
 
 fn parse_percent_or_float(s: &str) -> Option<f64> {

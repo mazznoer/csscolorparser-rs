@@ -207,6 +207,8 @@ fn invalid_format() {
         "rgb(255,0,0",
         "rgb(0,255,8s)",
         "rgb(100%,z9%,75%)",
+        "rgb(255,0,0%)",  // mix format
+        "rgb(70%,30%,0)", // mix format
         "cmyk(1 0 0)",
         "rgba(0 0)",
         "hsl(90',100%,50%)",
@@ -215,11 +217,14 @@ fn invalid_format() {
         "hsl(Xturn 100% 50%)",
         "hsl(Zgrad 100% 50%)",
         "hsl(180 1 x%)",
+        "hsl(360,0%,0)", // mix format
         "hsla(360)",
         "hwb(Xrad,50%,50%)",
         "hwb(270 0% 0% 0% 0%)",
+        "hwb(360,0,20%)", // mix format
         "hsv(120 100% 100% 1 50%)",
         "hsv(120 XXX 100%)",
+        "hsv(120,100%,0.5)", //mix format
         "lab(100%,0)",
         "lab(100% 0 X)",
         "lch(100%,0)",

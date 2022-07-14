@@ -109,16 +109,20 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 let a = if p_len == 4 {
                     parse_percent_or_float(params[3])
                 } else {
-                    Some(1.0)
+                    Some((1.0, true))
                 };
 
-                if let (Some(r), Some(g), Some(b), Some(a)) = (r, g, b, a) {
-                    return Ok(Color {
-                        r: r.clamp(0.0, 1.0),
-                        g: g.clamp(0.0, 1.0),
-                        b: b.clamp(0.0, 1.0),
-                        a: a.clamp(0.0, 1.0),
-                    });
+                if let (Some((r, r_fmt)), Some((g, g_fmt)), Some((b, b_fmt)), Some((a, _))) =
+                    (r, g, b, a)
+                {
+                    if r_fmt == g_fmt && g_fmt == b_fmt {
+                        return Ok(Color {
+                            r: r.clamp(0.0, 1.0),
+                            g: g.clamp(0.0, 1.0),
+                            b: b.clamp(0.0, 1.0),
+                            a: a.clamp(0.0, 1.0),
+                        });
+                    }
                 }
 
                 return Err(ParseColorError::InvalidRgb);
@@ -135,11 +139,13 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 let a = if p_len == 4 {
                     parse_percent_or_float(params[3])
                 } else {
-                    Some(1.0)
+                    Some((1.0, true))
                 };
 
-                if let (Some(h), Some(s), Some(l), Some(a)) = (h, s, l, a) {
-                    return Ok(Color::from_hsla(h, s, l, a));
+                if let (Some(h), Some((s, s_fmt)), Some((l, l_fmt)), Some((a, _))) = (h, s, l, a) {
+                    if s_fmt == l_fmt {
+                        return Ok(Color::from_hsla(h, s, l, a));
+                    }
                 }
 
                 return Err(ParseColorError::InvalidHsl);
@@ -156,11 +162,13 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 let a = if p_len == 4 {
                     parse_percent_or_float(params[3])
                 } else {
-                    Some(1.0)
+                    Some((1.0, true))
                 };
 
-                if let (Some(h), Some(w), Some(b), Some(a)) = (h, w, b, a) {
-                    return Ok(Color::from_hwba(h, w, b, a));
+                if let (Some(h), Some((w, w_fmt)), Some((b, b_fmt)), Some((a, _))) = (h, w, b, a) {
+                    if w_fmt == b_fmt {
+                        return Ok(Color::from_hwba(h, w, b, a));
+                    }
                 }
 
                 return Err(ParseColorError::InvalidHwb);
@@ -177,11 +185,13 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 let a = if p_len == 4 {
                     parse_percent_or_float(params[3])
                 } else {
-                    Some(1.0)
+                    Some((1.0, true))
                 };
 
-                if let (Some(h), Some(s), Some(v), Some(a)) = (h, s, v, a) {
-                    return Ok(Color::from_hsva(h, s, v, a));
+                if let (Some(h), Some((s, s_fmt)), Some((v, v_fmt)), Some((a, _))) = (h, s, v, a) {
+                    if s_fmt == v_fmt {
+                        return Ok(Color::from_hsva(h, s, v, a));
+                    }
                 }
 
                 return Err(ParseColorError::InvalidHsv);
@@ -199,10 +209,12 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 let alpha = if p_len == 4 {
                     parse_percent_or_float(params[3])
                 } else {
-                    Some(1.0)
+                    Some((1.0, true))
                 };
 
-                if let (Some(l), Some(a), Some(b), Some(alpha)) = (l, a, b, alpha) {
+                if let (Some((l, _)), Some((a, _)), Some((b, _)), Some((alpha, _))) =
+                    (l, a, b, alpha)
+                {
                     return Ok(Color::from_lab(l.max(0.0) * 100.0, a, b, alpha));
                 }
 
@@ -221,10 +233,10 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 let alpha = if p_len == 4 {
                     parse_percent_or_float(params[3])
                 } else {
-                    Some(1.0)
+                    Some((1.0, true))
                 };
 
-                if let (Some(l), Some(c), Some(h), Some(alpha)) = (l, c, h, alpha) {
+                if let (Some((l, _)), Some((c, _)), Some(h), Some((alpha, _))) = (l, c, h, alpha) {
                     return Ok(Color::from_lch(
                         l.max(0.0) * 100.0,
                         c.max(0.0),
@@ -288,16 +300,16 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     }
 }
 
-fn parse_percent_or_float(s: &str) -> Option<f64> {
+fn parse_percent_or_float(s: &str) -> Option<(f64, bool)> {
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f64| t / 100.0))
-        .or_else(|| s.parse().ok())
+        .and_then(|s| s.parse().ok().map(|t: f64| (t / 100.0, true)))
+        .or_else(|| s.parse().ok().map(|t| (t, false)))
 }
 
-fn parse_percent_or_255(s: &str) -> Option<f64> {
+fn parse_percent_or_255(s: &str) -> Option<(f64, bool)> {
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f64| t / 100.0))
-        .or_else(|| s.parse().ok().map(|t: f64| t / 255.0))
+        .and_then(|s| s.parse().ok().map(|t: f64| (t / 100.0, true)))
+        .or_else(|| s.parse().ok().map(|t: f64| (t / 255.0, false)))
 }
 
 fn parse_angle(s: &str) -> Option<f64> {

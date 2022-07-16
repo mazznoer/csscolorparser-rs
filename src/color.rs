@@ -47,19 +47,19 @@ impl Color {
 
     pub fn to_rgba8(&self) -> [u8; 4] {
         [
-            (self.r * 255.0).round() as u8,
-            (self.g * 255.0).round() as u8,
-            (self.b * 255.0).round() as u8,
-            (self.a * 255.0).round() as u8,
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+            (self.a * 255.0 + 0.5) as u8,
         ]
     }
 
     pub fn to_rgba16(&self) -> [u16; 4] {
         [
-            (self.r * 65535.0).round() as u16,
-            (self.g * 65535.0).round() as u16,
-            (self.b * 65535.0).round() as u16,
-            (self.a * 65535.0).round() as u16,
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
+            (self.a * 65535.0 + 0.5) as u16,
         ]
     }
 

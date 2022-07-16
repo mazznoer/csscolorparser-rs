@@ -212,9 +212,19 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     Some((1.0, true))
                 };
 
-                if let (Some((l, _)), Some((a, _)), Some((b, _)), Some((alpha, _))) =
+                if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt)), Some((alpha, _))) =
                     (l, a, b, alpha)
                 {
+                    let a = if a_fmt {
+                        remap(a, -1.0, 1.0, -125.0, 125.0)
+                    } else {
+                        a
+                    };
+                    let b = if b_fmt {
+                        remap(b, -1.0, 1.0, -125.0, 125.0)
+                    } else {
+                        b
+                    };
                     return Ok(Color::from_lab(l.max(0.0) * 100.0, a, b, alpha));
                 }
 
@@ -236,9 +246,12 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     Some((1.0, true))
                 };
 
-                if let (Some((l, _)), Some((c, _)), Some(h), Some((alpha, _))) = (l, c, h, alpha) {
+                if let (Some((l, _)), Some((c, c_fmt)), Some(h), Some((alpha, _))) =
+                    (l, c, h, alpha)
+                {
+                    let c = if c_fmt { c * 150.0 } else { c };
                     return Ok(Color::from_lch(
-                        l.max(0.0) * 100.0,
+                        l * 100.0,
                         c.max(0.0),
                         h.to_radians(),
                         alpha,
@@ -331,6 +344,11 @@ fn parse_angle(s: &str) -> Option<f64> {
                 .map(|t: f64| t * 360.0)
         })
         .or_else(|| s.parse().ok())
+}
+
+// Map t from range [a, b] to range [c, d]
+fn remap(t: f64, a: f64, b: f64, c: f64, d: f64) -> f64 {
+    (t - a) * ((d - c) / (b - a)) + c
 }
 
 #[cfg(test)]

@@ -356,21 +356,77 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_angle() {
-        let data = vec![
-            ("360", 360.0),
-            ("127.356", 127.356),
-            ("+120deg", 120.0),
-            ("90deg", 90.0),
-            ("-127deg", -127.0),
-            ("100grad", 90.0),
-            ("1.5707963267948966rad", 90.0),
-            ("0.25turn", 90.0),
-            ("-0.25turn", -90.0),
+    fn test_parse_percent_or_float() {
+        let test_data = [
+            ("0%", Some((0.0, true))),
+            ("100%", Some((1.0, true))),
+            ("50%", Some((0.5, true))),
+            ("0", Some((0.0, false))),
+            ("1", Some((1.0, false))),
+            ("0.5", Some((0.5, false))),
+            ("100.0", Some((100.0, false))),
+            ("-23.7", Some((-23.7, false))),
+            ("%", None),
+            ("1x", None),
         ];
-        for (s, expected) in data {
-            let c = parse_angle(s);
-            assert_eq!(Some(expected), c);
+        for (s, expected) in test_data {
+            assert_eq!(parse_percent_or_float(s), expected);
+        }
+    }
+
+    #[test]
+    fn test_parse_percent_or_255() {
+        let test_data = [
+            ("0%", Some((0.0, true))),
+            ("100%", Some((1.0, true))),
+            ("50%", Some((0.5, true))),
+            ("-100%", Some((-1.0, true))),
+            ("0", Some((0.0, false))),
+            ("255", Some((1.0, false))),
+            ("127.5", Some((0.5, false))),
+            ("%", None),
+            ("255x", None),
+        ];
+        for (s, expected) in test_data {
+            assert_eq!(parse_percent_or_255(s), expected);
+        }
+    }
+
+    #[test]
+    fn test_parse_angle() {
+        let test_data = [
+            ("360", Some(360.0)),
+            ("127.356", Some(127.356)),
+            ("+120deg", Some(120.0)),
+            ("90deg", Some(90.0)),
+            ("-127deg", Some(-127.0)),
+            ("100grad", Some(90.0)),
+            ("1.5707963267948966rad", Some(90.0)),
+            ("0.25turn", Some(90.0)),
+            ("-0.25turn", Some(-90.0)),
+            ("O", None),
+            ("Odeg", None),
+            ("rad", None),
+        ];
+        for (s, expected) in test_data {
+            assert_eq!(parse_angle(s), expected);
+        }
+    }
+
+    #[cfg(feature = "named-colors")]
+    #[test]
+    fn test_named_colors() {
+        for (&name, &rgb) in NAMED_COLORS.entries() {
+            assert_eq!(parse(name).unwrap().to_rgba8()[0..3], rgb);
+        }
+
+        let skip_list = ["aqua", "cyan", "fuchsia", "magenta"];
+
+        for &name in NAMED_COLORS.keys() {
+            if skip_list.contains(&name) || name.contains("gray") || name.contains("grey") {
+                continue;
+            }
+            assert_eq!(parse(name).unwrap().name(), Some(name));
         }
     }
 }

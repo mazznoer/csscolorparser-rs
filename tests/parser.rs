@@ -42,6 +42,24 @@ fn parser() {
     }
 }
 
+#[test]
+fn equal() {
+    let test_data = [
+        ("transparent", "rgb(0,0,0,0%)"),
+        ("#FF9900", "#f90"),
+        ("#aabbccdd", "#ABCD"),
+        ("#BAD455", "BAD455"),
+        ("rgb(0 255 127 / 75%)", "rgb(0,255,127,0.75)"),
+        ("hwb(180 0% 60%)", "hwb(180,0%,60%)"),
+        ("hwb(290 30% 0%)", "hwb(290 0.3 0)"),
+        ("hsl(180,50%,27%)", "hsl(180,0.5,0.27)"),
+    ];
+
+    for (a, b) in test_data {
+        assert_eq!(parse(a).unwrap().to_rgba8(), parse(b).unwrap().to_rgba8());
+    }
+}
+
 #[cfg(feature = "named-colors")]
 #[test]
 fn named_colors() {

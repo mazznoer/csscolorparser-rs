@@ -12,7 +12,6 @@ keywords = ["color", "colour", "css", "parser"]
 categories = ["graphics", "parser-implementations"]
 exclude = [
 	".github/*",
-	".travis.yml",
 	"tests/*",
 ]
 

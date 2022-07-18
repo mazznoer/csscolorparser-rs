@@ -1,6 +1,6 @@
 [package]
 name = "csscolorparser"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["Nor Khasyatillah <mazznoer@ymail.com>"]
 edition = "2018"
 description = "CSS color parser library"
@@ -27,7 +27,7 @@ rust-rgb = ["rgb"]
 [dependencies]
 cint = { version = "^0.3.1", optional = true }
 lab = { version = "0.11.0", optional = true }
-phf = { version = "0.10.1", optional = true, features = ["macros"] }
+phf = { version = "0.11.0", optional = true, features = ["macros"] }
 rgb = { version = "0.8.33", optional = true }
 serde = { version = "1.0.139", optional = true, features = ["derive"] }
 

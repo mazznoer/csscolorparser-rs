@@ -346,6 +346,7 @@ fn parse_angle(s: &str) -> Option<f64> {
         .or_else(|| s.parse().ok())
 }
 
+#[cfg(feature = "lab")]
 // Map t from range [a, b] to range [c, d]
 fn remap(t: f64, a: f64, b: f64, c: f64, d: f64) -> f64 {
     (t - a) * ((d - c) / (b - a)) + c

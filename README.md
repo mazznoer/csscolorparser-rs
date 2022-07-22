@@ -62,7 +62,7 @@ hsv(120deg 100% 100% / 100%)
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.6.1"
+csscolorparser = "0.6.2"
 ```
 
 ## Examples

@@ -212,9 +212,10 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     Some((1.0, true))
                 };
 
-                if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt)), Some((alpha, _))) =
+                if let (Some((l, l_fmt)), Some((a, a_fmt)), Some((b, b_fmt)), Some((alpha, _))) =
                     (l, a, b, alpha)
                 {
+                    let l = if l_fmt { l * 100.0 } else { l };
                     let a = if a_fmt {
                         remap(a, -1.0, 1.0, -125.0, 125.0)
                     } else {
@@ -225,7 +226,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     } else {
                         b
                     };
-                    return Ok(Color::from_lab(l.max(0.0) * 100.0, a, b, alpha));
+                    return Ok(Color::from_lab(l.max(0.0), a, b, alpha));
                 }
 
                 return Err(ParseColorError::InvalidLab);
@@ -246,12 +247,13 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     Some((1.0, true))
                 };
 
-                if let (Some((l, _)), Some((c, c_fmt)), Some(h), Some((alpha, _))) =
+                if let (Some((l, l_fmt)), Some((c, c_fmt)), Some(h), Some((alpha, _))) =
                     (l, c, h, alpha)
                 {
+                    let l = if l_fmt { l * 100.0 } else { l };
                     let c = if c_fmt { c * 150.0 } else { c };
                     return Ok(Color::from_lch(
-                        l * 100.0,
+                        l.max(0.0),
                         c.max(0.0),
                         h.to_radians(),
                         alpha,

@@ -297,6 +297,10 @@ impl Color {
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
+    pub fn from_oklcha(l: f64, c: f64, h: f64, alpha: f64) -> Self {
+        Self::from_oklaba(l, c * h.cos(), c * h.sin(), alpha)
+    }
+
     #[cfg(feature = "lab")]
     /// Arguments:
     ///

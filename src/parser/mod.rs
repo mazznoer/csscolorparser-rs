@@ -19,6 +19,8 @@ pub enum ParseColorError {
     InvalidLab,
     #[cfg(feature = "lab")]
     InvalidLch,
+    InvalidOklab,
+    InvalidOklch,
     InvalidFunction,
     InvalidUnknown,
 }
@@ -35,6 +37,8 @@ impl fmt::Display for ParseColorError {
             Self::InvalidLab => f.write_str("invalid lab format"),
             #[cfg(feature = "lab")]
             Self::InvalidLch => f.write_str("invalid lch format"),
+            Self::InvalidOklab => f.write_str("invalid oklab format"),
+            Self::InvalidOklch => f.write_str("invalid oklch format"),
             Self::InvalidFunction => f.write_str("invalid color function"),
             Self::InvalidUnknown => f.write_str("invalid unknown format"),
         }
@@ -262,6 +266,68 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 
                 return Err(ParseColorError::InvalidLch);
             }
+            "oklab" => {
+                if p_len != 3 && p_len != 4 {
+                    return Err(ParseColorError::InvalidOklab);
+                }
+
+                let l = parse_percent_or_float(params[0]);
+                let a = parse_percent_or_float(params[1]);
+                let b = parse_percent_or_float(params[2]);
+
+                let alpha = if p_len == 4 {
+                    parse_percent_or_float(params[3])
+                } else {
+                    Some((1.0, true))
+                };
+
+                if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt)), Some((alpha, _))) =
+                    (l, a, b, alpha)
+                {
+                    let a = if a_fmt {
+                        remap(a, -1.0, 1.0, -0.4, 0.4)
+                    } else {
+                        a
+                    };
+                    let b = if b_fmt {
+                        remap(b, -1.0, 1.0, -0.4, 0.4)
+                    } else {
+                        b
+                    };
+                    return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
+                }
+
+                return Err(ParseColorError::InvalidOklab);
+            }
+            "oklch" => {
+                if p_len != 3 && p_len != 4 {
+                    return Err(ParseColorError::InvalidOklch);
+                }
+
+                let l = parse_percent_or_float(params[0]);
+                let c = parse_percent_or_float(params[1]);
+                let h = parse_angle(params[2]);
+
+                let alpha = if p_len == 4 {
+                    parse_percent_or_float(params[3])
+                } else {
+                    Some((1.0, true))
+                };
+
+                if let (Some((l, _)), Some((c, c_fmt)), Some(h), Some((alpha, _))) =
+                    (l, c, h, alpha)
+                {
+                    let c = if c_fmt { c * 0.4 } else { c };
+                    return Ok(Color::from_oklcha(
+                        l.max(0.0),
+                        c.max(0.0),
+                        h.to_radians(),
+                        alpha,
+                    ));
+                }
+
+                return Err(ParseColorError::InvalidOklch);
+            }
             _ => {
                 return Err(ParseColorError::InvalidFunction);
             }
@@ -348,7 +414,6 @@ fn parse_angle(s: &str) -> Option<f64> {
         .or_else(|| s.parse().ok())
 }
 
-#[cfg(feature = "lab")]
 // Map t from range [a, b] to range [c, d]
 fn remap(t: f64, a: f64, b: f64, c: f64, d: f64) -> f64 {
     (t - a) * ((d - c) / (b - a)) + c

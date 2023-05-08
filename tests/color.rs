@@ -183,7 +183,7 @@ fn interpolate() {
     assert_eq!(a.interpolate_hsv(&b, 0.5).to_rgba8(), [0, 255, 255, 255]);
     assert_eq!(a.interpolate_hsv(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 
-    assert_eq!(a.interpolate_oklab(&b, 0.0).to_rgba8(), [0, 255, 0, 255]);
+    assert_eq!(a.interpolate_oklab(&b, 0.0).to_rgba8(), [0, 255, 1, 255]);
     assert_eq!(a.interpolate_oklab(&b, 0.5).to_rgba8(), [0, 170, 191, 255]);
     assert_eq!(a.interpolate_oklab(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 

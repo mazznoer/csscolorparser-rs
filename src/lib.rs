@@ -102,5 +102,8 @@
 mod color;
 mod parser;
 
+#[cfg(feature = "cint")]
+mod cint;
+
 pub use color::Color;
 pub use parser::{parse, ParseColorError};

@@ -33,7 +33,7 @@ jobs:
       id: coverage
       run: |
         cargo install cargo-tarpaulin
-        cargo tarpaulin -o lcov
+        cargo tarpaulin -o xml
 
     - name: Upload to codecov.io
       uses: codecov/codecov-action@v3

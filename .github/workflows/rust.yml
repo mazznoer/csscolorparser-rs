@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Build
       run: cargo build --verbose --all-features
@@ -31,10 +31,12 @@ jobs:
 
     - name: Tarpaulin code coverage
       id: coverage
-      uses: actions-rs/tarpaulin@v0.1
+      run: |
+        cargo install cargo-tarpaulin
+        cargo tarpaulin -o xml
 
     - name: Upload to codecov.io
-      uses: codecov/codecov-action@v1.0.2
+      uses: codecov/codecov-action@v3
       with:
         token: ${{secrets.CODECOV_TOKEN}}
 

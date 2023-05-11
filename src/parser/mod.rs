@@ -381,41 +381,41 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     }
 }
 
-fn parse_percent_or_float(s: &str) -> Option<(f64, bool)> {
+fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f64| (t / 100.0, true)))
+        .and_then(|s| s.parse().ok().map(|t: f32| (t / 100.0, true)))
         .or_else(|| s.parse().ok().map(|t| (t, false)))
 }
 
-fn parse_percent_or_255(s: &str) -> Option<(f64, bool)> {
+fn parse_percent_or_255(s: &str) -> Option<(f32, bool)> {
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f64| (t / 100.0, true)))
-        .or_else(|| s.parse().ok().map(|t: f64| (t / 255.0, false)))
+        .and_then(|s| s.parse().ok().map(|t: f32| (t / 100.0, true)))
+        .or_else(|| s.parse().ok().map(|t: f32| (t / 255.0, false)))
 }
 
-fn parse_angle(s: &str) -> Option<f64> {
+fn parse_angle(s: &str) -> Option<f32> {
     s.strip_suffix("deg")
         .and_then(|s| s.parse().ok())
         .or_else(|| {
             s.strip_suffix("grad")
                 .and_then(|s| s.parse().ok())
-                .map(|t: f64| t * 360.0 / 400.0)
+                .map(|t: f32| t * 360.0 / 400.0)
         })
         .or_else(|| {
             s.strip_suffix("rad")
                 .and_then(|s| s.parse().ok())
-                .map(|t: f64| t.to_degrees())
+                .map(|t: f32| t.to_degrees())
         })
         .or_else(|| {
             s.strip_suffix("turn")
                 .and_then(|s| s.parse().ok())
-                .map(|t: f64| t * 360.0)
+                .map(|t: f32| t * 360.0)
         })
         .or_else(|| s.parse().ok())
 }
 
 // Map t from range [a, b] to range [c, d]
-fn remap(t: f64, a: f64, b: f64, c: f64, d: f64) -> f64 {
+fn remap(t: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
     (t - a) * ((d - c) / (b - a)) + c
 }
 

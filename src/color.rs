@@ -6,8 +6,12 @@ use std::str::FromStr;
 
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+#[cfg(feature = "lab")]
+use lab::{LCh, Lab};
 
 use crate::{parse, ParseColorError};
 
@@ -310,22 +314,22 @@ impl Color {
     /// * `b`: Distance along the `b` axis
     /// * `alpha`: Alpha [0..1]
     pub fn from_lab(l: f32, a: f32, b: f32, alpha: f32) -> Self {
-        let [r, g, b] = lab::Lab { l, a, b }.to_rgb_normalized();
+        let [r, g, b] = Lab { l, a, b }.to_rgb_normalized();
         Self::new(r, g, b, alpha)
     }
 
     #[cfg(feature = "lab")]
-    /// Returns: `(l, a, b, alpha)`
-    pub fn to_lab(&self) -> (f32, f32, f32, f32) {
-        let lab = lab::Lab::from_rgb_normalized(&[self.r, self.g, self.b]);
-        (lab.l, lab.a, lab.b, self.a)
+    /// Returns: `[l, a, b, alpha]`
+    pub fn to_lab(&self) -> [f32; 4] {
+        let Lab { l, a, b } = Lab::from_rgb_normalized(&[self.r, self.g, self.b]);
+        [l, a, b, self.a]
     }
 
     #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
     pub fn interpolate_lab(&self, other: &Color, t: f32) -> Self {
-        let (l1, a1, b1, alpha1) = self.to_lab();
-        let (l2, a2, b2, alpha2) = other.to_lab();
+        let [l1, a1, b1, alpha1] = self.to_lab();
+        let [l2, a2, b2, alpha2] = other.to_lab();
         Self::from_lab(
             l1 + t * (l2 - l1),
             a1 + t * (a2 - a1),
@@ -342,22 +346,22 @@ impl Color {
     /// * `h`: Hue angle in radians
     /// * `alpha`: Alpha [0..1]
     pub fn from_lch(l: f32, c: f32, h: f32, alpha: f32) -> Self {
-        let [r, g, b] = lab::LCh { l, c, h }.to_lab().to_rgb_normalized();
+        let [r, g, b] = LCh { l, c, h }.to_lab().to_rgb_normalized();
         Self::new(r, g, b, alpha)
     }
 
     #[cfg(feature = "lab")]
-    /// Returns: `(l, c, h, alpha)`
-    pub fn to_lch(&self) -> (f32, f32, f32, f32) {
-        let lch = lab::LCh::from_lab(lab::Lab::from_rgb_normalized(&[self.r, self.g, self.b]));
-        (lch.l, lch.c, lch.h, self.a)
+    /// Returns: `[l, c, h, alpha]`
+    pub fn to_lch(&self) -> [f32; 4] {
+        let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[self.r, self.g, self.b]));
+        [l, c, h, self.a]
     }
 
     #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
     pub fn interpolate_lch(&self, other: &Color, t: f32) -> Self {
-        let (l1, c1, h1, alpha1) = self.to_lch();
-        let (l2, c2, h2, alpha2) = other.to_lch();
+        let [l1, c1, h1, alpha1] = self.to_lch();
+        let [l2, c2, h2, alpha2] = other.to_lch();
         Self::from_lch(
             l1 + t * (l2 - l1),
             c1 + t * (c2 - c1),
@@ -419,81 +423,81 @@ impl Color {
         )
     }
 
-    /// Returns: `(h, s, v, a)`
+    /// Returns: `[h, s, v, a]`
     ///
     /// * `h`: Hue angle [0..360]
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn to_hsva(&self) -> (f32, f32, f32, f32) {
+    pub fn to_hsva(&self) -> [f32; 4] {
         let (h, s, v) = rgb_to_hsv(self.r, self.g, self.b);
-        (h, s, v, self.a)
+        [h, s, v, self.a]
     }
 
-    /// Returns: `(h, s, l, a)`
+    /// Returns: `[h, s, l, a]`
     ///
     /// * `h`: Hue angle [0..360]
     /// * `s`: Saturation [0..1]
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn to_hsla(&self) -> (f32, f32, f32, f32) {
+    pub fn to_hsla(&self) -> [f32; 4] {
         let (h, s, l) = rgb_to_hsl(self.r, self.g, self.b);
-        (h, s, l, self.a)
+        [h, s, l, self.a]
     }
 
-    /// Returns: `(h, w, b, a)`
+    /// Returns: `[h, w, b, a]`
     ///
     /// * `h`: Hue angle [0..360]
     /// * `w`: Whiteness [0..1]
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn to_hwba(&self) -> (f32, f32, f32, f32) {
+    pub fn to_hwba(&self) -> [f32; 4] {
         let (h, w, b) = rgb_to_hwb(self.r, self.g, self.b);
-        (h, w, b, self.a)
+        [h, w, b, self.a]
     }
 
-    /// Returns: `(r, g, b, a)`
+    /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..1]
-    pub fn to_linear_rgba(&self) -> (f32, f32, f32, f32) {
+    pub fn to_linear_rgba(&self) -> [f32; 4] {
         fn to_linear(x: f32) -> f32 {
             if x >= 0.04045 {
                 return ((x + 0.055) / 1.055).powf(2.4);
             }
             x / 12.92
         }
-        (
+        [
             to_linear(self.r),
             to_linear(self.g),
             to_linear(self.b),
             self.a,
-        )
+        ]
     }
 
-    /// Returns: `(r, g, b, a)`
+    /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
-    pub fn to_linear_rgba_u8(&self) -> (u8, u8, u8, u8) {
-        let (r, g, b, a) = self.to_linear_rgba();
-        (
+    pub fn to_linear_rgba_u8(&self) -> [u8; 4] {
+        let [r, g, b, a] = self.to_linear_rgba();
+        [
             (r * 255.0).round() as u8,
             (g * 255.0).round() as u8,
             (b * 255.0).round() as u8,
             (a * 255.0).round() as u8,
-        )
+        ]
     }
 
-    /// Returns: `(l, a, b, alpha)`
+    /// Returns: `[l, a, b, alpha]`
     #[allow(clippy::excessive_precision)]
-    pub fn to_oklaba(&self) -> (f32, f32, f32, f32) {
-        let (r, g, b, _) = self.to_linear_rgba();
+    pub fn to_oklaba(&self) -> [f32; 4] {
+        let [r, g, b, _] = self.to_linear_rgba();
         let l_ = (0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b).cbrt();
         let m_ = (0.2118591070 * r + 0.6807189584 * g + 0.1074065790 * b).cbrt();
         let s_ = (0.0883097947 * r + 0.2818474174 * g + 0.6302613616 * b).cbrt();
         let l = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
         let a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
         let b = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
-        (l, a, b, self.a)
+        [l, a, b, self.a]
     }
 
     /// Get the RGB hexadecimal color string.
@@ -530,8 +534,8 @@ impl Color {
 
     /// Blend this color with the other one, in the linear RGB color-space. `t` in the range [0..1].
     pub fn interpolate_linear_rgb(&self, other: &Color, t: f32) -> Self {
-        let (r1, g1, b1, a1) = self.to_linear_rgba();
-        let (r2, g2, b2, a2) = other.to_linear_rgba();
+        let [r1, g1, b1, a1] = self.to_linear_rgba();
+        let [r2, g2, b2, a2] = other.to_linear_rgba();
         Self::from_linear_rgba(
             r1 + t * (r2 - r1),
             g1 + t * (g2 - g1),
@@ -542,8 +546,8 @@ impl Color {
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].
     pub fn interpolate_hsv(&self, other: &Color, t: f32) -> Self {
-        let (h1, s1, v1, a1) = self.to_hsva();
-        let (h2, s2, v2, a2) = other.to_hsva();
+        let [h1, s1, v1, a1] = self.to_hsva();
+        let [h2, s2, v2, a2] = other.to_hsva();
         Self::from_hsva(
             interp_angle(h1, h2, t),
             s1 + t * (s2 - s1),
@@ -554,8 +558,8 @@ impl Color {
 
     /// Blend this color with the other one, in the [Oklab](https://bottosson.github.io/posts/oklab/) color-space. `t` in the range [0..1].
     pub fn interpolate_oklab(&self, other: &Color, t: f32) -> Self {
-        let (l1, a1, b1, alpha1) = self.to_oklaba();
-        let (l2, a2, b2, alpha2) = other.to_oklaba();
+        let [l1, a1, b1, alpha1] = self.to_oklaba();
+        let [l2, a2, b2, alpha2] = other.to_oklaba();
         Self::from_oklaba(
             l1 + t * (l2 - l1),
             a1 + t * (a2 - a1),

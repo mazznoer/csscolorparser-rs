@@ -11,11 +11,11 @@ fn basic() {
     assert_eq!(c.to_hex_string(), "#ff0000");
     assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
     assert_eq!(c.to_string(), "RGBA(1,0,0,1)");
-    assert_eq!(c.to_hsva(), (0.0, 1.0, 1.0, 1.0));
-    assert_eq!(c.to_hsla(), (0.0, 1.0, 0.5, 1.0));
-    assert_eq!(c.to_hwba(), (0.0, 0.0, 0.0, 1.0));
-    assert_eq!(c.to_linear_rgba(), (1.0, 0.0, 0.0, 1.0));
-    assert_eq!(c.to_linear_rgba_u8(), (255, 0, 0, 255));
+    assert_eq!(c.to_hsva(), [0.0, 1.0, 1.0, 1.0]);
+    assert_eq!(c.to_hsla(), [0.0, 1.0, 0.5, 1.0]);
+    assert_eq!(c.to_hwba(), [0.0, 0.0, 0.0, 1.0]);
+    assert_eq!(c.to_linear_rgba(), [1.0, 0.0, 0.0, 1.0]);
+    assert_eq!(c.to_linear_rgba_u8(), [255, 0, 0, 255]);
 
     let c = Color::new(1.0, 0.0, 0.0, 0.5);
     assert_eq!(c.to_rgba8(), [255, 0, 0, 128]);
@@ -24,24 +24,24 @@ fn basic() {
     assert_eq!(c.to_string(), "RGBA(1,0,0,0.5)");
 
     let c = Color::new(0.0, 1.0, 0.0, 1.0);
-    assert_eq!(c.to_hsva(), (120.0, 1.0, 1.0, 1.0));
-    assert_eq!(c.to_hsla(), (120.0, 1.0, 0.5, 1.0));
-    assert_eq!(c.to_hwba(), (120.0, 0.0, 0.0, 1.0));
+    assert_eq!(c.to_hsva(), [120.0, 1.0, 1.0, 1.0]);
+    assert_eq!(c.to_hsla(), [120.0, 1.0, 0.5, 1.0]);
+    assert_eq!(c.to_hwba(), [120.0, 0.0, 0.0, 1.0]);
 
     let c = Color::new(0.0, 0.0, 1.0, 1.0);
-    assert_eq!(c.to_hsva(), (240.0, 1.0, 1.0, 1.0));
-    assert_eq!(c.to_hsla(), (240.0, 1.0, 0.5, 1.0));
-    assert_eq!(c.to_hwba(), (240.0, 0.0, 0.0, 1.0));
+    assert_eq!(c.to_hsva(), [240.0, 1.0, 1.0, 1.0]);
+    assert_eq!(c.to_hsla(), [240.0, 1.0, 0.5, 1.0]);
+    assert_eq!(c.to_hwba(), [240.0, 0.0, 0.0, 1.0]);
 
     let c = Color::new(0.0, 0.0, 0.6, 1.0);
-    assert_eq!(c.to_hsva(), (240.0, 1.0, 0.6, 1.0));
-    assert_eq!(c.to_hsla(), (240.0, 1.0, 0.3, 1.0));
-    //assert_eq!(c.to_hwba(), (240.0, 0.0, 0.4, 1.0));
+    assert_eq!(c.to_hsva(), [240.0, 1.0, 0.6, 1.0]);
+    assert_eq!(c.to_hsla(), [240.0, 1.0, 0.3, 1.0]);
+    //assert_eq!(c.to_hwba(), [240.0, 0.0, 0.4, 1.0]);
 
     let c = Color::new(0.5, 0.5, 0.5, 1.0);
-    assert_eq!(c.to_hsva(), (0.0, 0.0, 0.5, 1.0));
-    assert_eq!(c.to_hsla(), (0.0, 0.0, 0.5, 1.0));
-    assert_eq!(c.to_hwba(), (0.0, 0.5, 0.5, 1.0));
+    assert_eq!(c.to_hsva(), [0.0, 0.0, 0.5, 1.0]);
+    assert_eq!(c.to_hsla(), [0.0, 0.0, 0.5, 1.0]);
+    assert_eq!(c.to_hwba(), [0.0, 0.5, 0.5, 1.0]);
 
     #[cfg(feature = "lab")]
     {

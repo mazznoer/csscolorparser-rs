@@ -45,16 +45,16 @@ fn basic() {
 
     #[cfg(feature = "lab")]
     {
-        let c = Color::from_lab(0.0, 0.0, 0.0, 1.0);
+        let c = Color::from_laba(0.0, 0.0, 0.0, 1.0);
         assert_eq!(c.to_rgba8(), [0, 0, 0, 255]);
 
-        let c = Color::from_lab(100.0, 0.0, 0.0, 1.0);
+        let c = Color::from_laba(100.0, 0.0, 0.0, 1.0);
         assert_eq!(c.to_rgba8(), [255, 255, 255, 255]);
 
-        let c = Color::from_lch(0.0, 0.0, 0.0, 1.0);
+        let c = Color::from_lcha(0.0, 0.0, 0.0, 1.0);
         assert_eq!(c.to_rgba8(), [0, 0, 0, 255]);
 
-        let c = Color::from_lch(100.0, 0.0, 0.0, 1.0);
+        let c = Color::from_lcha(100.0, 0.0, 0.0, 1.0);
         assert_eq!(c.to_rgba8(), [255, 255, 255, 255]);
     }
 

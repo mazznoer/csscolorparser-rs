@@ -230,7 +230,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     } else {
                         b
                     };
-                    return Ok(Color::from_lab(l.max(0.0), a, b, alpha));
+                    return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
                 }
 
                 return Err(ParseColorError::InvalidLab);
@@ -256,7 +256,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 {
                     let l = if l_fmt { l * 100.0 } else { l };
                     let c = if c_fmt { c * 150.0 } else { c };
-                    return Ok(Color::from_lch(
+                    return Ok(Color::from_lcha(
                         l.max(0.0),
                         c.max(0.0),
                         h.to_radians(),

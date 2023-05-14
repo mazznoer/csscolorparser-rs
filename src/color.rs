@@ -313,24 +313,36 @@ impl Color {
     /// * `a`: Distance along the `a` axis
     /// * `b`: Distance along the `b` axis
     /// * `alpha`: Alpha [0..1]
-    pub fn from_lab(l: f32, a: f32, b: f32, alpha: f32) -> Self {
+    pub fn from_laba(l: f32, a: f32, b: f32, alpha: f32) -> Self {
         let [r, g, b] = Lab { l, a, b }.to_rgb_normalized();
         Self::new(r, g, b, alpha)
     }
 
     #[cfg(feature = "lab")]
+    #[deprecated = "Use [from_laba](#method.from_laba) instead."]
+    pub fn from_lab(l: f32, a: f32, b: f32, alpha: f32) -> Self {
+        Self::from_laba(l, a, b, alpha)
+    }
+
+    #[cfg(feature = "lab")]
     /// Returns: `[l, a, b, alpha]`
-    pub fn to_lab(&self) -> [f32; 4] {
+    pub fn to_laba(&self) -> [f32; 4] {
         let Lab { l, a, b } = Lab::from_rgb_normalized(&[self.r, self.g, self.b]);
         [l, a, b, self.a]
     }
 
     #[cfg(feature = "lab")]
+    #[deprecated = "Use [to_laba](#method.to_laba) instead."]
+    pub fn to_lab(&self) -> [f32; 4] {
+        self.to_laba()
+    }
+
+    #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
     pub fn interpolate_lab(&self, other: &Color, t: f32) -> Self {
-        let [l1, a1, b1, alpha1] = self.to_lab();
-        let [l2, a2, b2, alpha2] = other.to_lab();
-        Self::from_lab(
+        let [l1, a1, b1, alpha1] = self.to_laba();
+        let [l2, a2, b2, alpha2] = other.to_laba();
+        Self::from_laba(
             l1 + t * (l2 - l1),
             a1 + t * (a2 - a1),
             b1 + t * (b2 - b1),
@@ -345,24 +357,36 @@ impl Color {
     /// * `c`: Chroma
     /// * `h`: Hue angle in radians
     /// * `alpha`: Alpha [0..1]
-    pub fn from_lch(l: f32, c: f32, h: f32, alpha: f32) -> Self {
+    pub fn from_lcha(l: f32, c: f32, h: f32, alpha: f32) -> Self {
         let [r, g, b] = LCh { l, c, h }.to_lab().to_rgb_normalized();
         Self::new(r, g, b, alpha)
     }
 
     #[cfg(feature = "lab")]
+    #[deprecated = "Use [from_lcha](#method.from_lcha) instead."]
+    pub fn from_lch(l: f32, c: f32, h: f32, alpha: f32) -> Self {
+        Self::from_lcha(l, c, h, alpha)
+    }
+
+    #[cfg(feature = "lab")]
     /// Returns: `[l, c, h, alpha]`
-    pub fn to_lch(&self) -> [f32; 4] {
+    pub fn to_lcha(&self) -> [f32; 4] {
         let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[self.r, self.g, self.b]));
         [l, c, h, self.a]
     }
 
     #[cfg(feature = "lab")]
+    #[deprecated = "Use [to_lcha](#method.to_lcha) instead."]
+    pub fn to_lch(&self) -> [f32; 4] {
+        self.to_lcha()
+    }
+
+    #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
     pub fn interpolate_lch(&self, other: &Color, t: f32) -> Self {
-        let [l1, c1, h1, alpha1] = self.to_lch();
-        let [l2, c2, h2, alpha2] = other.to_lch();
-        Self::from_lch(
+        let [l1, c1, h1, alpha1] = self.to_lcha();
+        let [l2, c2, h2, alpha2] = other.to_lcha();
+        Self::from_lcha(
             l1 + t * (l2 - l1),
             c1 + t * (c2 - c1),
             interp_angle_rad(h1, h2, t),

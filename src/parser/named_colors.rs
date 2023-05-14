@@ -1,6 +1,6 @@
 // https://www.w3.org/TR/css-color-4/#named-colors
 
-pub(crate) static NAMED_COLORS: phf::Map<&'static str, [u8; 3]> = phf::phf_map! {
+pub static NAMED_COLORS: phf::Map<&'static str, [u8; 3]> = phf::phf_map! {
     "aliceblue" => [240, 248, 255],
     "antiquewhite" => [250, 235, 215],
     "aqua" => [0, 255, 255],

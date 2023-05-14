@@ -107,3 +107,6 @@ mod cint;
 
 pub use color::Color;
 pub use parser::{parse, ParseColorError};
+
+#[cfg(feature = "named-colors")]
+pub use parser::NAMED_COLORS;

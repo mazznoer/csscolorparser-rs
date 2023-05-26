@@ -1,11 +1,23 @@
-# Rust CSS Color Parser Library
+<p align="center">
+<strong>Rust CSS Color Parser Library</strong>
+</p>
 
-[![License](https://img.shields.io/crates/l/csscolorparser)](https://github.com/mazznoer/csscolorparser-rs)
-[![crates.io](https://img.shields.io/crates/v/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
-[![Documentation](https://docs.rs/csscolorparser/badge.svg)](https://docs.rs/csscolorparser)
-[![Build Status](https://github.com/mazznoer/csscolorparser-rs/workflows/Rust/badge.svg)](https://github.com/mazznoer/csscolorparser-rs/actions)
-[![codecov](https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg)](https://codecov.io/gh/mazznoer/csscolorparser-rs)
-[![Total Downloads](https://img.shields.io/crates/d/csscolorparser.svg)](https://crates.io/crates/csscolorparser)
+<p align="center">
+<a href="https://github.com/mazznoer/csscolorparser-rs"><img alt="License" src="https://img.shields.io/crates/l/csscolorparser"></a>
+<a href="https://crates.io/crates/csscolorparser"><img alt="crates.io" src="https://img.shields.io/crates/v/csscolorparser.svg"></a>
+<a href="https://docs.rs/csscolorparser"><img alt="Documentation" src="https://docs.rs/csscolorparser/badge.svg"></a>
+<a href="https://github.com/mazznoer/csscolorparser-rs/actions"><img alt="Build Status" src="https://github.com/mazznoer/csscolorparser-rs/workflows/Rust/badge.svg"></a>
+<a href="https://codecov.io/gh/mazznoer/csscolorparser-rs"><img alt="codecov" src="https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg"></a>
+<a href="https://crates.io/crates/csscolorparser"><img alt="Total Downloads" src="https://img.shields.io/crates/d/csscolorparser.svg"></a>
+</p>
+
+<p align="center">
+    <strong>
+        <a href="https://docs.rs/csscolorparser">Documentation</a> • <a href="CHANGELOG.md">Changelog</a> • <a href="#features">Features</a>
+    </strong>
+</p>
+
+<hr>
 
 [Rust](https://www.rust-lang.org/) library for parsing CSS color string as defined in the W3C's [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/).
 
@@ -29,7 +41,7 @@
 <details>
 <summary>Click to expand!</summary>
 
-```text
+```css
 transparent
 gold
 rebeccapurple
@@ -89,11 +101,13 @@ assert_eq!(c.to_rgba8(), [255, 0, 0, 127]);
 assert_eq!(c.to_hex_string(), "#ff00007f");
 ```
 
-## Default Feature
+## Features
+
+### Default
 
 * __named-colors__: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf). Can be disabled using `default-features = false`.
 
-## Optional Features
+### Optional
 
 * __lab__: Enables parsing `lab()` and `lch()` color format.
 * __rust-rgb__: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.

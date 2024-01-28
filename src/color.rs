@@ -49,12 +49,28 @@ impl Color {
         [self.r, self.g, self.b, self.a]
     }
 
+    pub fn to_rgb8(&self) -> [u8; 3] {
+        [
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+        ]
+    }
+
     pub fn to_rgba8(&self) -> [u8; 4] {
         [
             (self.r * 255.0 + 0.5) as u8,
             (self.g * 255.0 + 0.5) as u8,
             (self.b * 255.0 + 0.5) as u8,
             (self.a * 255.0 + 0.5) as u8,
+        ]
+    }
+
+    pub fn to_rgb16(&self) -> [u16; 3] {
+        [
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
         ]
     }
 
@@ -483,6 +499,23 @@ impl Color {
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..1]
+    pub fn to_linear_rgb(&self) -> [f32; 3] {
+        fn to_linear(x: f32) -> f32 {
+            if x >= 0.04045 {
+                return ((x + 0.055) / 1.055).powf(2.4);
+            }
+            x / 12.92
+        }
+        [
+            to_linear(self.r),
+            to_linear(self.g),
+            to_linear(self.b),
+        ]
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
     pub fn to_linear_rgba(&self) -> [f32; 4] {
         fn to_linear(x: f32) -> f32 {
             if x >= 0.04045 {
@@ -495,6 +528,18 @@ impl Color {
             to_linear(self.g),
             to_linear(self.b),
             self.a,
+        ]
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
+    pub fn to_linear_rgb_u8(&self) -> [u8; 3] {
+        let [r, g, b] = self.to_linear_rgb();
+        [
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
         ]
     }
 

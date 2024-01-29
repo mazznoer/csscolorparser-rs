@@ -730,6 +730,22 @@ impl Color {
             alpha1 + t * (alpha2 - alpha1),
         )
     }
+
+    /// Lighten this color using HSLA
+    pub fn lighten(&self, amount: f32) -> Self {
+        let [h, s, mut l, a] = self.to_hsla();
+        l += amount / 100.0;
+        l = clamp0_1(l);
+        Self::from_hsla(h, s, l, a)
+    }
+
+    /// Darken this color using HSLA
+    pub fn darken(&self, amount: f32) -> Self {
+        let [h, s, mut l, a] = self.to_hsla();
+        l -= amount / 100.0;
+        l = clamp0_1(l);
+        Self::from_hsla(h, s, l, a)
+    }
 }
 
 impl Default for Color {

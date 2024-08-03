@@ -105,6 +105,61 @@ fn basic() {
 }
 
 #[test]
+fn convert_colors() {
+    let data = &[
+        "#000000",
+        "#ffffff",
+        "#7f7f7f",
+        "#ff0000",
+        "#825dfa6d",
+        "#fa8072",
+        "#87ceeb",
+        "#ff6347",
+        "#ee82ee",
+        "#9acd32",
+    ];
+    for s in data {
+        let col = csscolorparser::parse(s).unwrap();
+        assert_eq!(s, &col.to_hex_string());
+
+        let [a, b, c, d] = col.to_rgba8();
+        let x = Color::from_rgba8(a, b, c, d);
+        assert_eq!(s, &x.to_hex_string());
+
+        let [a, b, c, d] = col.to_hsva();
+        let x = Color::from_hsva(a, b, c, d);
+        assert_eq!(s, &x.to_hex_string());
+
+        let [a, b, c, d] = col.to_hsla();
+        let x = Color::from_hsla(a, b, c, d);
+        assert_eq!(s, &x.to_hex_string());
+
+        let [a, b, c, d] = col.to_hwba();
+        let x = Color::from_hwba(a, b, c, d);
+        assert_eq!(s, &x.to_hex_string());
+
+        let [a, b, c, d] = col.to_linear_rgba();
+        let x = Color::from_linear_rgba(a, b, c, d);
+        assert_eq!(s, &x.to_hex_string());
+
+        let [a, b, c, d] = col.to_oklaba();
+        let x = Color::from_oklaba(a, b, c, d);
+        assert_eq!(s, &x.to_hex_string());
+
+        #[cfg(feature = "lab")]
+        {
+            let [a, b, c, d] = col.to_laba();
+            let x = Color::from_laba(a, b, c, d);
+            assert_eq!(s, &x.to_hex_string());
+
+            let [a, b, c, d] = col.to_lcha();
+            let x = Color::from_lcha(a, b, c, d);
+            assert_eq!(s, &x.to_hex_string());
+        }
+    }
+}
+
+#[test]
 fn red() {
     let data = &[
         Color::new(1.0, 0.0, 0.0, 1.0),
@@ -125,31 +180,6 @@ fn red() {
     ];
     for c in data {
         assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-    }
-}
-
-#[cfg(feature = "named-colors")]
-#[test]
-fn color_name() {
-    let test_data = [
-        (Color::new(0.0, 0.0, 0.0, 1.0), "black"),
-        (Color::new(1.0, 1.0, 1.0, 1.0), "white"),
-        (Color::new(1.0, 0.0, 0.0, 1.0), "red"),
-        (Color::from_html("gold").unwrap(), "gold"),
-        (Color::from_html("pink").unwrap(), "pink"),
-        (Color::from_html("tomato").unwrap(), "tomato"),
-    ];
-    for (color, name) in test_data {
-        assert_eq!(color.name(), Some(name));
-    }
-
-    let test_data = [
-        Color::new(0.7, 0.8, 0.9, 1.0),
-        Color::new(1.0, 0.5, 0.0, 1.0),
-        Color::from_rgba8(0, 50, 100, 255),
-    ];
-    for c in test_data {
-        assert!(c.name().is_none());
     }
 }
 

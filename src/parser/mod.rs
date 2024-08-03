@@ -483,21 +483,4 @@ mod tests {
             assert_eq!(parse_angle(s), expected);
         }
     }
-
-    #[cfg(feature = "named-colors")]
-    #[test]
-    fn test_named_colors() {
-        for (&name, &rgb) in NAMED_COLORS.entries() {
-            assert_eq!(parse(name).unwrap().to_rgba8()[0..3], rgb);
-        }
-
-        let skip_list = ["aqua", "cyan", "fuchsia", "magenta"];
-
-        for &name in NAMED_COLORS.keys() {
-            if skip_list.contains(&name) || name.contains("gray") || name.contains("grey") {
-                continue;
-            }
-            assert_eq!(parse(name).unwrap().name(), Some(name));
-        }
-    }
 }

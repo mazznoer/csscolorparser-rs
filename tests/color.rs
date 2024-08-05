@@ -106,17 +106,46 @@ fn basic() {
 
 #[test]
 fn convert_colors() {
+    let colors = &[
+        //Color::new(1.0, 0.7, 0.1, 1.0), //
+        Color::from_rgba8(255, 179, 26, 255),
+        Color::from_rgba8(10, 255, 125, 0),
+        Color::from_linear_rgba(0.1, 0.9, 1.0, 1.0),
+        Color::from_hwba(0.0, 0.0, 0.0, 1.0),
+        Color::from_hwba(320.0, 0.1, 0.3, 1.0),
+        Color::from_hsva(120.0, 0.3, 0.2, 0.1),
+        Color::from_hsla(120.0, 0.3, 0.2, 1.0),
+    ];
+    for (i, col) in colors.iter().enumerate() {
+        println!("{i} -> {}, {}", &col.to_hex_string(), &col.to_rgb_string());
+
+        let [a, b, c, d] = col.to_linear_rgba();
+        let x = Color::from_linear_rgba(a, b, c, d);
+        assert_eq!(&col.to_hex_string(), &x.to_hex_string());
+
+        let [a, b, c, d] = col.to_oklaba();
+        let x = Color::from_oklaba(a, b, c, d);
+        assert_eq!(&col.to_hex_string(), &x.to_hex_string());
+    }
+
     let data = &[
         "#000000",
         "#ffffff",
+        "#999999",
         "#7f7f7f",
         "#ff0000",
-        "#825dfa6d",
         "#fa8072",
         "#87ceeb",
         "#ff6347",
         "#ee82ee",
         "#9acd32",
+        "#0aff7d",
+        "#09ff7d",
+        "#ffb31a",
+        "#0aff7d",
+        "#09ff7d",
+        "#825dfa6d",
+        "#abc5679b",
     ];
     for s in data {
         let col = csscolorparser::parse(s).unwrap();
@@ -213,7 +242,7 @@ fn interpolate() {
     assert_eq!(a.interpolate_hsv(&b, 0.5).to_rgba8(), [0, 255, 255, 255]);
     assert_eq!(a.interpolate_hsv(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 
-    assert_eq!(a.interpolate_oklab(&b, 0.0).to_rgba8(), [0, 255, 1, 255]);
+    assert_eq!(a.interpolate_oklab(&b, 0.0).to_rgba8(), [0, 255, 0, 255]);
     assert_eq!(a.interpolate_oklab(&b, 0.5).to_rgba8(), [0, 170, 191, 255]);
     assert_eq!(a.interpolate_oklab(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 

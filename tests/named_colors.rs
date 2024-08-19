@@ -1,6 +1,5 @@
 use csscolorparser::Color;
 
-#[cfg(feature = "named-colors")]
 #[test]
 fn named_colors() {
     let skip_list = ["aqua", "cyan", "fuchsia", "magenta"];

@@ -8,7 +8,7 @@ use std::str::FromStr;
 use rgb::{RGB, RGBA};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(feature = "lab")]
 use lab::{LCh, Lab};
@@ -724,8 +724,26 @@ impl Serialize for Color {
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Color {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let string = String::deserialize(deserializer)?;
-        Self::from_str(&string).map_err(serde::de::Error::custom)
+        deserializer.deserialize_str(ColorVisitor)
+    }
+}
+
+#[cfg(feature = "serde")]
+struct ColorVisitor;
+
+#[cfg(feature = "serde")]
+impl Visitor<'_> for ColorVisitor {
+    type Value = Color;
+
+    fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("a valid css color")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Color::from_str(v).map_err(serde::de::Error::custom)
     }
 }
 

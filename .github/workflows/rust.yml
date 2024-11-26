@@ -27,7 +27,7 @@ jobs:
         cargo build --verbose --all-features
     - uses: taiki-e/install-action@cargo-hack
     - run: |
-        cargo hack build --no-private --feature-powerset --no-dev-deps
+        cargo hack build --no-private --feature-powerset --no-dev-deps --optional-deps cint lab serde
 
     - name: Run tests
       run: |

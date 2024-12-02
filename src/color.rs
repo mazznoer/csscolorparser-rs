@@ -8,7 +8,7 @@ use std::str::FromStr;
 use rgb::{RGB, RGBA};
 
 #[cfg(feature = "serde")]
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(feature = "lab")]
 use lab::{LCh, Lab};
@@ -654,9 +654,9 @@ impl Color {
     #[allow(clippy::excessive_precision)]
     pub fn to_oklaba(&self) -> [f32; 4] {
         let [r, g, b, _] = self.to_linear_rgba();
-        let l_ = (0.4121656120 * r + 0.5362752080 * g + 0.0514575653 * b).cbrt();
-        let m_ = (0.2118591070 * r + 0.6807189584 * g + 0.1074065790 * b).cbrt();
-        let s_ = (0.0883097947 * r + 0.2818474174 * g + 0.6302613616 * b).cbrt();
+        let l_ = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b).cbrt();
+        let m_ = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b).cbrt();
+        let s_ = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b).cbrt();
         let l = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
         let a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
         let b = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
@@ -879,8 +879,26 @@ impl Serialize for Color {
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Color {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let string = String::deserialize(deserializer)?;
-        Self::from_str(&string).map_err(serde::de::Error::custom)
+        deserializer.deserialize_str(ColorVisitor)
+    }
+}
+
+#[cfg(feature = "serde")]
+struct ColorVisitor;
+
+#[cfg(feature = "serde")]
+impl Visitor<'_> for ColorVisitor {
+    type Value = Color;
+
+    fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("a valid css color")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Color::from_str(v).map_err(serde::de::Error::custom)
     }
 }
 

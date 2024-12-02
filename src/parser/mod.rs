@@ -349,16 +349,19 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
 
     let n = s.len();
 
+    fn parse_single_digit(digit: &str) -> Result<u8, ParseColorError> {
+        u8::from_str_radix(digit, 16)
+            .map(|n| (n << 4) | n)
+            .map_err(|_| ParseColorError::InvalidHex)
+    }
+
     if n == 3 || n == 4 {
-        let r =
-            u8::from_str_radix(&s[0..1].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
-        let g =
-            u8::from_str_radix(&s[1..2].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
-        let b =
-            u8::from_str_radix(&s[2..3].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?;
+        let r = parse_single_digit(&s[0..1])?;
+        let g = parse_single_digit(&s[1..2])?;
+        let b = parse_single_digit(&s[2..3])?;
 
         let a = if n == 4 {
-            u8::from_str_radix(&s[3..4].repeat(2), 16).map_err(|_| ParseColorError::InvalidHex)?
+            parse_single_digit(&s[3..4])?
         } else {
             255
         };
@@ -478,23 +481,6 @@ mod tests {
         ];
         for (s, expected) in test_data {
             assert_eq!(parse_angle(s), expected);
-        }
-    }
-
-    #[cfg(feature = "named-colors")]
-    #[test]
-    fn test_named_colors() {
-        for (&name, &rgb) in NAMED_COLORS.entries() {
-            assert_eq!(parse(name).unwrap().to_rgba8()[0..3], rgb);
-        }
-
-        let skip_list = ["aqua", "cyan", "fuchsia", "magenta"];
-
-        for &name in NAMED_COLORS.keys() {
-            if skip_list.contains(&name) || name.contains("gray") || name.contains("grey") {
-                continue;
-            }
-            assert_eq!(parse(name).unwrap().name(), Some(name));
         }
     }
 }

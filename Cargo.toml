@@ -1,6 +1,6 @@
 [package]
 name = "csscolorparser"
-version = "0.6.2"
+version = "0.7.0"
 authors = ["Nor Khasyatillah <mazznoer@ymail.com>"]
 edition = "2018"
 description = "CSS color parser library"
@@ -22,6 +22,10 @@ features = ["named-colors", "lab", "rust-rgb", "cint", "serde"]
 default = ["named-colors"]
 named-colors = ["phf"]
 rust-rgb = ["rgb"]
+
+[[test]]
+name = "named_colors"
+required-features = ["named-colors"]
 
 [dependencies]
 cint = { version = "^0.3.1", optional = true }

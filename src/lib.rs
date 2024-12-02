@@ -55,7 +55,7 @@
 //! Add this to your `Cargo.toml`
 //!
 //! ```toml
-//! csscolorparser = "0.6.2"
+//! csscolorparser = "0.7.0"
 //! ```
 //!
 //! ## Examples

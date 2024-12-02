@@ -64,39 +64,6 @@ fn equal() {
     }
 }
 
-#[cfg(feature = "named-colors")]
-#[test]
-fn named_colors() {
-    #[rustfmt::skip]
-    let test_data = [
-        ("aliceblue",   "#f0f8ff"),
-        ("bisque",      "#ffe4c4"),
-        ("black",       "#000000"),
-        ("chartreuse",  "#7fff00"),
-        ("coral",       "#ff7f50"),
-        ("crimson",     "#dc143c"),
-        ("dodgerblue",  "#1e90ff"),
-        ("firebrick",   "#b22222"),
-        ("gold",        "#ffd700"),
-        ("hotpink",     "#ff69b4"),
-        ("indigo",      "#4b0082"),
-        ("lavender",    "#e6e6fa"),
-        ("lime",        "#00ff00"),
-        ("plum",        "#dda0dd"),
-        ("red",         "#ff0000"),
-        ("salmon",      "#fa8072"),
-        ("skyblue",     "#87ceeb"),
-        ("tomato",      "#ff6347"),
-        ("violet",      "#ee82ee"),
-        ("yellowgreen", "#9acd32"),
-    ];
-
-    for (s, hex) in test_data {
-        let c = parse(s).unwrap();
-        assert_eq!(hex, c.to_hex_string());
-    }
-}
-
 #[test]
 fn black() {
     let data = [

@@ -6,8 +6,7 @@
 <a href="https://github.com/mazznoer/csscolorparser-rs"><img alt="License" src="https://img.shields.io/crates/l/csscolorparser"></a>
 <a href="https://crates.io/crates/csscolorparser"><img alt="crates.io" src="https://img.shields.io/crates/v/csscolorparser.svg"></a>
 <a href="https://docs.rs/csscolorparser"><img alt="Documentation" src="https://docs.rs/csscolorparser/badge.svg"></a>
-<a href="https://github.com/mazznoer/csscolorparser-rs/actions"><img alt="Build Status" src="https://github.com/mazznoer/csscolorparser-rs/workflows/Rust/badge.svg"></a>
-<a href="https://codecov.io/gh/mazznoer/csscolorparser-rs"><img alt="codecov" src="https://codecov.io/gh/mazznoer/csscolorparser-rs/branch/master/graph/badge.svg"></a>
+<a href="https://github.com/mazznoer/csscolorparser-rs/actions"><img alt="Build Status" src="https://github.com/mazznoer/csscolorparser-rs/actions/workflows/rust.yml/badge.svg"></a>
 <a href="https://crates.io/crates/csscolorparser"><img alt="Total Downloads" src="https://img.shields.io/crates/d/csscolorparser.svg"></a>
 </p>
 
@@ -74,7 +73,7 @@ hsv(120deg 100% 100% / 100%)
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.6.2"
+csscolorparser = "0.7.0"
 ```
 
 ## Examples

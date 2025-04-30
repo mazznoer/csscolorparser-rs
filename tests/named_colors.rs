@@ -62,4 +62,26 @@ fn named_colors() {
     for c in test_data {
         assert!(c.name().is_none());
     }
+
+    // 8 digits hex code with fully opaque alpha component
+
+    let test_data = [
+        ("#f0f8ffff", "aliceblue"),
+        ("#ffe4c4ff", "bisque"),
+        ("#7fff00ff", "chartreuse"),
+        ("#ff7f50ff", "coral"),
+    ];
+
+    for (hex, name) in test_data {
+        let c = csscolorparser::parse(hex).unwrap();
+        assert_eq!(c.name(), Some(name));
+    }
+
+    // RGB is the same as named colors, but is not fully opaque
+
+    let test_data = ["#f0f8ff3f", "#ffe4c47f", "#7fff00bf"];
+    for hex in test_data {
+        let c = csscolorparser::parse(hex).unwrap();
+        assert!(c.name().is_none());
+    }
 }

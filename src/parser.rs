@@ -3,10 +3,7 @@ use std::{error, fmt};
 use crate::Color;
 
 #[cfg(feature = "named-colors")]
-mod named_colors;
-
-#[cfg(feature = "named-colors")]
-pub use named_colors::NAMED_COLORS;
+use crate::NAMED_COLORS;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParseColorError {

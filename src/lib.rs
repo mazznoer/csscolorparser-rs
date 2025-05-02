@@ -100,13 +100,15 @@
 //! * `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
 
 mod color;
-mod parser;
-
-#[cfg(feature = "cint")]
-mod cint;
-
 pub use color::Color;
+
+mod parser;
 pub use parser::{parse, ParseColorError};
 
 #[cfg(feature = "named-colors")]
-pub use parser::NAMED_COLORS;
+mod named_colors;
+#[cfg(feature = "named-colors")]
+pub use named_colors::NAMED_COLORS;
+
+#[cfg(feature = "cint")]
+mod cint;

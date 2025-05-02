@@ -16,7 +16,7 @@ use lab::{LCh, Lab};
 use crate::{parse, ParseColorError};
 
 #[cfg(feature = "named-colors")]
-use crate::parser::NAMED_COLORS;
+use crate::NAMED_COLORS;
 
 #[cfg(feature = "lab")]
 const PI_3: f32 = PI * 3.0;

@@ -416,6 +416,7 @@ impl Color {
     }
 
     #[cfg(feature = "named-colors")]
+    /// Returns name of this color, returning [`None`] if it is not available.
     pub fn name(&self) -> Option<&'static str> {
         let rgb = &self.to_rgba8()[0..3];
         for (&k, &v) in NAMED_COLORS.entries() {

@@ -415,6 +415,17 @@ impl Color {
         parse(s.as_ref())
     }
 
+    /// Returns name if there is a name for this color.
+    ///
+    /// **Note:** It ignores transparency (alpha value).
+    ///
+    /// ```
+    /// use csscolorparser::Color;
+    ///
+    /// assert_eq!(Color::from_rgba8(255, 0, 0, 255).name(), Some("red"));
+    /// assert_eq!(Color::from_rgba8(238, 130, 238, 255).name(), Some("violet"));
+    /// assert_eq!(Color::from_rgba8(90, 150, 200, 255).name(), None);
+    /// ```
     #[cfg(feature = "named-colors")]
     pub fn name(&self) -> Option<&'static str> {
         let rgb = &self.to_rgba8()[0..3];

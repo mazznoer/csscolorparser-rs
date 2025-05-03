@@ -1,5 +1,6 @@
 use std::{error, fmt};
 
+use crate::utils::remap;
 use crate::Color;
 
 #[cfg(feature = "named-colors")]
@@ -412,11 +413,6 @@ fn parse_angle(s: &str) -> Option<f32> {
                 .map(|t: f32| t * 360.0)
         })
         .or_else(|| s.parse().ok())
-}
-
-// Map t from range [a, b] to range [c, d]
-fn remap(t: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
-    (t - a) * ((d - c) / (b - a)) + c
 }
 
 #[cfg(test)]

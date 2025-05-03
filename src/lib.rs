@@ -112,3 +112,5 @@ pub use named_colors::NAMED_COLORS;
 
 #[cfg(feature = "cint")]
 mod cint;
+
+mod utils;

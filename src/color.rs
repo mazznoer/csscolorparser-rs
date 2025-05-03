@@ -45,12 +45,28 @@ impl Color {
         [self.r, self.g, self.b, self.a]
     }
 
+    pub fn to_rgb8(&self) -> [u8; 3] {
+        [
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+        ]
+    }
+
     pub fn to_rgba8(&self) -> [u8; 4] {
         [
             (self.r * 255.0 + 0.5) as u8,
             (self.g * 255.0 + 0.5) as u8,
             (self.b * 255.0 + 0.5) as u8,
             (self.a * 255.0 + 0.5) as u8,
+        ]
+    }
+
+    pub fn to_rgb16(&self) -> [u16; 3] {
+        [
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
         ]
     }
 
@@ -61,6 +77,40 @@ impl Color {
             (self.b * 65535.0 + 0.5) as u16,
             (self.a * 65535.0 + 0.5) as u16,
         ]
+    }
+
+    pub fn to_rgb8_tuple(&self) -> (u8, u8, u8) {
+        (
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+        )
+    }
+
+    pub fn to_rgba8_tuple(&self) -> (u8, u8, u8, u8) {
+        (
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+            (self.a * 255.0 + 0.5) as u8,
+        )
+    }
+
+    pub fn to_rgb16_tuple(&self) -> (u16, u16, u16) {
+        (
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
+        )
+    }
+
+    pub fn to_rgba16_tuple(&self) -> (u16, u16, u16, u16) {
+        (
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
+            (self.a * 65535.0 + 0.5) as u16,
+        )
     }
 
     pub fn clamp(&self) -> Self {
@@ -436,7 +486,7 @@ impl Color {
     #[deprecated]
     /// Returns: `(r, g, b, a)`
     ///
-    /// * Red, green, blue and alpha in the range [0..1]
+    /// * Red, green, blue, and alpha in the range [0..1]
     pub fn rgba(&self) -> (f32, f32, f32, f32) {
         (self.r, self.g, self.b, self.a)
     }
@@ -444,7 +494,7 @@ impl Color {
     #[deprecated = "Use [to_rgba8](#method.to_rgba8) instead."]
     /// Returns: `(r, g, b, a)`
     ///
-    /// * Red, green, blue and alpha in the range [0..255]
+    /// * Red, green, blue, and alpha in the range [0..255]
     pub fn rgba_u8(&self) -> (u8, u8, u8, u8) {
         (
             (self.r * 255.0).round() as u8,
@@ -489,7 +539,24 @@ impl Color {
 
     /// Returns: `[r, g, b, a]`
     ///
-    /// * Red, green, blue and alpha in the range [0..1]
+    /// * Red, green, blue, and alpha in the range [0..1]
+    pub fn to_linear_rgb(&self) -> [f32; 3] {
+        fn to_linear(x: f32) -> f32 {
+            if x >= 0.04045 {
+                return ((x + 0.055) / 1.055).powf(2.4);
+            }
+            x / 12.92
+        }
+        [
+            to_linear(self.r),
+            to_linear(self.g),
+            to_linear(self.b),
+        ]
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue, and alpha in the range [0..1]
     pub fn to_linear_rgba(&self) -> [f32; 4] {
         fn to_linear(x: f32) -> f32 {
             if x >= 0.04045 {
@@ -507,7 +574,19 @@ impl Color {
 
     /// Returns: `[r, g, b, a]`
     ///
-    /// * Red, green, blue and alpha in the range [0..255]
+    /// * Red, green, blue, and alpha in the range [0..255]
+    pub fn to_linear_rgb_u8(&self) -> [u8; 3] {
+        let [r, g, b] = self.to_linear_rgb();
+        [
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
+        ]
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue, and alpha in the range [0..255]
     pub fn to_linear_rgba_u8(&self) -> [u8; 4] {
         let [r, g, b, a] = self.to_linear_rgba();
         [
@@ -516,6 +595,66 @@ impl Color {
             (b * 255.0).round() as u8,
             (a * 255.0).round() as u8,
         ]
+    }
+
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue, and alpha in the range [0..1]
+    pub fn to_linear_rgb_tuple(&self) -> (f32, f32, f32) {
+        fn to_linear(x: f32) -> f32 {
+            if x >= 0.04045 {
+                return ((x + 0.055) / 1.055).powf(2.4);
+            }
+            x / 12.92
+        }
+        (
+            to_linear(self.r),
+            to_linear(self.g),
+            to_linear(self.b),
+        )
+    }
+
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue, and alpha in the range [0..1]
+    pub fn to_linear_rgba_tuple(&self) -> (f32, f32, f32, f32) {
+        fn to_linear(x: f32) -> f32 {
+            if x >= 0.04045 {
+                return ((x + 0.055) / 1.055).powf(2.4);
+            }
+            x / 12.92
+        }
+        (
+            to_linear(self.r),
+            to_linear(self.g),
+            to_linear(self.b),
+            self.a,
+        )
+    }
+
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue, and alpha in the range [0..255]
+    pub fn to_linear_rgb_u8_tuple(&self) -> (u8, u8, u8) {
+        let [r, g, b] = self.to_linear_rgb();
+        (
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
+        )
+    }
+
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue, and alpha in the range [0..255]
+    pub fn to_linear_rgba_u8_tuple(&self) -> (u8, u8, u8, u8) {
+        let [r, g, b, a] = self.to_linear_rgba();
+        (
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
+            (a * 255.0).round() as u8,
+        )
     }
 
     /// Returns: `[l, a, b, alpha]`
@@ -597,6 +736,22 @@ impl Color {
             b1 + t * (b2 - b1),
             alpha1 + t * (alpha2 - alpha1),
         )
+    }
+
+    /// Lighten this color using HSLA
+    pub fn lighten(&self, amount: f32) -> Self {
+        let [h, s, mut l, a] = self.to_hsla();
+        l += amount / 100.0;
+        l = clamp0_1(l);
+        Self::from_hsla(h, s, l, a)
+    }
+
+    /// Darken this color using HSLA
+    pub fn darken(&self, amount: f32) -> Self {
+        let [h, s, mut l, a] = self.to_hsla();
+        l -= amount / 100.0;
+        l = clamp0_1(l);
+        Self::from_hsla(h, s, l, a)
     }
 }
 

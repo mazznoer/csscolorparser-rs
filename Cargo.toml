@@ -12,7 +12,6 @@ keywords = ["color", "colour", "css", "parser"]
 categories = ["graphics", "parser-implementations"]
 exclude = [
 	".github/*",
-	"tests/*",
 ]
 
 [package.metadata.docs.rs]
@@ -23,10 +22,6 @@ default = ["named-colors"]
 named-colors = ["phf"]
 rust-rgb = ["rgb"]
 
-[[test]]
-name = "named_colors"
-required-features = ["named-colors"]
-
 [dependencies]
 cint = { version = "^0.3.1", optional = true }
 lab = { version = "0.11.0", optional = true }
@@ -36,3 +31,11 @@ serde = { version = "1.0.139", optional = true, features = ["derive"] }
 
 [dev-dependencies]
 serde_test = "1.0.139"
+
+[[test]]
+name = "named_colors"
+required-features = ["named-colors"]
+
+[[example]]
+name = "named-colors"
+required-features = ["named-colors"]

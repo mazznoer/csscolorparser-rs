@@ -1,5 +1,4 @@
-// https://www.w3.org/TR/css-color-4/#named-colors
-
+/// Named colors defined in <https://www.w3.org/TR/css-color-4/#named-colors>.
 pub static NAMED_COLORS: phf::Map<&'static str, [u8; 3]> = phf::phf_map! {
     "aliceblue" => [240, 248, 255],
     "antiquewhite" => [250, 235, 215],

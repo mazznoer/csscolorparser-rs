@@ -41,10 +41,16 @@ impl Color {
         Self { r, g, b, a }
     }
 
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
     pub fn to_array(&self) -> [f32; 4] {
         [self.r, self.g, self.b, self.a]
     }
 
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
     pub fn to_rgba8(&self) -> [u8; 4] {
         [
             (self.r * 255.0 + 0.5) as u8,
@@ -54,6 +60,9 @@ impl Color {
         ]
     }
 
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..65535]
     pub fn to_rgba16(&self) -> [u16; 4] {
         [
             (self.r * 65535.0 + 0.5) as u16,
@@ -63,6 +72,7 @@ impl Color {
         ]
     }
 
+    /// Restricts R, G, B, A values to the range [0..1].
     pub fn clamp(&self) -> Self {
         Self {
             r: self.r.clamp(0.0, 1.0),
@@ -298,6 +308,12 @@ impl Color {
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
+    /// Arguments:
+    ///
+    /// * `l`: Perceived lightness
+    /// * `c`: Chroma
+    /// * `h`: Hue angle in radians
+    /// * `alpha`: Alpha [0..1]
     pub fn from_oklcha(l: f32, c: f32, h: f32, alpha: f32) -> Self {
         Self::from_oklaba(l, c * h.cos(), c * h.sin(), alpha)
     }
@@ -316,6 +332,12 @@ impl Color {
 
     #[cfg(feature = "lab")]
     #[deprecated = "Use [from_laba](#method.from_laba) instead."]
+    /// Arguments:
+    ///
+    /// * `l`: Lightness
+    /// * `a`: Distance along the `a` axis
+    /// * `b`: Distance along the `b` axis
+    /// * `alpha`: Alpha [0..1]
     pub fn from_lab(l: f32, a: f32, b: f32, alpha: f32) -> Self {
         Self::from_laba(l, a, b, alpha)
     }
@@ -329,6 +351,7 @@ impl Color {
 
     #[cfg(feature = "lab")]
     #[deprecated = "Use [to_laba](#method.to_laba) instead."]
+    /// Returns: `[l, a, b, alpha]`
     pub fn to_lab(&self) -> [f32; 4] {
         self.to_laba()
     }
@@ -360,6 +383,12 @@ impl Color {
 
     #[cfg(feature = "lab")]
     #[deprecated = "Use [from_lcha](#method.from_lcha) instead."]
+    /// Arguments:
+    ///
+    /// * `l`: Lightness
+    /// * `c`: Chroma
+    /// * `h`: Hue angle in radians
+    /// * `alpha`: Alpha [0..1]
     pub fn from_lch(l: f32, c: f32, h: f32, alpha: f32) -> Self {
         Self::from_lcha(l, c, h, alpha)
     }
@@ -373,6 +402,7 @@ impl Color {
 
     #[cfg(feature = "lab")]
     #[deprecated = "Use [to_lcha](#method.to_lcha) instead."]
+    /// Returns: `[l, c, h, alpha]`
     pub fn to_lch(&self) -> [f32; 4] {
         self.to_lcha()
     }

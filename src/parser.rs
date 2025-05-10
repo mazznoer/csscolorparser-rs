@@ -6,20 +6,32 @@ use crate::Color;
 #[cfg(feature = "named-colors")]
 use crate::NAMED_COLORS;
 
+/// An error which can be returned when parsing a CSS color string.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParseColorError {
+    /// A CSS color string was invalid hex format.
     InvalidHex,
+    /// A CSS color string was invalid rgb format.
     InvalidRgb,
+    /// A CSS color string was invalid hsl format.
     InvalidHsl,
+    /// A CSS color string was invalid hwb format.
     InvalidHwb,
+    /// A CSS color string was invalid hsv format.
     InvalidHsv,
+    /// A CSS color string was invalid lab format.
     #[cfg(feature = "lab")]
     InvalidLab,
+    /// A CSS color string was invalid lch format.
     #[cfg(feature = "lab")]
     InvalidLch,
+    /// A CSS color string was invalid oklab format.
     InvalidOklab,
+    /// A CSS color string was invalid oklch format.
     InvalidOklch,
+    /// A CSS color string was invalid color function.
     InvalidFunction,
+    /// A CSS color string was invalid unknown format.
     InvalidUnknown,
 }
 

@@ -488,4 +488,22 @@ mod tests {
             assert_eq!(parse_angle(s), expected);
         }
     }
+
+    #[test]
+    fn test_parse_hex() {
+        // case-insensitive tests
+        macro_rules! cmp {
+            ($a:expr, $b:expr) => {
+                assert_eq!(
+                    parse_hex($a).unwrap().to_rgba8(),
+                    parse_hex($b).unwrap().to_rgba8()
+                );
+            };
+        }
+        cmp!("abc", "ABC");
+        cmp!("DeF", "dEf");
+        cmp!("f0eB", "F0Eb");
+        cmp!("abcdef", "ABCDEF");
+        cmp!("Ff03E0cB", "fF03e0Cb");
+    }
 }

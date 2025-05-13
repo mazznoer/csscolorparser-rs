@@ -230,7 +230,7 @@ fn invalid_format() {
 
     for s in test_data {
         let c = parse(s);
-        assert!(c.is_err());
+        assert!(c.is_err(), "{:?}", s);
     }
 
     #[rustfmt::skip]
@@ -239,7 +239,7 @@ fn invalid_format() {
         ("rgb(255,0)",       "invalid rgb format"),
         ("hsl(0,100%,2o%)",  "invalid hsl format"),
         ("hsv(360)",         "invalid hsv format"),
-        ("hwb(270,0%,0%,x)", "invalid hwb format"),
+        ("hwb(270,0%,0%,x)", "invalid color function"),
         ("lab(0%)",          "invalid lab format"),
         ("lch(0%)",          "invalid lch format"),
         ("cmyk(0,0,0,0)",    "invalid color function"),

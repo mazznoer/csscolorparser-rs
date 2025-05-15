@@ -213,9 +213,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             } else {
                 return Err(ParseColorError::InvalidLab);
             }
-
-            #[cfg(not(feature = "lab"))]
-            return Err(ParseColorError::InvalidFunction);
         } else if fname.eq_ignore_ascii_case("lch") {
             #[cfg(feature = "lab")]
             if let (Some((l, l_fmt)), Some((c, c_fmt)), Some(h)) = (
@@ -237,9 +234,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             } else {
                 return Err(ParseColorError::InvalidLch);
             }
-
-            #[cfg(not(feature = "lab"))]
-            return Err(ParseColorError::InvalidFunction);
         } else if fname.eq_ignore_ascii_case("oklab") {
             if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt))) = (
                 // lightness
@@ -287,18 +281,18 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
         return Err(ParseColorError::InvalidFunction);
     }
 
-    // Named colors
-    #[cfg(feature = "named-colors")]
-    {
-        let s = s.to_ascii_lowercase();
-        if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
-            return Ok(Color::from_rgba8(*r, *g, *b, 255));
-        }
-    }
-
     // Hex format without prefix '#'
     if let Ok(c) = parse_hex(s) {
         return Ok(c);
+    }
+
+    // Named colors
+    #[cfg(feature = "named-colors")]
+    if s.len() > 2 && s.len() < 21 {
+        let s = s.to_ascii_lowercase();
+        if let Some([r, g, b]) = NAMED_COLORS.get(&s) {
+            return Ok(Color::from_rgba8(*r, *g, *b, 255));
+        }
     }
 
     Err(ParseColorError::InvalidUnknown)

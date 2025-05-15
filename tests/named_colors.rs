@@ -1,11 +1,11 @@
-use csscolorparser::Color;
+use csscolorparser::{parse, Color, NAMED_COLORS};
 
 #[test]
 fn named_colors() {
     let skip_list = ["aqua", "cyan", "fuchsia", "magenta"];
 
-    for (&name, &rgb) in csscolorparser::NAMED_COLORS.entries() {
-        let c = csscolorparser::parse(name).unwrap();
+    for (&name, &rgb) in NAMED_COLORS.entries() {
+        let c = parse(name).unwrap();
         assert_eq!(c.to_rgba8()[0..3], rgb);
 
         if skip_list.contains(&name) || name.contains("gray") || name.contains("grey") {
@@ -17,6 +17,19 @@ fn named_colors() {
         let c = Color::from_rgba8(r, g, b, 255);
         assert_eq!(c.name(), Some(name));
     }
+
+    // Case-insensitive tests
+
+    macro_rules! cmp {
+        ($a:expr, $b:expr) => {
+            assert_eq!(parse($a).unwrap().to_rgba8(), parse($b).unwrap().to_rgba8());
+        };
+    }
+
+    cmp!("red", "RED");
+    cmp!("red", "Red");
+    cmp!("skyblue", "SKYBLUE");
+    cmp!("skyblue", "SkyBlue");
 
     // Hex
 

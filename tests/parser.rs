@@ -226,6 +226,12 @@ fn invalid_format() {
         "oklab(0,0,x,0)",
         "oklch(0,0,0,0,0)",
         "oklch(0,0,0,x)",
+        "æ",
+        "#ß",
+        "rgb(ß,0,0)",
+        "\u{1F602}",
+        "#\u{1F602}",
+        "rgb(\u{1F602},\u{1F602},\u{1F602})",
     ];
 
     for s in test_data {
@@ -236,12 +242,13 @@ fn invalid_format() {
     #[rustfmt::skip]
     let test_data = [
         ("#78afzd",          "invalid hex format"),
-        ("rgb(255,0)",       "invalid rgb format"),
+        ("rgb(xx,yy,xx)",    "invalid rgb format"),
+        ("rgb(255,0)",       "invalid color function"),
         ("hsl(0,100%,2o%)",  "invalid hsl format"),
-        ("hsv(360)",         "invalid hsv format"),
+        ("hsv(360)",         "invalid color function"),
         ("hwb(270,0%,0%,x)", "invalid color function"),
-        ("lab(0%)",          "invalid lab format"),
-        ("lch(0%)",          "invalid lch format"),
+        ("lab(0%)",          "invalid color function"),
+        ("lch(0%)",          "invalid color function"),
         ("cmyk(0,0,0,0)",    "invalid color function"),
         ("blood",            "invalid unknown format"),
         ("rgb(255,0,0",      "invalid unknown format"),
@@ -254,6 +261,6 @@ fn invalid_format() {
 
     for (s, err_msg) in test_data {
         let c = parse(s);
-        assert_eq!(c.unwrap_err().to_string(), err_msg);
+        assert_eq!(c.unwrap_err().to_string(), err_msg, "{:?}", s);
     }
 }

@@ -4,6 +4,7 @@ use csscolorparser::{parse, Color};
 fn parser() {
     let test_data = [
         ("transparent", [0, 0, 0, 0]),
+        ("TRANSPARENT", [0, 0, 0, 0]),
         ("#ff00ff64", [255, 0, 255, 100]),
         ("ff00ff64", [255, 0, 255, 100]),
         ("rgb(247,179,99)", [247, 179, 99, 255]),
@@ -115,6 +116,7 @@ fn red() {
         "hsl(360 100% 50%)",
         "hwb(0 0% 0%)",
         "hwb(360deg 0% 0% 100%)",
+        "hwb(360DEG 0% 0% 100%)",
         "hsv(0 100% 100%)",
         "oklab(0.62796, 0.22486, 0.12585)",
         "oklch(0.62796, 0.25768, 29.23388)",
@@ -123,7 +125,9 @@ fn red() {
     let red = [255, 0, 0, 255];
 
     for s in data {
-        let c = parse(s).unwrap().to_rgba8();
+        let res = parse(s);
+        assert!(res.is_ok(), "{:?}", s);
+        let c = res.unwrap().to_rgba8();
         assert_eq!(red, c);
     }
 }
@@ -148,8 +152,11 @@ fn lime() {
         "hsl(-240 100% 50%)",
         "hsl(-240deg 100% 50%)",
         "hsl(0.3333turn 100% 50%)",
+        "hsl(0.3333TURN 100% 50%)",
         "hsl(133.333grad 100% 50%)",
+        "hsl(133.333GRAD 100% 50%)",
         "hsl(2.0944rad 100% 50%)",
+        "hsl(2.0944RAD 100% 50%)",
         "hsla(120,100%,50%,100%)",
         "hwb(120 0% 0%)",
         "hwb(480deg 0% 0% / 100%)",
@@ -161,7 +168,9 @@ fn lime() {
     let lime = [0, 255, 0, 255];
 
     for s in data {
-        let c = parse(s).unwrap().to_rgba8();
+        let res = parse(s);
+        assert!(res.is_ok(), "{:?}", s);
+        let c = res.unwrap().to_rgba8();
         assert_eq!(lime, c);
     }
 }

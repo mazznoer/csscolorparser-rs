@@ -87,16 +87,10 @@ impl error::Error for ParseColorError {}
 /// # }
 /// ```
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
-    let s = s.trim().to_lowercase();
+    let s = s.trim();
 
-    if s == "transparent" {
+    if s.eq_ignore_ascii_case("transparent") {
         return Ok(Color::new(0.0, 0.0, 0.0, 0.0));
-    }
-
-    // Named colors
-    #[cfg(feature = "named-colors")]
-    if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
-        return Ok(Color::from_rgba8(*r, *g, *b, 255));
     }
 
     // Hex format
@@ -129,176 +123,181 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             return Err(ParseColorError::InvalidFunction);
         }
 
-        match *fname {
-            "rgb" | "rgba" => {
-                if let (Some((r, r_fmt)), Some((g, g_fmt)), Some((b, b_fmt))) = (
-                    // red
-                    parse_percent_or_255(val0),
-                    // green
-                    parse_percent_or_255(val1),
-                    // blue
-                    parse_percent_or_255(val2),
-                ) {
-                    if r_fmt == g_fmt && g_fmt == b_fmt {
-                        return Ok(Color {
-                            r: r.clamp(0.0, 1.0),
-                            g: g.clamp(0.0, 1.0),
-                            b: b.clamp(0.0, 1.0),
-                            a: alpha,
-                        });
-                    }
+        if fname.eq_ignore_ascii_case("rgb") || fname.eq_ignore_ascii_case("rgba") {
+            if let (Some((r, r_fmt)), Some((g, g_fmt)), Some((b, b_fmt))) = (
+                // red
+                parse_percent_or_255(val0),
+                // green
+                parse_percent_or_255(val1),
+                // blue
+                parse_percent_or_255(val2),
+            ) {
+                if r_fmt == g_fmt && g_fmt == b_fmt {
+                    return Ok(Color {
+                        r: r.clamp(0.0, 1.0),
+                        g: g.clamp(0.0, 1.0),
+                        b: b.clamp(0.0, 1.0),
+                        a: alpha,
+                    });
                 }
-
-                return Err(ParseColorError::InvalidRgb);
             }
-            "hsl" | "hsla" => {
-                if let (Some(h), Some((s, s_fmt)), Some((l, l_fmt))) = (
-                    // hue
-                    parse_angle(val0),
-                    // saturation
-                    parse_percent_or_float(val1),
-                    // lightness
-                    parse_percent_or_float(val2),
-                ) {
-                    if s_fmt == l_fmt {
-                        return Ok(Color::from_hsla(h, s, l, alpha));
-                    }
+
+            return Err(ParseColorError::InvalidRgb);
+        } else if fname.eq_ignore_ascii_case("hsl") || fname.eq_ignore_ascii_case("hsla") {
+            if let (Some(h), Some((s, s_fmt)), Some((l, l_fmt))) = (
+                // hue
+                parse_angle(val0),
+                // saturation
+                parse_percent_or_float(val1),
+                // lightness
+                parse_percent_or_float(val2),
+            ) {
+                if s_fmt == l_fmt {
+                    return Ok(Color::from_hsla(h, s, l, alpha));
                 }
-
-                return Err(ParseColorError::InvalidHsl);
             }
-            "hwb" | "hwba" => {
-                if let (Some(h), Some((w, w_fmt)), Some((b, b_fmt))) = (
-                    // hue
-                    parse_angle(val0),
-                    // whiteness
-                    parse_percent_or_float(val1),
-                    // blackness
-                    parse_percent_or_float(val2),
-                ) {
-                    if w_fmt == b_fmt {
-                        return Ok(Color::from_hwba(h, w, b, alpha));
-                    }
+
+            return Err(ParseColorError::InvalidHsl);
+        } else if fname.eq_ignore_ascii_case("hwb") || fname.eq_ignore_ascii_case("hwba") {
+            if let (Some(h), Some((w, w_fmt)), Some((b, b_fmt))) = (
+                // hue
+                parse_angle(val0),
+                // whiteness
+                parse_percent_or_float(val1),
+                // blackness
+                parse_percent_or_float(val2),
+            ) {
+                if w_fmt == b_fmt {
+                    return Ok(Color::from_hwba(h, w, b, alpha));
                 }
-
-                return Err(ParseColorError::InvalidHwb);
             }
-            "hsv" | "hsva" => {
-                if let (Some(h), Some((s, s_fmt)), Some((v, v_fmt))) = (
-                    // hue
-                    parse_angle(val0),
-                    // saturation
-                    parse_percent_or_float(val1),
-                    // value
-                    parse_percent_or_float(val2),
-                ) {
-                    if s_fmt == v_fmt {
-                        return Ok(Color::from_hsva(h, s, v, alpha));
-                    }
+
+            return Err(ParseColorError::InvalidHwb);
+        } else if fname.eq_ignore_ascii_case("hsv") || fname.eq_ignore_ascii_case("hsva") {
+            if let (Some(h), Some((s, s_fmt)), Some((v, v_fmt))) = (
+                // hue
+                parse_angle(val0),
+                // saturation
+                parse_percent_or_float(val1),
+                // value
+                parse_percent_or_float(val2),
+            ) {
+                if s_fmt == v_fmt {
+                    return Ok(Color::from_hsva(h, s, v, alpha));
                 }
-
-                return Err(ParseColorError::InvalidHsv);
             }
+
+            return Err(ParseColorError::InvalidHsv);
+        } else if fname.eq_ignore_ascii_case("lab") {
             #[cfg(feature = "lab")]
-            "lab" => {
-                if let (Some((l, l_fmt)), Some((a, a_fmt)), Some((b, b_fmt))) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // a
-                    parse_percent_or_float(val1),
-                    // b
-                    parse_percent_or_float(val2),
-                ) {
-                    let l = if l_fmt { l * 100.0 } else { l };
-                    let a = if a_fmt {
-                        remap(a, -1.0, 1.0, -125.0, 125.0)
-                    } else {
-                        a
-                    };
-                    let b = if b_fmt {
-                        remap(b, -1.0, 1.0, -125.0, 125.0)
-                    } else {
-                        b
-                    };
-                    return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
-                }
-
+            if let (Some((l, l_fmt)), Some((a, a_fmt)), Some((b, b_fmt))) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // a
+                parse_percent_or_float(val1),
+                // b
+                parse_percent_or_float(val2),
+            ) {
+                let l = if l_fmt { l * 100.0 } else { l };
+                let a = if a_fmt {
+                    remap(a, -1.0, 1.0, -125.0, 125.0)
+                } else {
+                    a
+                };
+                let b = if b_fmt {
+                    remap(b, -1.0, 1.0, -125.0, 125.0)
+                } else {
+                    b
+                };
+                return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+            } else {
                 return Err(ParseColorError::InvalidLab);
             }
-            #[cfg(feature = "lab")]
-            "lch" => {
-                if let (Some((l, l_fmt)), Some((c, c_fmt)), Some(h)) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // chroma
-                    parse_percent_or_float(val1),
-                    // hue
-                    parse_angle(val2),
-                ) {
-                    let l = if l_fmt { l * 100.0 } else { l };
-                    let c = if c_fmt { c * 150.0 } else { c };
-                    return Ok(Color::from_lcha(
-                        l.max(0.0),
-                        c.max(0.0),
-                        h.to_radians(),
-                        alpha,
-                    ));
-                }
 
+            #[cfg(not(feature = "lab"))]
+            return Err(ParseColorError::InvalidFunction);
+        } else if fname.eq_ignore_ascii_case("lch") {
+            #[cfg(feature = "lab")]
+            if let (Some((l, l_fmt)), Some((c, c_fmt)), Some(h)) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // chroma
+                parse_percent_or_float(val1),
+                // hue
+                parse_angle(val2),
+            ) {
+                let l = if l_fmt { l * 100.0 } else { l };
+                let c = if c_fmt { c * 150.0 } else { c };
+                return Ok(Color::from_lcha(
+                    l.max(0.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    alpha,
+                ));
+            } else {
                 return Err(ParseColorError::InvalidLch);
             }
-            "oklab" => {
-                if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt))) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // a
-                    parse_percent_or_float(val1),
-                    // b
-                    parse_percent_or_float(val2),
-                ) {
-                    let a = if a_fmt {
-                        remap(a, -1.0, 1.0, -0.4, 0.4)
-                    } else {
-                        a
-                    };
-                    let b = if b_fmt {
-                        remap(b, -1.0, 1.0, -0.4, 0.4)
-                    } else {
-                        b
-                    };
-                    return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
-                }
 
-                return Err(ParseColorError::InvalidOklab);
+            #[cfg(not(feature = "lab"))]
+            return Err(ParseColorError::InvalidFunction);
+        } else if fname.eq_ignore_ascii_case("oklab") {
+            if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt))) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // a
+                parse_percent_or_float(val1),
+                // b
+                parse_percent_or_float(val2),
+            ) {
+                let a = if a_fmt {
+                    remap(a, -1.0, 1.0, -0.4, 0.4)
+                } else {
+                    a
+                };
+                let b = if b_fmt {
+                    remap(b, -1.0, 1.0, -0.4, 0.4)
+                } else {
+                    b
+                };
+                return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
             }
-            "oklch" => {
-                if let (Some((l, _)), Some((c, c_fmt)), Some(h)) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // chroma
-                    parse_percent_or_float(val1),
-                    // hue
-                    parse_angle(val2),
-                ) {
-                    let c = if c_fmt { c * 0.4 } else { c };
-                    return Ok(Color::from_oklcha(
-                        l.max(0.0),
-                        c.max(0.0),
-                        h.to_radians(),
-                        alpha,
-                    ));
-                }
 
-                return Err(ParseColorError::InvalidOklch);
+            return Err(ParseColorError::InvalidOklab);
+        } else if fname.eq_ignore_ascii_case("oklch") {
+            if let (Some((l, _)), Some((c, c_fmt)), Some(h)) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // chroma
+                parse_percent_or_float(val1),
+                // hue
+                parse_angle(val2),
+            ) {
+                let c = if c_fmt { c * 0.4 } else { c };
+                return Ok(Color::from_oklcha(
+                    l.max(0.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    alpha,
+                ));
             }
-            _ => {
-                return Err(ParseColorError::InvalidFunction);
-            }
+
+            return Err(ParseColorError::InvalidOklch);
+        }
+
+        return Err(ParseColorError::InvalidFunction);
+    }
+
+    // Named colors
+    #[cfg(feature = "named-colors")]
+    {
+        let s = s.to_ascii_lowercase();
+        if let Some([r, g, b]) = NAMED_COLORS.get(&*s) {
+            return Ok(Color::from_rgba8(*r, *g, *b, 255));
         }
     }
 
     // Hex format without prefix '#'
-    if let Ok(c) = parse_hex(&s) {
+    if let Ok(c) = parse_hex(s) {
         return Ok(c);
     }
 
@@ -347,6 +346,19 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     }
 }
 
+// strip suffix ignore case
+fn strip_suffix<'a>(s: &'a str, suffix: &str) -> Option<&'a str> {
+    if suffix.len() > s.len() {
+        return None;
+    }
+    let s_end = &s[s.len() - suffix.len()..];
+    if s_end.eq_ignore_ascii_case(suffix) {
+        Some(&s[..s.len() - suffix.len()])
+    } else {
+        None
+    }
+}
+
 fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
     s.strip_suffix('%')
         .and_then(|s| s.parse().ok().map(|t: f32| (t / 100.0, true)))
@@ -360,20 +372,20 @@ fn parse_percent_or_255(s: &str) -> Option<(f32, bool)> {
 }
 
 fn parse_angle(s: &str) -> Option<f32> {
-    s.strip_suffix("deg")
+    strip_suffix(s, "deg")
         .and_then(|s| s.parse().ok())
         .or_else(|| {
-            s.strip_suffix("grad")
+            strip_suffix(s, "grad")
                 .and_then(|s| s.parse().ok())
                 .map(|t: f32| t * 360.0 / 400.0)
         })
         .or_else(|| {
-            s.strip_suffix("rad")
+            strip_suffix(s, "rad")
                 .and_then(|s| s.parse().ok())
                 .map(|t: f32| t.to_degrees())
         })
         .or_else(|| {
-            s.strip_suffix("turn")
+            strip_suffix(s, "turn")
                 .and_then(|s| s.parse().ok())
                 .map(|t: f32| t * 360.0)
         })
@@ -383,6 +395,17 @@ fn parse_angle(s: &str) -> Option<f32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_strip_suffix() {
+        assert_eq!(strip_suffix("45deg", "deg"), Some("45"));
+        assert_eq!(strip_suffix("90DEG", "deg"), Some("90"));
+        assert_eq!(strip_suffix("0.25turn", "turn"), Some("0.25"));
+        assert_eq!(strip_suffix("1.0Turn", "turn"), Some("1.0"));
+
+        assert_eq!(strip_suffix("", "deg"), None);
+        assert_eq!(strip_suffix("90", "deg"), None);
+    }
 
     #[test]
     fn test_parse_percent_or_float() {

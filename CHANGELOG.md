@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.0...HEAD)
+## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.1...HEAD)
+
+## [0.7.1](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.0...v0.7.1)
+
+### Changed
+
+- Remove some unnecessary allocations on parser code.
 
 ## [0.7.0](https://github.com/mazznoer/csscolorparser-rs/compare/v0.6.2...v0.7.0)
 

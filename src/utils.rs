@@ -25,9 +25,9 @@ pub(crate) fn hue_to_rgb(n1: f32, n2: f32, h: f32) -> f32 {
 // h = 0..360
 // s, l = 0..1
 // r, g, b = 0..1
-pub(crate) fn hsl_to_rgb(h: f32, s: f32, l: f32) -> (f32, f32, f32) {
+pub(crate) fn hsl_to_rgb(h: f32, s: f32, l: f32) -> [f32; 3] {
     if s == 0.0 {
-        return (l, l, l);
+        return [l, l, l];
     }
 
     let n2 = if l < 0.5 {
@@ -41,24 +41,24 @@ pub(crate) fn hsl_to_rgb(h: f32, s: f32, l: f32) -> (f32, f32, f32) {
     let r = hue_to_rgb(n1, n2, h + 2.0);
     let g = hue_to_rgb(n1, n2, h);
     let b = hue_to_rgb(n1, n2, h - 2.0);
-    (r, g, b)
+    [r, g, b]
 }
 
-pub(crate) fn hwb_to_rgb(hue: f32, white: f32, black: f32) -> (f32, f32, f32) {
+pub(crate) fn hwb_to_rgb(hue: f32, white: f32, black: f32) -> [f32; 3] {
     if white + black >= 1.0 {
         let l = white / (white + black);
-        return (l, l, l);
+        return [l, l, l];
     }
 
-    let (r, g, b) = hsl_to_rgb(hue, 1.0, 0.5);
+    let [r, g, b] = hsl_to_rgb(hue, 1.0, 0.5);
     let r = r * (1.0 - white - black) + white;
     let g = g * (1.0 - white - black) + white;
     let b = b * (1.0 - white - black) + white;
-    (r, g, b)
+    [r, g, b]
 }
 
 #[allow(clippy::float_cmp)]
-pub(crate) fn hsv_to_hsl(h: f32, s: f32, v: f32) -> (f32, f32, f32) {
+pub(crate) fn hsv_to_hsl(h: f32, s: f32, v: f32) -> [f32; 3] {
     let l = (2.0 - s) * v / 2.0;
 
     let s = if l != 0.0 {
@@ -73,21 +73,21 @@ pub(crate) fn hsv_to_hsl(h: f32, s: f32, v: f32) -> (f32, f32, f32) {
         s
     };
 
-    (h, s, l)
+    [h, s, l]
 }
 
-pub(crate) fn hsv_to_rgb(h: f32, s: f32, v: f32) -> (f32, f32, f32) {
-    let (h, s, l) = hsv_to_hsl(h, s, v);
+pub(crate) fn hsv_to_rgb(h: f32, s: f32, v: f32) -> [f32; 3] {
+    let [h, s, l] = hsv_to_hsl(h, s, v);
     hsl_to_rgb(h, s, l)
 }
 
 #[allow(clippy::float_cmp)]
-pub(crate) fn rgb_to_hsv(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
+pub(crate) fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
     let v = r.max(g.max(b));
     let d = v - r.min(g.min(b));
 
     if d == 0.0 {
-        return (0.0, 0.0, v);
+        return [0.0, 0.0, v];
     }
 
     let s = d / v;
@@ -104,17 +104,17 @@ pub(crate) fn rgb_to_hsv(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
     };
 
     let h = (h * 60.0) % 360.0;
-    (normalize_angle(h), s, v)
+    [normalize_angle(h), s, v]
 }
 
 #[allow(clippy::float_cmp)]
-pub(crate) fn rgb_to_hsl(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
+pub(crate) fn rgb_to_hsl(r: f32, g: f32, b: f32) -> [f32; 3] {
     let min = r.min(g.min(b));
     let max = r.max(g.max(b));
     let l = (max + min) / 2.0;
 
     if min == max {
-        return (0.0, 0.0, l);
+        return [0.0, 0.0, l];
     }
 
     let d = max - min;
@@ -138,14 +138,14 @@ pub(crate) fn rgb_to_hsl(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
     };
 
     let h = (h * 60.0) % 360.0;
-    (normalize_angle(h), s, l)
+    [normalize_angle(h), s, l]
 }
 
-pub(crate) fn rgb_to_hwb(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
-    let (hue, _, _) = rgb_to_hsl(r, g, b);
+pub(crate) fn rgb_to_hwb(r: f32, g: f32, b: f32) -> [f32; 3] {
+    let [hue, _, _] = rgb_to_hsl(r, g, b);
     let white = r.min(g.min(b));
     let black = 1.0 - r.max(g.max(b));
-    (hue, white, black)
+    [hue, white, black]
 }
 
 #[inline]
@@ -168,11 +168,6 @@ pub(crate) fn interp_angle(a0: f32, a1: f32, t: f32) -> f32 {
 pub(crate) fn interp_angle_rad(a0: f32, a1: f32, t: f32) -> f32 {
     let delta = (((a1 - a0) % TAU) + PI_3) % TAU - PI;
     (a0 + t * delta + TAU) % TAU
-}
-
-#[inline]
-pub(crate) fn clamp0_1(t: f32) -> f32 {
-    t.clamp(0.0, 1.0)
 }
 
 #[inline]

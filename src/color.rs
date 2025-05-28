@@ -45,7 +45,12 @@ impl Color {
     ///
     /// * Red, green, blue and alpha in the range [0..1]
     pub fn to_array(&self) -> [f32; 4] {
-        [self.r, self.g, self.b, self.a]
+        [
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        ]
     }
 
     /// Returns: `[r, g, b, a]`
@@ -233,8 +238,8 @@ impl Color {
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
     pub fn from_hsva(h: f32, s: f32, v: f32, a: f32) -> Self {
-        let (r, g, b) = hsv_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(v));
-        Self::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+        let [r, g, b] = hsv_to_rgb(normalize_angle(h), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
+        Self::new(r, g, b, a)
     }
 
     #[deprecated = "Use [from_hsla](#method.from_hsla) instead."]
@@ -254,8 +259,8 @@ impl Color {
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
     pub fn from_hsla(h: f32, s: f32, l: f32, a: f32) -> Self {
-        let (r, g, b) = hsl_to_rgb(normalize_angle(h), clamp0_1(s), clamp0_1(l));
-        Self::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), clamp0_1(a))
+        let [r, g, b] = hsl_to_rgb(normalize_angle(h), s.clamp(0.0, 1.0), l.clamp(0.0, 1.0));
+        Self::new(r, g, b, a)
     }
 
     #[deprecated = "Use [from_hwba](#method.from_hwba) instead."]
@@ -275,8 +280,8 @@ impl Color {
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
     pub fn from_hwba(h: f32, w: f32, b: f32, a: f32) -> Self {
-        let (r, g, b) = hwb_to_rgb(normalize_angle(h), clamp0_1(w), clamp0_1(b));
-        Self::new(clamp0_1(r), clamp0_1(g), clamp0_1(b), a)
+        let [r, g, b] = hwb_to_rgb(normalize_angle(h), w.clamp(0.0, 1.0), b.clamp(0.0, 1.0));
+        Self::new(r, g, b, a)
     }
 
     #[deprecated = "Use [from_oklaba](#method.from_oklaba) instead."]
@@ -491,8 +496,17 @@ impl Color {
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
     pub fn to_hsva(&self) -> [f32; 4] {
-        let (h, s, v) = rgb_to_hsv(self.r, self.g, self.b);
-        [h, s, v, self.a]
+        let [h, s, v] = rgb_to_hsv(
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        );
+        [
+            h,
+            s.clamp(0.0, 1.0),
+            v.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        ]
     }
 
     /// Returns: `[h, s, l, a]`
@@ -502,8 +516,17 @@ impl Color {
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
     pub fn to_hsla(&self) -> [f32; 4] {
-        let (h, s, l) = rgb_to_hsl(self.r, self.g, self.b);
-        [h, s, l, self.a]
+        let [h, s, l] = rgb_to_hsl(
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        );
+        [
+            h,
+            s.clamp(0.0, 1.0),
+            l.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        ]
     }
 
     /// Returns: `[h, w, b, a]`
@@ -513,8 +536,17 @@ impl Color {
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
     pub fn to_hwba(&self) -> [f32; 4] {
-        let (h, w, b) = rgb_to_hwb(self.r, self.g, self.b);
-        [h, w, b, self.a]
+        let [h, w, b] = rgb_to_hwb(
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        );
+        [
+            h,
+            w.clamp(0.0, 1.0),
+            b.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        ]
     }
 
     /// Returns: `[r, g, b, a]`

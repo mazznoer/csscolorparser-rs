@@ -92,16 +92,16 @@ fn basic() {
         [0, 255, 128, 255]
     );
 
-    // clamp
+    // clamping
+
     let c = Color::new(1.23, 0.5, -0.01, 1.01);
-    assert_eq!(c.to_array(), [1.23, 0.5, -0.01, 1.01]);
+    assert_eq!([c.r, c.g, c.b, c.a], [1.23, 0.5, -0.01, 1.01]);
+    assert_eq!(c.to_array(), [1.0, 0.5, 0.0, 1.0]);
     assert_eq!(c.to_rgba8(), [255, 128, 0, 255]);
     assert_eq!(c.to_rgba16(), [65535, 32768, 0, 65535]);
 
     let c = Color::new(1.23, 0.5, -0.01, 1.01).clamp();
-    assert_eq!(c.to_array(), [1.0, 0.5, 0.0, 1.0]);
-    assert_eq!(c.to_rgba8(), [255, 128, 0, 255]);
-    assert_eq!(c.to_rgba16(), [65535, 32768, 0, 65535]);
+    assert_eq!([c.r, c.g, c.b, c.a], [1.0, 0.5, 0.0, 1.0]);
 }
 
 #[test]

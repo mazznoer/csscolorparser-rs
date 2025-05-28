@@ -61,7 +61,9 @@ fn equal() {
     ];
 
     for (a, b) in test_data {
-        assert_eq!(parse(a).unwrap().to_rgba8(), parse(b).unwrap().to_rgba8());
+        let c1 = parse(a).unwrap();
+        let c2 = parse(b).unwrap();
+        assert_eq!(c1.to_rgba8(), c2.to_rgba8(), "{:?}", [a, b]);
     }
 }
 

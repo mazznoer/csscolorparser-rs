@@ -300,16 +300,8 @@ impl Color {
     /// * `a`: How green/red the color is
     /// * `b`: How blue/yellow the color is
     /// * `alpha`: Alpha [0..1]
-    #[allow(clippy::excessive_precision)]
     pub fn from_oklaba(l: f32, a: f32, b: f32, alpha: f32) -> Self {
-        let l_ = (l + 0.3963377774 * a + 0.2158037573 * b).powi(3);
-        let m_ = (l - 0.1055613458 * a - 0.0638541728 * b).powi(3);
-        let s_ = (l - 0.0894841775 * a - 1.2914855480 * b).powi(3);
-
-        let r = 4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_;
-        let g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_;
-        let b = -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_;
-
+        let [r, g, b] = oklab_to_linear_rgb(l, a, b);
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
@@ -350,8 +342,12 @@ impl Color {
     #[cfg(feature = "lab")]
     /// Returns: `[l, a, b, alpha]`
     pub fn to_laba(&self) -> [f32; 4] {
-        let Lab { l, a, b } = Lab::from_rgb_normalized(&[self.r, self.g, self.b]);
-        [l, a, b, self.a]
+        let Lab { l, a, b } = Lab::from_rgb_normalized(&[
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        ]);
+        [l, a, b, self.a.clamp(0.0, 1.0)]
     }
 
     #[cfg(feature = "lab")]
@@ -401,8 +397,12 @@ impl Color {
     #[cfg(feature = "lab")]
     /// Returns: `[l, c, h, alpha]`
     pub fn to_lcha(&self) -> [f32; 4] {
-        let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[self.r, self.g, self.b]));
-        [l, c, h, self.a]
+        let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        ]));
+        [l, c, h, self.a.clamp(0.0, 1.0)]
     }
 
     #[cfg(feature = "lab")]
@@ -581,16 +581,10 @@ impl Color {
     }
 
     /// Returns: `[l, a, b, alpha]`
-    #[allow(clippy::excessive_precision)]
     pub fn to_oklaba(&self) -> [f32; 4] {
         let [r, g, b, _] = self.to_linear_rgba();
-        let l_ = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b).cbrt();
-        let m_ = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b).cbrt();
-        let s_ = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b).cbrt();
-        let l = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
-        let a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
-        let b = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
-        [l, a, b, self.a]
+        let [l, a, b] = linear_rgb_to_oklab(r, g, b);
+        [l, a, b, self.a.clamp(0.0, 1.0)]
     }
 
     /// Get the RGB hexadecimal color string.

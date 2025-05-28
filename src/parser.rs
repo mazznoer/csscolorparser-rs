@@ -86,6 +86,7 @@ impl error::Error for ParseColorError {}
 /// # Ok(())
 /// # }
 /// ```
+#[inline(never)]
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     let s = s.trim();
 

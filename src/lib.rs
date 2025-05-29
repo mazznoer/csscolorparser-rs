@@ -72,6 +72,7 @@
 #![warn(missing_docs)]
 
 mod color;
+mod color2;
 pub use color::Color;
 
 mod parser;

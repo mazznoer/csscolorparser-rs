@@ -41,52 +41,6 @@ impl Color {
         Self { r, g, b, a }
     }
 
-    /// Returns: `[r, g, b, a]`
-    ///
-    /// * Red, green, blue and alpha in the range [0..1]
-    pub fn to_array(&self) -> [f32; 4] {
-        [
-            self.r.clamp(0.0, 1.0),
-            self.g.clamp(0.0, 1.0),
-            self.b.clamp(0.0, 1.0),
-            self.a.clamp(0.0, 1.0),
-        ]
-    }
-
-    /// Returns: `[r, g, b, a]`
-    ///
-    /// * Red, green, blue and alpha in the range [0..255]
-    pub fn to_rgba8(&self) -> [u8; 4] {
-        [
-            (self.r * 255.0 + 0.5) as u8,
-            (self.g * 255.0 + 0.5) as u8,
-            (self.b * 255.0 + 0.5) as u8,
-            (self.a * 255.0 + 0.5) as u8,
-        ]
-    }
-
-    /// Returns: `[r, g, b, a]`
-    ///
-    /// * Red, green, blue and alpha in the range [0..65535]
-    pub fn to_rgba16(&self) -> [u16; 4] {
-        [
-            (self.r * 65535.0 + 0.5) as u16,
-            (self.g * 65535.0 + 0.5) as u16,
-            (self.b * 65535.0 + 0.5) as u16,
-            (self.a * 65535.0 + 0.5) as u16,
-        ]
-    }
-
-    /// Restricts R, G, B, A values to the range [0..1].
-    pub fn clamp(&self) -> Self {
-        Self {
-            r: self.r.clamp(0.0, 1.0),
-            g: self.g.clamp(0.0, 1.0),
-            b: self.b.clamp(0.0, 1.0),
-            a: self.a.clamp(0.0, 1.0),
-        }
-    }
-
     /// Arguments:
     ///
     /// * `r`: Red value [0..255]
@@ -200,30 +154,6 @@ impl Color {
     }
 
     #[cfg(feature = "lab")]
-    /// Returns: `[l, a, b, alpha]`
-    pub fn to_laba(&self) -> [f32; 4] {
-        let Lab { l, a, b } = Lab::from_rgb_normalized(&[
-            self.r.clamp(0.0, 1.0),
-            self.g.clamp(0.0, 1.0),
-            self.b.clamp(0.0, 1.0),
-        ]);
-        [l, a, b, self.a.clamp(0.0, 1.0)]
-    }
-
-    #[cfg(feature = "lab")]
-    /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
-    pub fn interpolate_lab(&self, other: &Color, t: f32) -> Self {
-        let [l1, a1, b1, alpha1] = self.to_laba();
-        let [l2, a2, b2, alpha2] = other.to_laba();
-        Self::from_laba(
-            l1 + t * (l2 - l1),
-            a1 + t * (a2 - a1),
-            b1 + t * (b2 - b1),
-            alpha1 + t * (alpha2 - alpha1),
-        )
-    }
-
-    #[cfg(feature = "lab")]
     /// Arguments:
     ///
     /// * `l`: Lightness
@@ -233,30 +163,6 @@ impl Color {
     pub fn from_lcha(l: f32, c: f32, h: f32, alpha: f32) -> Self {
         let [r, g, b] = LCh { l, c, h }.to_lab().to_rgb_normalized();
         Self::new(r, g, b, alpha)
-    }
-
-    #[cfg(feature = "lab")]
-    /// Returns: `[l, c, h, alpha]`
-    pub fn to_lcha(&self) -> [f32; 4] {
-        let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[
-            self.r.clamp(0.0, 1.0),
-            self.g.clamp(0.0, 1.0),
-            self.b.clamp(0.0, 1.0),
-        ]));
-        [l, c, h, self.a.clamp(0.0, 1.0)]
-    }
-
-    #[cfg(feature = "lab")]
-    /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
-    pub fn interpolate_lch(&self, other: &Color, t: f32) -> Self {
-        let [l1, c1, h1, alpha1] = self.to_lcha();
-        let [l2, c2, h2, alpha2] = other.to_lcha();
-        Self::from_lcha(
-            l1 + t * (l2 - l1),
-            c1 + t * (c2 - c1),
-            interp_angle_rad(h1, h2, t),
-            alpha1 + t * (alpha2 - alpha1),
-        )
     }
 
     /// Create color from CSS color string.
@@ -280,6 +186,16 @@ impl Color {
         parse(s.as_ref())
     }
 
+    /// Restricts R, G, B, A values to the range [0..1].
+    pub fn clamp(&self) -> Self {
+        Self {
+            r: self.r.clamp(0.0, 1.0),
+            g: self.g.clamp(0.0, 1.0),
+            b: self.b.clamp(0.0, 1.0),
+            a: self.a.clamp(0.0, 1.0),
+        }
+    }
+
     /// Returns name if there is a name for this color.
     ///
     /// **Note:** It ignores transparency (alpha value).
@@ -300,6 +216,42 @@ impl Color {
             }
         }
         None
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
+    pub fn to_array(&self) -> [f32; 4] {
+        [
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        ]
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
+    pub fn to_rgba8(&self) -> [u8; 4] {
+        [
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+            (self.a * 255.0 + 0.5) as u8,
+        ]
+    }
+
+    /// Returns: `[r, g, b, a]`
+    ///
+    /// * Red, green, blue and alpha in the range [0..65535]
+    pub fn to_rgba16(&self) -> [u16; 4] {
+        [
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
+            (self.a * 65535.0 + 0.5) as u16,
+        ]
     }
 
     /// Returns: `[h, s, v, a]`
@@ -400,6 +352,28 @@ impl Color {
         [l, a, b, self.a.clamp(0.0, 1.0)]
     }
 
+    #[cfg(feature = "lab")]
+    /// Returns: `[l, a, b, alpha]`
+    pub fn to_laba(&self) -> [f32; 4] {
+        let Lab { l, a, b } = Lab::from_rgb_normalized(&[
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        ]);
+        [l, a, b, self.a.clamp(0.0, 1.0)]
+    }
+
+    #[cfg(feature = "lab")]
+    /// Returns: `[l, c, h, alpha]`
+    pub fn to_lcha(&self) -> [f32; 4] {
+        let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        ]));
+        [l, c, h, self.a.clamp(0.0, 1.0)]
+    }
+
     /// Get the RGB hexadecimal color string.
     pub fn to_hex_string(&self) -> String {
         let [r, g, b, a] = self.to_rgba8();
@@ -464,6 +438,32 @@ impl Color {
             l1 + t * (l2 - l1),
             a1 + t * (a2 - a1),
             b1 + t * (b2 - b1),
+            alpha1 + t * (alpha2 - alpha1),
+        )
+    }
+
+    #[cfg(feature = "lab")]
+    /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
+    pub fn interpolate_lab(&self, other: &Color, t: f32) -> Self {
+        let [l1, a1, b1, alpha1] = self.to_laba();
+        let [l2, a2, b2, alpha2] = other.to_laba();
+        Self::from_laba(
+            l1 + t * (l2 - l1),
+            a1 + t * (a2 - a1),
+            b1 + t * (b2 - b1),
+            alpha1 + t * (alpha2 - alpha1),
+        )
+    }
+
+    #[cfg(feature = "lab")]
+    /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
+    pub fn interpolate_lch(&self, other: &Color, t: f32) -> Self {
+        let [l1, c1, h1, alpha1] = self.to_lcha();
+        let [l2, c2, h2, alpha2] = other.to_lcha();
+        Self::from_lcha(
+            l1 + t * (l2 - l1),
+            c1 + t * (c2 - c1),
+            interp_angle_rad(h1, h2, t),
             alpha1 + t * (alpha2 - alpha1),
         )
     }

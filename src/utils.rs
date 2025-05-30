@@ -172,11 +172,7 @@ pub(crate) fn rgb_to_hwb(r: f32, g: f32, b: f32) -> [f32; 3] {
 
 #[inline]
 pub(crate) fn normalize_angle(t: f32) -> f32 {
-    let mut t = t % 360.0;
-    if t < 0.0 {
-        t += 360.0;
-    }
-    t
+    ((t % 360.0) + 360.0) % 360.0
 }
 
 #[inline]
@@ -212,6 +208,7 @@ mod tests {
         let data = vec![
             (0.0, 0.0),
             (360.0, 0.0),
+            (720.0, 0.0),
             (400.0, 40.0),
             (1155.0, 75.0),
             (-360.0, 0.0),

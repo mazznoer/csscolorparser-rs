@@ -404,6 +404,50 @@ impl Color {
         format!("rgb({},{},{})", r, g, b)
     }
 
+    /// Get CSS `hsl()` color representation
+    pub fn to_css_hsl(&self) -> String {
+        let [h, s, l, alpha] = self.to_hsla();
+        let h = if h.is_nan() {
+            "none".into()
+        } else {
+            fmt_float(h, 2)
+        };
+        let s = (s * 100.0).floor();
+        let l = (l * 100.0).floor();
+        format!("hsl({h} {s}% {l}%{})", fmt_alpha(alpha))
+    }
+
+    /// Get CSS `hwb()` color representation
+    pub fn to_css_hwb(&self) -> String {
+        let [h, w, b, alpha] = self.to_hwba();
+        let h = if h.is_nan() {
+            "none".into()
+        } else {
+            fmt_float(h, 2)
+        };
+        let w = (w * 100.0).floor();
+        let b = (b * 100.0).floor();
+        format!("hwb({h} {w}% {b}%{})", fmt_alpha(alpha))
+    }
+
+    /// Get CSS `oklab()` color representation
+    pub fn to_css_oklab(&self) -> String {
+        let [l, a, b, alpha] = self.to_oklaba();
+        let l = fmt_float(l, 3);
+        let a = fmt_float(a, 3);
+        let b = fmt_float(b, 3);
+        format!("oklab({l} {a} {b}{})", fmt_alpha(alpha))
+    }
+
+    /// Get CSS `oklch()` color representation
+    pub fn to_css_oklch(&self) -> String {
+        let [l, c, h, alpha] = self.to_oklcha();
+        let l = fmt_float(l, 3);
+        let c = fmt_float(c, 3);
+        let h = fmt_float(normalize_angle(h.to_degrees()), 2);
+        format!("oklch({l} {c} {h}{})", fmt_alpha(alpha))
+    }
+
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
     pub fn interpolate_rgb(&self, other: &Color, t: f32) -> Self {
         Self {
@@ -628,6 +672,19 @@ impl Visitor<'_> for ColorVisitor {
         E: serde::de::Error,
     {
         Color::from_str(v).map_err(serde::de::Error::custom)
+    }
+}
+
+fn fmt_float(t: f32, precision: usize) -> String {
+    let s = format!("{:.1$}", t, precision);
+    s.trim_end_matches('0').trim_end_matches('.').to_string()
+}
+
+fn fmt_alpha(alpha: f32) -> String {
+    if alpha < 1.0 {
+        format!(" / {}%", (alpha.max(0.0) * 100.0).floor())
+    } else {
+        "".into()
     }
 }
 

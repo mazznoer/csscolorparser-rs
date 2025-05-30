@@ -352,6 +352,14 @@ impl Color {
         [l, a, b, self.a.clamp(0.0, 1.0)]
     }
 
+    /// Returns: `[l, c, h, alpha]`
+    pub fn to_oklcha(&self) -> [f32; 4] {
+        let [l, a, b, alpha] = self.to_oklaba();
+        let c = (a * a + b * b).sqrt();
+        let h = b.atan2(a);
+        [l, c, h, alpha]
+    }
+
     #[cfg(feature = "lab")]
     /// Returns: `[l, a, b, alpha]`
     pub fn to_laba(&self) -> [f32; 4] {

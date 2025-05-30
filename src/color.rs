@@ -448,6 +448,26 @@ impl Color {
         format!("oklch({l} {c} {h}{})", fmt_alpha(alpha))
     }
 
+    #[cfg(feature = "lab")]
+    /// Get CSS `lab()` color representation
+    pub fn to_css_lab(&self) -> String {
+        let [l, a, b, alpha] = self.to_laba();
+        let l = fmt_float(l, 2);
+        let a = fmt_float(a, 2);
+        let b = fmt_float(b, 2);
+        format!("lab({l} {a} {b}{})", fmt_alpha(alpha))
+    }
+
+    #[cfg(feature = "lab")]
+    /// Get CSS `lch()` color representation
+    pub fn to_css_lch(&self) -> String {
+        let [l, c, h, alpha] = self.to_lcha();
+        let l = fmt_float(l, 2);
+        let c = fmt_float(c, 2);
+        let h = fmt_float(h.to_degrees(), 2);
+        format!("lch({l} {c} {h}{})", fmt_alpha(alpha))
+    }
+
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
     pub fn interpolate_rgb(&self, other: &Color, t: f32) -> Self {
         Self {

@@ -19,12 +19,12 @@ features = ["named-colors", "lab", "rust-rgb", "cint", "serde"]
 
 [features]
 default = ["named-colors"]
+lab = []
 named-colors = ["phf"]
 rust-rgb = ["rgb"]
 
 [dependencies]
 cint = { version = "^0.3.1", optional = true }
-lab = { version = "0.11.0", optional = true }
 phf = { version = "0.11.0", optional = true, features = ["macros"] }
 rgb = { version = "0.8.33", optional = true }
 serde = { version = "1.0.139", optional = true, features = ["derive"] }

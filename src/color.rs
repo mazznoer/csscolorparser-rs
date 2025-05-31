@@ -9,7 +9,7 @@ use rgb::{RGB, RGBA};
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 #[cfg(feature = "lab")]
-use lab::{LCh, Lab};
+use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 
 use crate::utils::*;
 use crate::{parse, ParseColorError};
@@ -149,8 +149,8 @@ impl Color {
     /// * `b`: Distance along the `b` axis
     /// * `alpha`: Alpha [0..1]
     pub fn from_laba(l: f32, a: f32, b: f32, alpha: f32) -> Self {
-        let [r, g, b] = Lab { l, a, b }.to_rgb_normalized();
-        Self::new(r, g, b, alpha)
+        let [r, g, b] = lab_to_linear_rgb(l, a, b);
+        Self::from_linear_rgba(r, g, b, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -161,8 +161,7 @@ impl Color {
     /// * `h`: Hue angle in radians
     /// * `alpha`: Alpha [0..1]
     pub fn from_lcha(l: f32, c: f32, h: f32, alpha: f32) -> Self {
-        let [r, g, b] = LCh { l, c, h }.to_lab().to_rgb_normalized();
-        Self::new(r, g, b, alpha)
+        Self::from_laba(l, c * h.cos(), c * h.sin(), alpha)
     }
 
     /// Create color from CSS color string.
@@ -363,23 +362,18 @@ impl Color {
     #[cfg(feature = "lab")]
     /// Returns: `[l, a, b, alpha]`
     pub fn to_laba(&self) -> [f32; 4] {
-        let Lab { l, a, b } = Lab::from_rgb_normalized(&[
-            self.r.clamp(0.0, 1.0),
-            self.g.clamp(0.0, 1.0),
-            self.b.clamp(0.0, 1.0),
-        ]);
-        [l, a, b, self.a.clamp(0.0, 1.0)]
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let [l, a, b] = linear_rgb_to_lab(r, g, b);
+        [l, a, b, alpha.clamp(0.0, 1.0)]
     }
 
     #[cfg(feature = "lab")]
     /// Returns: `[l, c, h, alpha]`
     pub fn to_lcha(&self) -> [f32; 4] {
-        let LCh { l, c, h } = LCh::from_lab(Lab::from_rgb_normalized(&[
-            self.r.clamp(0.0, 1.0),
-            self.g.clamp(0.0, 1.0),
-            self.b.clamp(0.0, 1.0),
-        ]));
-        [l, c, h, self.a.clamp(0.0, 1.0)]
+        let [l, a, b, alpha] = self.to_laba();
+        let c = (a * a + b * b).sqrt();
+        let h = b.atan2(a);
+        [l, c, h, alpha.clamp(0.0, 1.0)]
     }
 
     /// Get CSS RGB hexadecimal color representation
@@ -455,10 +449,20 @@ impl Color {
     #[cfg(feature = "lab")]
     /// Get CSS `lch()` color representation
     pub fn to_css_lch(&self) -> String {
+        use std::f32::consts::PI;
+
+        fn to_degrees(t: f32) -> f32 {
+            if t > 0.0 {
+                t / PI * 180.0
+            } else {
+                360.0 - (t.abs() / PI) * 180.0
+            }
+        }
+
         let [l, c, h, alpha] = self.to_lcha();
         let l = fmt_float(l, 2);
         let c = fmt_float(c, 2);
-        let h = fmt_float(h.to_degrees(), 2);
+        let h = fmt_float(to_degrees(h), 2);
         format!("lch({l} {c} {h}{})", fmt_alpha(alpha))
     }
 

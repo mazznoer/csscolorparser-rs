@@ -59,7 +59,7 @@ fn named_colors() {
 
     for (name, hex) in test_data {
         let c = csscolorparser::parse(name).unwrap();
-        assert_eq!(c.to_hex_string(), hex);
+        assert_eq!(c.to_css_hex(), hex);
 
         let c = csscolorparser::parse(hex).unwrap();
         assert_eq!(c.name(), Some(name));

@@ -177,8 +177,8 @@ impl Color {
     ///
     /// assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
     /// assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-    /// assert_eq!(c.to_hex_string(), "#ff0000");
-    /// assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+    /// assert_eq!(c.to_css_hex(), "#ff0000");
+    /// assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
     /// # Ok(())
     /// # }
     /// ```
@@ -382,26 +382,20 @@ impl Color {
         [l, c, h, self.a.clamp(0.0, 1.0)]
     }
 
-    /// Get the RGB hexadecimal color string.
-    pub fn to_hex_string(&self) -> String {
+    /// Get CSS RGB hexadecimal color representation
+    pub fn to_css_hex(&self) -> String {
         let [r, g, b, a] = self.to_rgba8();
-
         if a < 255 {
-            return format!("#{:02x}{:02x}{:02x}{:02x}", r, g, b, a);
+            format!("#{r:02x}{g:02x}{b:02x}{a:02x}")
+        } else {
+            format!("#{r:02x}{g:02x}{b:02x}")
         }
-
-        format!("#{:02x}{:02x}{:02x}", r, g, b)
     }
 
-    /// Get the CSS `rgb()` format string.
-    pub fn to_rgb_string(&self) -> String {
+    /// Get CSS `rgb()` color representation
+    pub fn to_css_rgb(&self) -> String {
         let [r, g, b, _] = self.to_rgba8();
-
-        if self.a < 1.0 {
-            return format!("rgba({},{},{},{})", r, g, b, self.a);
-        }
-
-        format!("rgb({},{},{})", r, g, b)
+        format!("rgb({r} {g} {b}{})", fmt_alpha(self.a))
     }
 
     /// Get CSS `hsl()` color representation
@@ -664,7 +658,7 @@ impl From<RGBA<f32>> for Color {
 #[cfg(feature = "serde")]
 impl Serialize for Color {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(&self.to_hex_string())
+        serializer.serialize_str(&self.to_css_hex())
     }
 }
 

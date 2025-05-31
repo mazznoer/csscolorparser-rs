@@ -54,8 +54,8 @@ let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 
 assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
 assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-assert_eq!(c.to_hex_string(), "#ff0000");
-assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+assert_eq!(c.to_css_hex(), "#ff0000");
+assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
 assert_eq!(c.name(), Some("red"));
 ```
 
@@ -67,7 +67,7 @@ use csscolorparser::Color;
 let c: Color = "#ff00007f".parse()?;
 
 assert_eq!(c.to_rgba8(), [255, 0, 0, 127]);
-assert_eq!(c.to_hex_string(), "#ff00007f");
+assert_eq!(c.to_css_hex(), "#ff00007f");
 ```
 
 ## Features

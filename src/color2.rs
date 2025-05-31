@@ -189,4 +189,18 @@ impl Color {
             (self.a * 255.0).round() as u8,
         )
     }
+
+    // --- Since version 0.7.2
+
+    #[deprecated = "Use [to_css_hex](#method.to_css_hex) instead."]
+    /// Get the RGB hexadecimal color string.
+    pub fn to_hex_string(&self) -> String {
+        self.to_css_hex()
+    }
+
+    #[deprecated = "Use [to_css_rgb](#method.to_css_rgb) instead."]
+    /// Get the CSS `rgb()` format string.
+    pub fn to_rgb_string(&self) -> String {
+        self.to_css_rgb()
+    }
 }

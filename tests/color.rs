@@ -8,8 +8,8 @@ fn basic() {
     assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
     assert_eq!(c.to_rgba16(), [65535, 0, 0, 65535]);
     assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-    assert_eq!(c.to_hex_string(), "#ff0000");
-    assert_eq!(c.to_rgb_string(), "rgb(255,0,0)");
+    assert_eq!(c.to_css_hex(), "#ff0000");
+    assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
     assert_eq!(c.to_string(), "RGBA(1,0,0,1)");
     assert_eq!(c.to_hsva(), [0.0, 1.0, 1.0, 1.0]);
     assert_eq!(c.to_hsla(), [0.0, 1.0, 0.5, 1.0]);
@@ -19,8 +19,8 @@ fn basic() {
 
     let c = Color::new(1.0, 0.0, 0.0, 0.5);
     assert_eq!(c.to_rgba8(), [255, 0, 0, 128]);
-    assert_eq!(c.to_hex_string(), "#ff000080");
-    assert_eq!(c.to_rgb_string(), "rgba(255,0,0,0.5)");
+    assert_eq!(c.to_css_hex(), "#ff000080");
+    assert_eq!(c.to_css_rgb(), "rgb(255 0 0 / 50%)");
     assert_eq!(c.to_string(), "RGBA(1,0,0,0.5)");
 
     let c = Color::new(0.0, 1.0, 0.0, 1.0);
@@ -117,15 +117,15 @@ fn convert_colors() {
         Color::from_hsla(120.0, 0.3, 0.2, 1.0),
     ];
     for (i, col) in colors.iter().enumerate() {
-        println!("{i} -> {}, {}", &col.to_hex_string(), &col.to_rgb_string());
+        println!("{i} -> {}, {}", &col.to_css_hex(), &col.to_css_rgb());
 
         let [a, b, c, d] = col.to_linear_rgba();
         let x = Color::from_linear_rgba(a, b, c, d);
-        assert_eq!(&col.to_hex_string(), &x.to_hex_string());
+        assert_eq!(&col.to_css_hex(), &x.to_css_hex());
 
         let [a, b, c, d] = col.to_oklaba();
         let x = Color::from_oklaba(a, b, c, d);
-        assert_eq!(&col.to_hex_string(), &x.to_hex_string());
+        assert_eq!(&col.to_css_hex(), &x.to_css_hex());
     }
 
     let data = &[
@@ -149,41 +149,41 @@ fn convert_colors() {
     ];
     for s in data {
         let col = csscolorparser::parse(s).unwrap();
-        assert_eq!(s, &col.to_hex_string());
+        assert_eq!(s, &col.to_css_hex());
 
         let [a, b, c, d] = col.to_rgba8();
         let x = Color::from_rgba8(a, b, c, d);
-        assert_eq!(s, &x.to_hex_string());
+        assert_eq!(s, &x.to_css_hex());
 
         let [a, b, c, d] = col.to_hsva();
         let x = Color::from_hsva(a, b, c, d);
-        assert_eq!(s, &x.to_hex_string());
+        assert_eq!(s, &x.to_css_hex());
 
         let [a, b, c, d] = col.to_hsla();
         let x = Color::from_hsla(a, b, c, d);
-        assert_eq!(s, &x.to_hex_string());
+        assert_eq!(s, &x.to_css_hex());
 
         let [a, b, c, d] = col.to_hwba();
         let x = Color::from_hwba(a, b, c, d);
-        assert_eq!(s, &x.to_hex_string());
+        assert_eq!(s, &x.to_css_hex());
 
         let [a, b, c, d] = col.to_linear_rgba();
         let x = Color::from_linear_rgba(a, b, c, d);
-        assert_eq!(s, &x.to_hex_string());
+        assert_eq!(s, &x.to_css_hex());
 
         let [a, b, c, d] = col.to_oklaba();
         let x = Color::from_oklaba(a, b, c, d);
-        assert_eq!(s, &x.to_hex_string());
+        assert_eq!(s, &x.to_css_hex());
 
         #[cfg(feature = "lab")]
         {
             let [a, b, c, d] = col.to_laba();
             let x = Color::from_laba(a, b, c, d);
-            assert_eq!(s, &x.to_hex_string());
+            assert_eq!(s, &x.to_css_hex());
 
             let [a, b, c, d] = col.to_lcha();
             let x = Color::from_lcha(a, b, c, d);
-            assert_eq!(s, &x.to_hex_string());
+            assert_eq!(s, &x.to_css_hex());
         }
     }
 }

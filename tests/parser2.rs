@@ -1,6 +1,37 @@
 use csscolorparser::parse;
 
 #[test]
+fn rgb() {
+    let test_data = [
+        "rgb(71 175 99)",
+        "rgb(170 203 72)",
+        "rgb(45 232 237)",
+        "rgb(119 1 124)",
+        "rgb(243 93 86)",
+        "rgb(223 25 119)",
+        "rgb(6 44 133)",
+        "rgb(167 240 237)",
+        "rgb(97 71 129)",
+        "rgb(125 68 93)",
+        "rgb(139 187 62)",
+        "rgb(100 51 80)",
+        "rgb(27 249 123)",
+        "rgb(230 63 99)",
+        "rgb(241 34 4)",
+        "rgb(149 222 185)",
+        "rgb(3 129 213)",
+        "rgb(88 220 108)",
+        "rgb(199 169 6)",
+        "rgb(54 70 163)",
+        "rgb(90 42 106)",
+    ];
+    for s in test_data {
+        let c = parse(s).unwrap();
+        assert_eq!(s, c.to_css_rgb());
+    }
+}
+
+#[test]
 fn hsl() {
     let test_data = [
     /*

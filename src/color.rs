@@ -400,8 +400,8 @@ impl Color {
         } else {
             fmt_float(h, 2)
         };
-        let s = (s * 100.0).floor();
-        let l = (l * 100.0).floor();
+        let s = (s * 100.0 + 0.5).floor();
+        let l = (l * 100.0 + 0.5).floor();
         format!("hsl({h} {s}% {l}%{})", fmt_alpha(alpha))
     }
 
@@ -413,8 +413,8 @@ impl Color {
         } else {
             fmt_float(h, 2)
         };
-        let w = (w * 100.0).floor();
-        let b = (b * 100.0).floor();
+        let w = (w * 100.0 + 0.5).floor();
+        let b = (b * 100.0 + 0.5).floor();
         format!("hwb({h} {w}% {b}%{})", fmt_alpha(alpha))
     }
 
@@ -700,7 +700,7 @@ fn fmt_float(t: f32, precision: usize) -> String {
 
 fn fmt_alpha(alpha: f32) -> String {
     if alpha < 1.0 {
-        format!(" / {}%", (alpha.max(0.0) * 100.0).floor())
+        format!(" / {}%", (alpha.max(0.0) * 100.0 + 0.5).floor())
     } else {
         "".into()
     }

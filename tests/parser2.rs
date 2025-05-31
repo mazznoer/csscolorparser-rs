@@ -34,7 +34,6 @@ fn rgb() {
 #[test]
 fn hsl() {
     let test_data = [
-    /*
         "hsl(0 48% 83%)",
         "hsl(17 73% 13%)",
         "hsl(35 40% 84%)",
@@ -56,7 +55,6 @@ fn hsl() {
         "hsl(323 97% 26%)",
         "hsl(341 61% 66%)",
         "hsl(359 15% 74%)",
-    */
     ];
     for s in test_data {
         let c = parse(s).unwrap();
@@ -67,7 +65,6 @@ fn hsl() {
 #[test]
 fn hwb() {
     let test_data = [
-    /*
         "hwb(0 87% 0%)",
         "hwb(17 0% 23%)",
         "hwb(35 0% 7%)",
@@ -89,7 +86,6 @@ fn hwb() {
         "hwb(323 55% 0%)",
         "hwb(341 0% 72%)",
         "hwb(359 0% 2%)",
-    */
     ];
     for s in test_data {
         let c = parse(s).unwrap();

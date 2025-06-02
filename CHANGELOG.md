@@ -2,6 +2,22 @@
 
 ## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.1...HEAD)
 
+### Added
+
+- `Color::to_oklcha()`
+- `Color::to_css_hex()`
+- `Color::to_css_rgb()`
+- `Color::to_css_hsl()`
+- `Color::to_css_hwb()`
+- `Color::to_css_lab()`
+- `Color::to_css_lch()`
+- `Color::to_css_oklab()`
+- `Color::to_css_oklch()`
+
+### Changed
+
+- Deprecate `Color::to_hex_string()` and `Color::to_rgb_string()`
+
 ## [0.7.1](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.0...v0.7.1)
 
 ### Changed

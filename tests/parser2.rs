@@ -1,6 +1,47 @@
 use csscolorparser::parse;
 
 #[test]
+fn hex() {
+    let test_data = [
+        "#71fe15",
+        "#d6e3c9",
+        "#2a7719",
+        "#b53717",
+        "#5b0b8d",
+        "#aff632",
+        "#65ec8d",
+        "#d35493",
+        "#289e5f",
+        "#b46152",
+        "#e0afee",
+        "#ac2be4",
+        "#233490",
+        "#1afbc5",
+        "#e41755",
+        "#e052ee",
+        "#4d1b5e",
+        "#230cde",
+        "#f8a243",
+        "#a130d1",
+        "#b38373",
+        "#6b9fa203",
+        "#0e5e0be6",
+        "#84f9a716",
+        "#48651550",
+        "#1adc2cf4",
+        "#c191a31c",
+        "#a25518c5",
+        "#cb33f2c9",
+        "#89b21d36",
+        "#cbb97f3e",
+    ];
+    for s in test_data {
+        let c = parse(s).unwrap();
+        assert_eq!(s, c.to_css_hex());
+    }
+}
+
+#[test]
 fn rgb() {
     let test_data = [
         "rgb(71 175 99)",

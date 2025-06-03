@@ -708,6 +708,7 @@ fn fmt_alpha(alpha: f32) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(any(feature = "serde", feature = "rust-rgb"))]
     use super::*;
 
     #[cfg(feature = "rust-rgb")]

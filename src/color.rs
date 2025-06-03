@@ -230,6 +230,18 @@ impl Color {
         ]
     }
 
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
+    pub fn to_tuple(&self) -> (f32, f32, f32, f32) {
+        (
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        )
+    }
+
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
@@ -242,6 +254,18 @@ impl Color {
         ]
     }
 
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
+    pub fn to_rgba8_tuple(&self) -> (u8, u8, u8, u8) {
+        (
+            (self.r * 255.0 + 0.5) as u8,
+            (self.g * 255.0 + 0.5) as u8,
+            (self.b * 255.0 + 0.5) as u8,
+            (self.a * 255.0 + 0.5) as u8,
+        )
+    }
+
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..65535]
@@ -252,6 +276,18 @@ impl Color {
             (self.b * 65535.0 + 0.5) as u16,
             (self.a * 65535.0 + 0.5) as u16,
         ]
+    }
+
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..65535]
+    pub fn to_rgba16_tuple(&self) -> (u16, u16, u16, u16) {
+        (
+            (self.r * 65535.0 + 0.5) as u16,
+            (self.g * 65535.0 + 0.5) as u16,
+            (self.b * 65535.0 + 0.5) as u16,
+            (self.a * 65535.0 + 0.5) as u16,
+        )
     }
 
     /// Returns: `[h, s, v, a]`
@@ -274,6 +310,26 @@ impl Color {
         ]
     }
 
+    /// Returns: `(h, s, v, a)`
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `v`: Value [0..1]
+    /// * `a`: Alpha [0..1]
+    pub fn to_hsva_tuple(&self) -> (f32, f32, f32, f32) {
+        let [h, s, v] = rgb_to_hsv(
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        );
+        (
+            h,
+            s.clamp(0.0, 1.0),
+            v.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        )
+    }
+
     /// Returns: `[h, s, l, a]`
     ///
     /// * `h`: Hue angle [0..360]
@@ -292,6 +348,26 @@ impl Color {
             l.clamp(0.0, 1.0),
             self.a.clamp(0.0, 1.0),
         ]
+    }
+
+    /// Returns: `(h, s, l, a)`
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `s`: Saturation [0..1]
+    /// * `l`: Lightness [0..1]
+    /// * `a`: Alpha [0..1]
+    pub fn to_hsla_tuple(&self) -> (f32, f32, f32, f32) {
+        let [h, s, l] = rgb_to_hsl(
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        );
+        (
+            h,
+            s.clamp(0.0, 1.0),
+            l.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        )
     }
 
     /// Returns: `[h, w, b, a]`
@@ -314,6 +390,26 @@ impl Color {
         ]
     }
 
+    /// Returns: `(h, w, b, a)`
+    ///
+    /// * `h`: Hue angle [0..360]
+    /// * `w`: Whiteness [0..1]
+    /// * `b`: Blackness [0..1]
+    /// * `a`: Alpha [0..1]
+    pub fn to_hwba_tuple(&self) -> (f32, f32, f32, f32) {
+        let [h, w, b] = rgb_to_hwb(
+            self.r.clamp(0.0, 1.0),
+            self.g.clamp(0.0, 1.0),
+            self.b.clamp(0.0, 1.0),
+        );
+        (
+            h,
+            w.clamp(0.0, 1.0),
+            b.clamp(0.0, 1.0),
+            self.a.clamp(0.0, 1.0),
+        )
+    }
+
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..1]
@@ -332,6 +428,24 @@ impl Color {
         ]
     }
 
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..1]
+    pub fn to_linear_rgba_tuple(&self) -> (f32, f32, f32, f32) {
+        fn to_linear(x: f32) -> f32 {
+            if x >= 0.04045 {
+                return ((x + 0.055) / 1.055).powf(2.4);
+            }
+            x / 12.92
+        }
+        (
+            to_linear(self.r),
+            to_linear(self.g),
+            to_linear(self.b),
+            self.a,
+        )
+    }
+
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
@@ -345,11 +459,31 @@ impl Color {
         ]
     }
 
+    /// Returns: `(r, g, b, a)`
+    ///
+    /// * Red, green, blue and alpha in the range [0..255]
+    pub fn to_linear_rgba_u8_tuple(&self) -> (u8, u8, u8, u8) {
+        let (r, g, b, a) = self.to_linear_rgba_tuple();
+        (
+            (r * 255.0).round() as u8,
+            (g * 255.0).round() as u8,
+            (b * 255.0).round() as u8,
+            (a * 255.0).round() as u8,
+        )
+    }
+
     /// Returns: `[l, a, b, alpha]`
     pub fn to_oklaba(&self) -> [f32; 4] {
         let [r, g, b, _] = self.to_linear_rgba();
         let [l, a, b] = linear_rgb_to_oklab(r, g, b);
         [l, a, b, self.a.clamp(0.0, 1.0)]
+    }
+
+    /// Returns: `(l, a, b, alpha)`
+    pub fn to_oklaba_tuple(&self) -> (f32, f32, f32, f32) {
+        let [r, g, b, _] = self.to_linear_rgba();
+        let [l, a, b] = linear_rgb_to_oklab(r, g, b);
+        (l, a, b, self.a.clamp(0.0, 1.0))
     }
 
     /// Returns: `[l, c, h, alpha]`
@@ -358,6 +492,14 @@ impl Color {
         let c = (a * a + b * b).sqrt();
         let h = b.atan2(a);
         [l, c, h, alpha]
+    }
+
+    /// Returns: `(l, c, h, alpha)`
+    pub fn to_oklcha_tuple(&self) -> (f32, f32, f32, f32) {
+        let (l, a, b, alpha) = self.to_oklaba_tuple();
+        let c = (a * a + b * b).sqrt();
+        let h = b.atan2(a);
+        (l, c, h, alpha)
     }
 
     #[cfg(feature = "lab")]
@@ -369,12 +511,29 @@ impl Color {
     }
 
     #[cfg(feature = "lab")]
+    /// Returns: `(l, a, b, alpha)`
+    pub fn to_laba_tuple(&self) -> (f32, f32, f32, f32) {
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let [l, a, b] = linear_rgb_to_lab(r, g, b);
+        (l, a, b, alpha.clamp(0.0, 1.0))
+    }
+
+    #[cfg(feature = "lab")]
     /// Returns: `[l, c, h, alpha]`
     pub fn to_lcha(&self) -> [f32; 4] {
         let [l, a, b, alpha] = self.to_laba();
         let c = (a * a + b * b).sqrt();
         let h = b.atan2(a);
         [l, c, h, alpha.clamp(0.0, 1.0)]
+    }
+
+    #[cfg(feature = "lab")]
+    /// Returns: `(l, c, h, alpha)`
+    pub fn to_lcha_tuple(&self) -> (f32, f32, f32, f32) {
+        let (l, a, b, alpha) = self.to_laba_tuple();
+        let c = (a * a + b * b).sqrt();
+        let h = b.atan2(a);
+        (l, c, h, alpha.clamp(0.0, 1.0))
     }
 
     /// Get CSS RGB hexadecimal color representation

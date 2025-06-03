@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.1...HEAD)
+## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.2...HEAD)
+
+## [0.7.2](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.1...v0.7.2)
 
 ### Added
 

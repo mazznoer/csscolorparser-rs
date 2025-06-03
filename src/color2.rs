@@ -144,13 +144,6 @@ impl Color {
     }
 
     #[cfg(feature = "lab")]
-    #[deprecated = "Use [to_laba](#method.to_laba) instead."]
-    /// Returns: `[l, a, b, alpha]`
-    pub fn to_lab(&self) -> [f32; 4] {
-        self.to_laba()
-    }
-
-    #[cfg(feature = "lab")]
     #[deprecated = "Use [from_lcha](#method.from_lcha) instead."]
     /// Arguments:
     ///
@@ -160,13 +153,6 @@ impl Color {
     /// * `alpha`: Alpha [0..1]
     pub fn from_lch(l: f32, c: f32, h: f32, alpha: f32) -> Self {
         Self::from_lcha(l, c, h, alpha)
-    }
-
-    #[cfg(feature = "lab")]
-    #[deprecated = "Use [to_lcha](#method.to_lcha) instead."]
-    /// Returns: `[l, c, h, alpha]`
-    pub fn to_lch(&self) -> [f32; 4] {
-        self.to_lcha()
     }
 
     #[deprecated]

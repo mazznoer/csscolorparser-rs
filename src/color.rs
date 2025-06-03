@@ -956,6 +956,22 @@ impl Color {
         )
     }
 
+    /// Lighten this color using HSLA
+    pub fn lighten(&self, amount: f32) -> Self {
+        let [h, s, mut l, a] = self.to_hsla();
+        l += amount / 100.0;
+        l = l.clamp(0.0, 1.0);
+        Self::from_hsla(h, s, l, a)
+    }
+
+    /// Darken this color using HSLA
+    pub fn darken(&self, amount: f32) -> Self {
+        let [h, s, mut l, a] = self.to_hsla();
+        l -= amount / 100.0;
+        l = l.clamp(0.0, 1.0);
+        Self::from_hsla(h, s, l, a)
+    }
+
     #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
     pub fn interpolate_lab(&self, other: &Color, t: f32) -> Self {

@@ -572,6 +572,14 @@ impl TryFrom<&str> for Color {
     }
 }
 
+impl TryFrom<String> for Color {
+    type Error = ParseColorError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        parse(s.as_ref())
+    }
+}
+
 impl From<(f32, f32, f32, f32)> for Color {
     fn from((r, g, b, a): (f32, f32, f32, f32)) -> Self {
         Self { r, g, b, a }

@@ -105,6 +105,22 @@ fn basic() {
 }
 
 #[test]
+fn parser() {
+    use std::str::FromStr;
+    let test_data = ["#71fe15", "#d6e3c9", "#2a7719", "#b53717", "#5b0b8d"];
+    for s in test_data {
+        let c = Color::from_str(s).unwrap();
+        assert_eq!(c.to_css_hex(), s);
+
+        let c = Color::try_from(s).unwrap();
+        assert_eq!(c.to_css_hex(), s);
+
+        let c = Color::try_from(s.to_string()).unwrap();
+        assert_eq!(c.to_css_hex(), s);
+    }
+}
+
+#[test]
 fn convert_colors() {
     let colors = &[
         //Color::new(1.0, 0.7, 0.1, 1.0), //

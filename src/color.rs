@@ -47,7 +47,7 @@ impl Color {
     /// * `g`: Green value [0..255]
     /// * `b`: Blue value [0..255]
     /// * `a`: Alpha value [0..255]
-    pub fn from_rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
+    pub const fn from_rgba8(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self {
             r: r as f32 / 255.0,
             g: g as f32 / 255.0,
@@ -93,7 +93,7 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn from_hsva(h: f32, s: f32, v: f32, a: f32) -> Self {
+    pub const fn from_hsva(h: f32, s: f32, v: f32, a: f32) -> Self {
         let [r, g, b] = hsv_to_rgb(normalize_angle(h), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
         Self::new(r, g, b, a)
     }
@@ -104,7 +104,7 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn from_hsla(h: f32, s: f32, l: f32, a: f32) -> Self {
+    pub const fn from_hsla(h: f32, s: f32, l: f32, a: f32) -> Self {
         let [r, g, b] = hsl_to_rgb(normalize_angle(h), s.clamp(0.0, 1.0), l.clamp(0.0, 1.0));
         Self::new(r, g, b, a)
     }
@@ -115,7 +115,7 @@ impl Color {
     /// * `w`: Whiteness [0..1]
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn from_hwba(h: f32, w: f32, b: f32, a: f32) -> Self {
+    pub const fn from_hwba(h: f32, w: f32, b: f32, a: f32) -> Self {
         let [r, g, b] = hwb_to_rgb(normalize_angle(h), w.clamp(0.0, 1.0), b.clamp(0.0, 1.0));
         Self::new(r, g, b, a)
     }
@@ -186,7 +186,7 @@ impl Color {
     }
 
     /// Restricts R, G, B, A values to the range [0..1].
-    pub fn clamp(&self) -> Self {
+    pub const fn clamp(&self) -> Self {
         Self {
             r: self.r.clamp(0.0, 1.0),
             g: self.g.clamp(0.0, 1.0),
@@ -220,7 +220,7 @@ impl Color {
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..1]
-    pub fn to_array(&self) -> [f32; 4] {
+    pub const fn to_array(&self) -> [f32; 4] {
         [
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
@@ -232,7 +232,7 @@ impl Color {
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..255]
-    pub fn to_rgba8(&self) -> [u8; 4] {
+    pub const fn to_rgba8(&self) -> [u8; 4] {
         [
             (self.r * 255.0 + 0.5) as u8,
             (self.g * 255.0 + 0.5) as u8,
@@ -244,7 +244,7 @@ impl Color {
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..65535]
-    pub fn to_rgba16(&self) -> [u16; 4] {
+    pub const fn to_rgba16(&self) -> [u16; 4] {
         [
             (self.r * 65535.0 + 0.5) as u16,
             (self.g * 65535.0 + 0.5) as u16,
@@ -259,7 +259,7 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn to_hsva(&self) -> [f32; 4] {
+    pub const fn to_hsva(&self) -> [f32; 4] {
         let [h, s, v] = rgb_to_hsv(
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
@@ -279,7 +279,7 @@ impl Color {
     /// * `s`: Saturation [0..1]
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn to_hsla(&self) -> [f32; 4] {
+    pub const fn to_hsla(&self) -> [f32; 4] {
         let [h, s, l] = rgb_to_hsl(
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
@@ -299,7 +299,7 @@ impl Color {
     /// * `w`: Whiteness [0..1]
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
-    pub fn to_hwba(&self) -> [f32; 4] {
+    pub const fn to_hwba(&self) -> [f32; 4] {
         let [h, w, b] = rgb_to_hwb(
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
@@ -467,7 +467,7 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
-    pub fn interpolate_rgb(&self, other: &Color, t: f32) -> Self {
+    pub const fn interpolate_rgb(&self, other: &Color, t: f32) -> Self {
         Self {
             r: self.r + t * (other.r - self.r),
             g: self.g + t * (other.g - self.g),
@@ -489,7 +489,7 @@ impl Color {
     }
 
     /// Blend this color with the other one, in the HSV color-space. `t` in the range [0..1].
-    pub fn interpolate_hsv(&self, other: &Color, t: f32) -> Self {
+    pub const fn interpolate_hsv(&self, other: &Color, t: f32) -> Self {
         let [h1, s1, v1, a1] = self.to_hsva();
         let [h2, s2, v2, a2] = other.to_hsva();
         Self::from_hsva(

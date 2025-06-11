@@ -26,7 +26,7 @@ pub(crate) fn linear_rgb_to_oklab(r: f32, g: f32, b: f32) -> [f32; 3] {
     [l, a, b]
 }
 
-pub(crate) fn hue_to_rgb(n1: f32, n2: f32, h: f32) -> f32 {
+pub(crate) const fn hue_to_rgb(n1: f32, n2: f32, h: f32) -> f32 {
     let h = modulo(h, 6.0);
 
     if h < 1.0 {
@@ -47,7 +47,7 @@ pub(crate) fn hue_to_rgb(n1: f32, n2: f32, h: f32) -> f32 {
 // h = 0..360
 // s, l = 0..1
 // r, g, b = 0..1
-pub(crate) fn hsl_to_rgb(h: f32, s: f32, l: f32) -> [f32; 3] {
+pub(crate) const fn hsl_to_rgb(h: f32, s: f32, l: f32) -> [f32; 3] {
     if s == 0.0 {
         return [l, l, l];
     }
@@ -66,7 +66,7 @@ pub(crate) fn hsl_to_rgb(h: f32, s: f32, l: f32) -> [f32; 3] {
     [r, g, b]
 }
 
-pub(crate) fn hwb_to_rgb(hue: f32, white: f32, black: f32) -> [f32; 3] {
+pub(crate) const fn hwb_to_rgb(hue: f32, white: f32, black: f32) -> [f32; 3] {
     if white + black >= 1.0 {
         let l = white / (white + black);
         return [l, l, l];
@@ -80,7 +80,7 @@ pub(crate) fn hwb_to_rgb(hue: f32, white: f32, black: f32) -> [f32; 3] {
 }
 
 #[allow(clippy::float_cmp)]
-pub(crate) fn hsv_to_hsl(h: f32, s: f32, v: f32) -> [f32; 3] {
+pub(crate) const fn hsv_to_hsl(h: f32, s: f32, v: f32) -> [f32; 3] {
     let l = (2.0 - s) * v / 2.0;
 
     let s = if l != 0.0 {
@@ -98,13 +98,13 @@ pub(crate) fn hsv_to_hsl(h: f32, s: f32, v: f32) -> [f32; 3] {
     [h, s, l]
 }
 
-pub(crate) fn hsv_to_rgb(h: f32, s: f32, v: f32) -> [f32; 3] {
+pub(crate) const fn hsv_to_rgb(h: f32, s: f32, v: f32) -> [f32; 3] {
     let [h, s, l] = hsv_to_hsl(h, s, v);
     hsl_to_rgb(h, s, l)
 }
 
 #[allow(clippy::float_cmp)]
-pub(crate) fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
+pub(crate) const fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
     let v = r.max(g.max(b));
     let d = v - r.min(g.min(b));
 
@@ -130,7 +130,7 @@ pub(crate) fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
 }
 
 #[allow(clippy::float_cmp)]
-pub(crate) fn rgb_to_hsl(r: f32, g: f32, b: f32) -> [f32; 3] {
+pub(crate) const fn rgb_to_hsl(r: f32, g: f32, b: f32) -> [f32; 3] {
     let min = r.min(g.min(b));
     let max = r.max(g.max(b));
     let l = (max + min) / 2.0;
@@ -163,7 +163,7 @@ pub(crate) fn rgb_to_hsl(r: f32, g: f32, b: f32) -> [f32; 3] {
     [normalize_angle(h), s, l]
 }
 
-pub(crate) fn rgb_to_hwb(r: f32, g: f32, b: f32) -> [f32; 3] {
+pub(crate) const fn rgb_to_hwb(r: f32, g: f32, b: f32) -> [f32; 3] {
     let [hue, _, _] = rgb_to_hsl(r, g, b);
     let white = r.min(g.min(b));
     let black = 1.0 - r.max(g.max(b));
@@ -171,31 +171,31 @@ pub(crate) fn rgb_to_hwb(r: f32, g: f32, b: f32) -> [f32; 3] {
 }
 
 #[inline]
-pub(crate) fn normalize_angle(t: f32) -> f32 {
+pub(crate) const fn normalize_angle(t: f32) -> f32 {
     ((t % 360.0) + 360.0) % 360.0
 }
 
 #[inline]
-pub(crate) fn interp_angle(a0: f32, a1: f32, t: f32) -> f32 {
+pub(crate) const fn interp_angle(a0: f32, a1: f32, t: f32) -> f32 {
     let delta = (((a1 - a0) % 360.0) + 540.0) % 360.0 - 180.0;
     (a0 + t * delta + 360.0) % 360.0
 }
 
 #[cfg(feature = "lab")]
 #[inline]
-pub(crate) fn interp_angle_rad(a0: f32, a1: f32, t: f32) -> f32 {
+pub(crate) const fn interp_angle_rad(a0: f32, a1: f32, t: f32) -> f32 {
     let delta = (((a1 - a0) % TAU) + PI_3) % TAU - PI;
     (a0 + t * delta + TAU) % TAU
 }
 
 #[inline]
-pub(crate) fn modulo(x: f32, n: f32) -> f32 {
+pub(crate) const fn modulo(x: f32, n: f32) -> f32 {
     (x % n + n) % n
 }
 
 // Map t from range [a, b] to range [c, d]
 #[inline]
-pub(crate) fn remap(t: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
+pub(crate) const fn remap(t: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
     (t - a) * ((d - c) / (b - a)) + c
 }
 

@@ -271,3 +271,28 @@ fn interpolate() {
         assert_eq!(a.interpolate_lch(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
     }
 }
+
+#[test]
+fn const_fn() {
+    #![allow(dead_code)]
+
+    const C: Color = Color::new(1.0, 0.0, 0.0, 1.0);
+    const _: Color = Color::from_rgba8(255, 0, 0, 255);
+    const _: Color = Color::from_hsla(0.0, 1.0, 1.0, 1.0);
+    const _: Color = Color::from_hsva(0.0, 1.0, 1.0, 1.0);
+    const _: Color = Color::from_hwba(0.0, 0.0, 0.3, 1.0);
+
+    const _: Color = C.clamp();
+
+    const _: [f32; 4] = C.to_array();
+    const _: [u8; 4] = C.to_rgba8();
+    const _: [u16; 4] = C.to_rgba16();
+    const _: [f32; 4] = C.to_hsla();
+    const _: [f32; 4] = C.to_hsva();
+    const _: [f32; 4] = C.to_hwba();
+
+    const A: Color = Color::new(0.0, 0.0, 0.0, 1.0);
+
+    const _: Color = A.interpolate_rgb(&C, 0.75);
+    const _: Color = A.interpolate_hsv(&C, 0.75);
+}

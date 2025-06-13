@@ -186,6 +186,7 @@ impl Color {
     }
 
     /// Restricts R, G, B, A values to the range [0..1].
+    #[must_use = "method returns a new Color and does not mutate the original Color"]
     pub const fn clamp(&self) -> Self {
         Self {
             r: self.r.clamp(0.0, 1.0),

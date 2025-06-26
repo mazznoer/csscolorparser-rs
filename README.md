@@ -87,4 +87,4 @@ assert_eq!(c.to_css_hex(), "#ff00007f");
 
 * [csscolorparser](https://github.com/mazznoer/csscolorparser) (Go)
 * [csscolorparser](https://github.com/deanm/css-color-parser-js) (Javascript)
-
+* [csscolorparser-zig](https://github.com/sorairolake/csscolorparser-zig) (Zig)

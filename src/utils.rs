@@ -1,5 +1,5 @@
 #[cfg(feature = "lab")]
-use std::f32::consts::{PI, TAU};
+use core::f32::consts::{PI, TAU};
 
 #[cfg(feature = "lab")]
 const PI_3: f32 = PI * 3.0;

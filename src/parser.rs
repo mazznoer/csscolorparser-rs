@@ -9,7 +9,7 @@ use crate::NAMED_COLORS;
 /// # Examples
 ///
 /// ```
-/// # use std::error::Error;
+/// # use core::error::Error;
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let c = csscolorparser::parse("#ff0")?;
 ///
@@ -22,7 +22,7 @@ use crate::NAMED_COLORS;
 /// ```
 ///
 /// ```
-/// # use std::error::Error;
+/// # use core::error::Error;
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let c = csscolorparser::parse("hsl(360deg,100%,50%)")?;
 ///

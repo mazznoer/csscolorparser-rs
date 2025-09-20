@@ -32,7 +32,7 @@
 //! Using [`csscolorparser::parse()`](fn.parse.html) function.
 //!
 //! ```rust
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # fn main() -> Result<(), Box<dyn core::error::Error>> {
 //! let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 //!
 //! assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
@@ -47,7 +47,7 @@
 //!
 //! ```rust
 //! use csscolorparser::Color;
-//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! # fn main() -> Result<(), Box<dyn core::error::Error>> {
 //!
 //! let c: Color = "#ff00007f".parse()?;
 //!
@@ -70,6 +70,10 @@
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(feature = "std")]
+extern crate std as core;
 
 mod color;
 mod color2;

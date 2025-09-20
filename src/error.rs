@@ -1,5 +1,5 @@
-use std::error::Error;
-use std::fmt;
+use core::error::Error;
+use core::fmt;
 
 /// An error which can be returned when parsing a CSS color string.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

@@ -583,7 +583,7 @@ impl<'a> Iterator for SplitBySpace<'a> {
     }
 }
 
-fn split_by_space(s: &str) -> SplitBySpace {
+fn split_by_space(s: &str) -> SplitBySpace<'_> {
     SplitBySpace {
         s,
         pos: 0,
@@ -653,6 +653,18 @@ fn parse_angle(s: &str) -> Option<f32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_strip_prefix() {
+        assert_eq!(strip_prefix("rgb(77)", "rgb"), Some("(77)"));
+        assert_eq!(strip_prefix("RGB(0,0)", "rgb"), Some("(0,0)"));
+        assert_eq!(strip_prefix("Hsv()", "HSV"), Some("()"));
+
+        assert_eq!(strip_prefix("", "rgb"), None);
+        assert_eq!(strip_prefix("10", "rgb"), None);
+        assert_eq!(strip_prefix("hsv(0,0)", "hsva"), None);
+        assert_eq!(strip_prefix("hsv", "hsva"), None);
+    }
 
     #[test]
     fn test_strip_suffix() {
@@ -739,5 +751,84 @@ mod tests {
         cmp!("f0eB", "F0Eb");
         cmp!("abcdef", "ABCDEF");
         cmp!("Ff03E0cB", "fF03e0Cb");
+    }
+
+    #[test]
+    fn test_split_by_space() {
+        let mut iter = split_by_space("");
+        assert_eq!(iter.next(), None);
+
+        let mut iter = split_by_space("   ");
+        assert_eq!(iter.next(), None);
+
+        let mut iter = split_by_space(" (   ) ");
+        assert_eq!(iter.next(), Some("(   )"));
+        assert_eq!(iter.next(), None);
+
+        let mut iter = split_by_space(" x ");
+        assert_eq!(iter.next(), Some("x"));
+        assert_eq!(iter.next(), None);
+
+        let s = "pink";
+        let res: Vec<_> = split_by_space(s).collect();
+        assert_eq!(res, ["pink"]);
+
+        let s = ") (ab cd) (";
+        let res: Vec<_> = split_by_space(s).collect();
+        assert_eq!(res, [")", "(ab cd)", "("]);
+
+        let s = "  plum teal f(1, 2, 3) abc  ";
+        let res: Vec<_> = split_by_space(s).collect();
+        assert_eq!(res, ["plum", "teal", "f(1, 2, 3)", "abc"]);
+
+        let s = "from rgb(from red r g calc(b + 15) / 0.75) h w b / calc(alpha + 0.25) )";
+        let res: Vec<_> = split_by_space(s).collect();
+        assert_eq!(
+            res,
+            [
+                "from",
+                "rgb(from red r g calc(b + 15) / 0.75)",
+                "h",
+                "w",
+                "b",
+                "/",
+                "calc(alpha + 0.25)",
+                ")",
+            ]
+        );
+    }
+
+    #[test]
+    fn test_parse_calc() {
+        let variables = [("r", 220.0), ("g", 5.0), ("b", 100.0), ("alpha", 1.0)];
+
+        assert_eq!(parse_value("0.75", variables), Some(0.75));
+        assert_eq!(parse_value("100", variables), Some(100.0));
+        assert_eq!(parse_value("g", variables), Some(5.0));
+        assert_eq!(parse_value("r", variables), Some(220.0));
+
+        assert_eq!(parse_value("calc(10 + r)", variables), Some(230.0));
+        assert_eq!(parse_value("calc(b + g)", variables), Some(105.0));
+        assert_eq!(parse_value("calc( r - 10 )", variables), Some(210.0));
+        assert_eq!(parse_value("calc(b - 50)", variables), Some(50.0));
+        assert_eq!(parse_value("calc(g * 5)", variables), Some(25.0));
+        assert_eq!(parse_value("calc(b / 5)", variables), Some(20.0));
+        assert_eq!(parse_value("calc(alpha * 0.5)", variables), Some(0.5));
+
+        assert_eq!(parse_value("calc(a * 2)", variables), None);
+        assert_eq!(parse_value("calc(l - 60)", variables), None);
+        assert_eq!(parse_value("calc(r + 10", variables), None);
+        assert_eq!(parse_value("calc(h + 10)", variables), None);
+        assert_eq!(parse_value("calc(r 10)", variables), None);
+        assert_eq!(parse_value("calc(10)", variables), None);
+
+        let variables = [("l", 75.0), ("a", 0.5), ("b", 10.0), ("alpha", 0.5)];
+
+        assert_eq!(parse_value("calc(a * 2)", variables), Some(1.0));
+        assert_eq!(parse_value("calc(l - 60)", variables), Some(15.0));
+        assert_eq!(parse_value("alpha", variables), Some(0.5));
+        assert_eq!(parse_value("calc(alpha + 0.25)", variables), Some(0.75));
+
+        assert_eq!(parse_value("calc(r + 10)", variables), None);
     }
 }

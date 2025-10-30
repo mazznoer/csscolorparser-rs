@@ -34,9 +34,196 @@ use crate::NAMED_COLORS;
 /// # }
 /// ```
 #[inline(never)]
+#[allow(clippy::needless_match)]
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     let s = s.trim();
 
+    let err = match parse_abs(s) {
+        Ok(c) => return Ok(c),
+        Err(e @ ParseColorError::InvalidHex) => return Err(e),
+        Err(e @ ParseColorError::InvalidUnknown) => return Err(e),
+        e => e,
+    };
+
+    if !s.is_ascii() {
+        return err;
+    }
+
+    if let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) {
+        let fname = &s[..idx];
+        let mut params = split_by_space(&s[idx + 1..]);
+
+        if let Some(s) = params.next() {
+            if !s.eq_ignore_ascii_case("from") {
+                return err;
+            }
+        } else {
+            return err;
+        };
+
+        // parse next value as color
+        let color = if let Some(s) = params.next() {
+            if let Ok(color) = parse(s) {
+                color
+            } else {
+                return err;
+            }
+        } else {
+            return err;
+        };
+
+        let (Some(val1), Some(val2), Some(val3)) = (params.next(), params.next(), params.next())
+        else {
+            return err;
+        };
+
+        let val4 = if let (Some("/"), Some(alpha)) = (params.next(), params.next()) {
+            alpha
+        } else {
+            "alpha"
+        };
+
+        if fname.eq_ignore_ascii_case("rgb") {
+            // r, g, b [0..255]
+            // alpha   [0..1]
+            let variables = [
+                ("r", color.r * 255.0),
+                ("g", color.g * 255.0),
+                ("b", color.b * 255.0),
+                ("alpha", color.a),
+            ];
+            if let (Some(r), Some(g), Some(b), Some(a)) = (
+                parse_value(val1, variables),
+                parse_value(val2, variables),
+                parse_value(val3, variables),
+                parse_value(val4, variables),
+            ) {
+                return Ok(Color::new(r / 255.0, g / 255.0, b / 255.0, a));
+            };
+            return err;
+        } else if fname.eq_ignore_ascii_case("hwb") {
+            // h    [0..360]
+            // w, b [0..100]
+            let [h, w, b, a] = color.to_hwba();
+            let variables = [("h", h), ("w", w * 100.0), ("b", b * 100.0), ("alpha", a)];
+            if let (Some(h), Some(w), Some(b), Some(a)) = (
+                parse_value(val1, variables),
+                parse_value(val2, variables),
+                parse_value(val3, variables),
+                parse_value(val4, variables),
+            ) {
+                return Ok(Color::from_hwba(h, w / 100.0, b / 100.0, a));
+            };
+            return err;
+        } else if fname.eq_ignore_ascii_case("hsl") {
+            // h    [0..360]
+            // s, l [0..100]
+            let [h, s, l, a] = color.to_hsla();
+            let variables = [("h", h), ("s", s * 100.0), ("l", l * 100.0), ("alpha", a)];
+            if let (Some(h), Some(s), Some(l), Some(a)) = (
+                parse_value(val1, variables),
+                parse_value(val2, variables),
+                parse_value(val3, variables),
+                parse_value(val4, variables),
+            ) {
+                return Ok(Color::from_hsla(
+                    h,
+                    (s / 100.0).clamp(0.0, 1.0),
+                    (l / 100.0).clamp(0.0, 1.0),
+                    a,
+                ));
+            };
+            return err;
+        } else if fname.eq_ignore_ascii_case("hsv") {
+            // h    [0..360]
+            // s, v [0..100]
+            let [h, s, v, a] = color.to_hsva();
+            let variables = [("h", h), ("s", s * 100.0), ("v", v * 100.0), ("alpha", a)];
+            if let (Some(h), Some(s), Some(v), Some(a)) = (
+                parse_value(val1, variables),
+                parse_value(val2, variables),
+                parse_value(val3, variables),
+                parse_value(val4, variables),
+            ) {
+                return Ok(Color::from_hsva(h, s / 100.0, v / 100.0, a));
+            };
+            return err;
+        } else if fname.eq_ignore_ascii_case("lab") {
+            #[cfg(feature = "lab")]
+            {
+                // l    [0..100]
+                // a, b [-125..125]
+                let [l, a, b, alpha] = color.to_laba();
+                let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
+                if let (Some(l), Some(a), Some(b), Some(alpha)) = (
+                    parse_value(val1, variables),
+                    parse_value(val2, variables),
+                    parse_value(val3, variables),
+                    parse_value(val4, variables),
+                ) {
+                    return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+                };
+            }
+            return err;
+        } else if fname.eq_ignore_ascii_case("lch") {
+            #[cfg(feature = "lab")]
+            {
+                // l [0..100]
+                // c [0..150]
+                // h [0..360]
+                let [l, c, h, a] = color.to_lcha();
+                let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
+                if let (Some(l), Some(c), Some(h), Some(a)) = (
+                    parse_value(val1, variables),
+                    parse_value(val2, variables),
+                    parse_value(val3, variables),
+                    parse_value(val4, variables),
+                ) {
+                    return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
+                };
+            }
+            return err;
+        } else if fname.eq_ignore_ascii_case("oklab") {
+            // l    [0..1]
+            // a, b [-0.4 .. 0.4]
+            let [l, a, b, alpha] = color.to_oklaba();
+            let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
+            if let (Some(l), Some(a), Some(b), Some(alpha)) = (
+                parse_value(val1, variables),
+                parse_value(val2, variables),
+                parse_value(val3, variables),
+                parse_value(val4, variables),
+            ) {
+                return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
+            };
+            return err;
+        } else if fname.eq_ignore_ascii_case("oklch") {
+            // l [0..1]
+            // c [0..0.4]
+            // h [0..360]
+            let [l, c, h, a] = to_oklcha(&color);
+            let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
+            if let (Some(l), Some(c), Some(h), Some(a)) = (
+                parse_value(val1, variables),
+                parse_value(val2, variables),
+                parse_value(val3, variables),
+                parse_value(val4, variables),
+            ) {
+                return Ok(Color::from_oklcha(
+                    l.max(0.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    a,
+                ));
+            };
+            return err;
+        }
+    }
+
+    err
+}
+
+fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
     if s.eq_ignore_ascii_case("transparent") {
         return Ok(Color::new(0.0, 0.0, 0.0, 0.0));
     }
@@ -285,6 +472,135 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
         Ok(Color::from_rgba8(r, g, b, a))
     } else {
         Err(ParseColorError::InvalidHex)
+    }
+}
+
+fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
+    let parse_v = |s: &str| {
+        if let Ok(value) = s.parse() {
+            return Some(value);
+        };
+        for (var, value) in variables {
+            if s.eq_ignore_ascii_case(var) {
+                return Some(value);
+            }
+        }
+        None
+    };
+
+    let s = s.trim();
+
+    if let Some(t) = parse_v(s) {
+        return Some(t);
+    }
+
+    if let Some(s) = strip_prefix(s, "calc(") {
+        if let Some(s) = s.strip_suffix(')') {
+            let mut it = s.split_ascii_whitespace();
+
+            let (Some(val1), Some(op), Some(val2)) = (it.next(), it.next(), it.next()) else {
+                return None;
+            };
+
+            if it.next().is_some() {
+                return None;
+            }
+
+            let (Some(val1), Some(val2)) = (parse_v(val1), parse_v(val2)) else {
+                return None;
+            };
+
+            match op {
+                "+" => return Some(val1 + val2),
+                "-" => return Some(val1 - val2),
+                "*" => return Some(val1 * val2),
+                "/" => {
+                    if val2 == 0.0 {
+                        return None;
+                    }
+                    return Some(val1 / val2);
+                }
+                _ => return None,
+            }
+        }
+    }
+
+    None
+}
+
+fn to_oklcha(color: &Color) -> [f32; 4] {
+    let [l, a, b, alpha] = color.to_oklaba();
+    let c = (a * a + b * b).sqrt();
+    let h = b.atan2(a);
+    [l, c, h, alpha]
+}
+
+struct SplitBySpace<'a> {
+    s: &'a str,
+    pos: usize,
+    inside: usize,
+}
+
+impl<'a> Iterator for SplitBySpace<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pos >= self.s.len() {
+            return None;
+        }
+
+        let start = self.pos;
+        let mut found_value = false;
+
+        for (i, c) in self.s[self.pos..].chars().enumerate() {
+            if c.is_whitespace() && self.inside == 0 {
+                if found_value {
+                    let end = self.pos + i;
+                    self.pos = end + 1;
+                    return Some(&self.s[start..end]);
+                }
+                self.pos += 1;
+                return self.next();
+            } else if c == '(' {
+                self.inside += 1;
+                found_value = true;
+            } else if c == ')' {
+                if self.inside > 0 {
+                    self.inside -= 1;
+                }
+                found_value = true;
+            } else if !c.is_whitespace() {
+                found_value = true;
+            }
+        }
+
+        if found_value {
+            self.pos = self.s.len();
+            Some(&self.s[start..])
+        } else {
+            None
+        }
+    }
+}
+
+fn split_by_space(s: &str) -> SplitBySpace {
+    SplitBySpace {
+        s,
+        pos: 0,
+        inside: 0,
+    }
+}
+
+// strip prefix ignore case
+fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
+    if prefix.len() > s.len() {
+        return None;
+    }
+    let s_start = &s[..prefix.len()];
+    if s_start.eq_ignore_ascii_case(prefix) {
+        Some(&s[prefix.len()..])
+    } else {
+        None
     }
 }
 

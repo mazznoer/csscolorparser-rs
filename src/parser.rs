@@ -156,43 +156,39 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 };
                 return err;
             }
+            #[cfg(feature = "lab")]
             Err(ParseColorError::InvalidLab) => {
-                #[cfg(feature = "lab")]
-                {
-                    // l     [0..100]
-                    // a, b  [-125..125]
-                    // alpha [0..1]
-                    let [l, a, b, alpha] = color.to_laba();
-                    let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-                    if let (Some(l), Some(a), Some(b), Some(alpha)) = (
-                        parse_value(val1, variables),
-                        parse_value(val2, variables),
-                        parse_value(val3, variables),
-                        parse_value(val4, variables),
-                    ) {
-                        return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
-                    };
-                }
+                // l     [0..100]
+                // a, b  [-125..125]
+                // alpha [0..1]
+                let [l, a, b, alpha] = color.to_laba();
+                let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
+                if let (Some(l), Some(a), Some(b), Some(alpha)) = (
+                    parse_value(val1, variables),
+                    parse_value(val2, variables),
+                    parse_value(val3, variables),
+                    parse_value(val4, variables),
+                ) {
+                    return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+                };
                 return err;
             }
+            #[cfg(feature = "lab")]
             Err(ParseColorError::InvalidLch) => {
-                #[cfg(feature = "lab")]
-                {
-                    // l [0..100]
-                    // c [0..150]
-                    // h [0..360]
-                    // alpha [0..1]
-                    let [l, c, h, a] = color.to_lcha();
-                    let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-                    if let (Some(l), Some(c), Some(h), Some(a)) = (
-                        parse_value(val1, variables),
-                        parse_value(val2, variables),
-                        parse_value(val3, variables),
-                        parse_value(val4, variables),
-                    ) {
-                        return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
-                    };
-                }
+                // l [0..100]
+                // c [0..150]
+                // h [0..360]
+                // alpha [0..1]
+                let [l, c, h, a] = color.to_lcha();
+                let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
+                if let (Some(l), Some(c), Some(h), Some(a)) = (
+                    parse_value(val1, variables),
+                    parse_value(val2, variables),
+                    parse_value(val3, variables),
+                    parse_value(val4, variables),
+                ) {
+                    return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
+                };
                 return err;
             }
             Err(ParseColorError::InvalidOklab) => {
@@ -269,7 +265,9 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
             s if s.eq_ignore_ascii_case("hsv") || s.eq_ignore_ascii_case("hsva") => {
                 ParseColorError::InvalidHsv
             }
+            #[cfg(feature = "lab")]
             s if s.eq_ignore_ascii_case("lab") => ParseColorError::InvalidLab,
+            #[cfg(feature = "lab")]
             s if s.eq_ignore_ascii_case("lch") => ParseColorError::InvalidLch,
             s if s.eq_ignore_ascii_case("oklab") => ParseColorError::InvalidOklab,
             s if s.eq_ignore_ascii_case("oklch") => ParseColorError::InvalidOklch,

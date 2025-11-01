@@ -49,6 +49,36 @@ fn parser() {
         ],
     ];
     for [s, hex] in test_data {
-        assert_eq!(parse(s).unwrap().to_css_hex(), hex);
+        assert_eq!(parse(s).unwrap().to_css_hex(), hex, "{:?}", s);
+    }
+}
+
+#[cfg(feature = "lab")]
+#[test]
+fn lab() {
+    let test_data = [
+        ["lab(from #bad455 l a b)", "#bad455"],
+        ["lab(from #bad455 l a b / calc(alpha / 2))", "#bad45580"],
+        ["lch(from #bad455 l c h)", "#bad455"],
+        ["lch(from #bad455 l c h / calc(alpha * 0.5))", "#bad45580"],
+    ];
+    for [s, hex] in test_data {
+        assert_eq!(parse(s).unwrap().to_css_hex(), hex, "{:?}", s);
+    }
+}
+
+#[test]
+fn invalid() {
+    let test_data = [
+        "rgb(from)",
+        "rgb(from #f00)",
+        "rgb(from #f00 r g)",
+        "rgb(from #f00 r g b 0.5)",
+        "hwb(from #f00 h w b alpha)",
+        "rgb(from #f00 r g b / alpha 10)",
+        "hsl(from #f00 h s x)",
+    ];
+    for s in test_data {
+        assert!(parse(s).is_err(), "{:?}", s);
     }
 }

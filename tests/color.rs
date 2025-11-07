@@ -1,5 +1,5 @@
+use core::convert::TryFrom;
 use csscolorparser::Color;
-use std::convert::TryFrom;
 
 #[test]
 fn basic() {
@@ -106,7 +106,7 @@ fn basic() {
 
 #[test]
 fn parser() {
-    use std::str::FromStr;
+    use core::str::FromStr;
     let test_data = ["#71fe15", "#d6e3c9", "#2a7719", "#b53717", "#5b0b8d"];
     for s in test_data {
         let c = Color::from_str(s).unwrap();

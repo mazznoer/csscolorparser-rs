@@ -2,6 +2,11 @@
 
 use crate::Color;
 
+use alloc::string::String;
+
+#[cfg(not(feature = "std"))]
+use num_traits::float::Float;
+
 impl Color {
     #[deprecated = "Use [new](#method.new) instead."]
     /// Arguments:

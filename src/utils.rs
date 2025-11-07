@@ -1,8 +1,11 @@
 #[cfg(feature = "lab")]
-use std::f32::consts::{PI, TAU};
+use core::f32::consts::{PI, TAU};
 
 #[cfg(feature = "lab")]
 const PI_3: f32 = PI * 3.0;
+
+#[cfg(not(feature = "std"))]
+use num_traits::float::Float;
 
 #[allow(clippy::excessive_precision)]
 pub(crate) fn oklab_to_linear_rgb(l: f32, a: f32, b: f32) -> [f32; 3] {
@@ -202,6 +205,7 @@ pub(crate) const fn remap(t: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
 
     #[test]
     fn test_normalize_angle() {

@@ -1,6 +1,6 @@
-use std::convert::TryFrom;
-use std::fmt;
-use std::str::FromStr;
+use core::convert::TryFrom;
+use core::fmt;
+use core::str::FromStr;
 
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
@@ -13,6 +13,13 @@ use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 
 use crate::utils::*;
 use crate::{parse, ParseColorError};
+
+use alloc::format;
+use alloc::string::String;
+use alloc::string::ToString;
+
+#[cfg(not(feature = "std"))]
+use num_traits::float::Float;
 
 #[cfg(feature = "named-colors")]
 use crate::NAMED_COLORS;
@@ -169,7 +176,7 @@ impl Color {
     /// # Examples
     /// ```
     /// use csscolorparser::Color;
-    /// # use std::error::Error;
+    /// # use core::error::Error;
     /// # fn main() -> Result<(), Box<dyn Error>> {
     ///
     /// let c = Color::from_html("rgb(255,0,0)")?;
@@ -450,7 +457,7 @@ impl Color {
     #[cfg(feature = "lab")]
     /// Get CSS `lch()` color representation
     pub fn to_css_lch(&self) -> String {
-        use std::f32::consts::PI;
+        use core::f32::consts::PI;
 
         fn to_degrees(t: f32) -> f32 {
             if t > 0.0 {

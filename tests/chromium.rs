@@ -1,7 +1,7 @@
 #[test]
 fn random_colors() {
     // The color string is randomly generated, then parsed using Chromium 87.0.4280.66
-    let test_data = vec![
+    let test_data = [
         ("#9F2", [153, 255, 34, 255]),
         ("#919211", [145, 146, 17, 255]),
         ("#DF1A94", [223, 26, 148, 255]),

@@ -1,7 +1,7 @@
 #[test]
 fn random_colors() {
     // The color string is randomly generated, then parsed using Chrome 87.0 on Android
-    let test_data = vec![
+    let test_data = [
         ("#6946", [102, 153, 68, 102]),
         ("#4F0", [68, 255, 0, 255]),
         ("#75C57A", [117, 197, 122, 255]),

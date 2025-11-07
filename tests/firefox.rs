@@ -1,7 +1,7 @@
 #[test]
 fn random_colors() {
     // The color string is randomly generated, then parsed using Mozilla Firefox 84.0.2
-    let test_data = vec![
+    let test_data = [
         ("#30758CE9", [48, 117, 140, 233]),
         ("#91F76A89", [145, 247, 106, 137]),
         ("#CF0206", [207, 2, 6, 255]),

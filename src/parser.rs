@@ -681,7 +681,6 @@ fn parse_angle(s: &str) -> Option<f32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::vec::Vec;
 
     #[test]
     fn test_strip_prefix() {
@@ -799,32 +798,36 @@ mod tests {
         assert_eq!(iter.next(), None);
 
         let s = "pink";
-        let res: Vec<_> = split_by_space(s).collect();
-        assert_eq!(res, ["pink"]);
+        let mut iter = split_by_space(s);
+        assert_eq!(iter.next(), Some("pink"));
+        assert_eq!(iter.next(), None);
 
         let s = ") (ab cd) (";
-        let res: Vec<_> = split_by_space(s).collect();
-        assert_eq!(res, [")", "(ab cd)", "("]);
+        let mut iter = split_by_space(s);
+        assert_eq!(iter.next(), Some(")"));
+        assert_eq!(iter.next(), Some("(ab cd)"));
+        assert_eq!(iter.next(), Some("("));
+        assert_eq!(iter.next(), None);
 
         let s = "  plum teal f(1, 2, 3) abc  ";
-        let res: Vec<_> = split_by_space(s).collect();
-        assert_eq!(res, ["plum", "teal", "f(1, 2, 3)", "abc"]);
+        let mut iter = split_by_space(s);
+        assert_eq!(iter.next(), Some("plum"));
+        assert_eq!(iter.next(), Some("teal"));
+        assert_eq!(iter.next(), Some("f(1, 2, 3)"));
+        assert_eq!(iter.next(), Some("abc"));
+        assert_eq!(iter.next(), None);
 
         let s = "from rgb(from red r g calc(b + 15) / 0.75) h w b / calc(alpha + 0.25) )";
-        let res: Vec<_> = split_by_space(s).collect();
-        assert_eq!(
-            res,
-            [
-                "from",
-                "rgb(from red r g calc(b + 15) / 0.75)",
-                "h",
-                "w",
-                "b",
-                "/",
-                "calc(alpha + 0.25)",
-                ")",
-            ]
-        );
+        let mut iter = split_by_space(s);
+        assert_eq!(iter.next(), Some("from"));
+        assert_eq!(iter.next(), Some("rgb(from red r g calc(b + 15) / 0.75)"));
+        assert_eq!(iter.next(), Some("h"));
+        assert_eq!(iter.next(), Some("w"));
+        assert_eq!(iter.next(), Some("b"));
+        assert_eq!(iter.next(), Some("/"));
+        assert_eq!(iter.next(), Some("calc(alpha + 0.25)"));
+        assert_eq!(iter.next(), Some(")"));
+        assert_eq!(iter.next(), None);
     }
 
     #[test]

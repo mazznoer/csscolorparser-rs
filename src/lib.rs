@@ -94,7 +94,6 @@ pub use named_colors::NAMED_COLORS;
 #[cfg(feature = "cint")]
 mod cint;
 
-#[cfg(feature = "lab")]
 mod lab;
 
 mod utils;

@@ -26,20 +26,17 @@ fn parser() {
         assert_eq!(expected, c);
     }
 
-    #[cfg(feature = "lab")]
-    {
-        let test_data = [
-            ("lab(0% 0 0)", [0, 0, 0, 255]),
-            ("lab(100% 0 0)", [255, 255, 255, 255]),
-            ("lab(0% 0 0 / 0.5)", [0, 0, 0, 128]),
-            ("lch(0% 0 0)", [0, 0, 0, 255]),
-            ("lch(100% 0 0)", [255, 255, 255, 255]),
-            ("lch(0% 0 0 / 0.5)", [0, 0, 0, 128]),
-        ];
+    let test_data = [
+        ("lab(0% 0 0)", [0, 0, 0, 255]),
+        ("lab(100% 0 0)", [255, 255, 255, 255]),
+        ("lab(0% 0 0 / 0.5)", [0, 0, 0, 128]),
+        ("lch(0% 0 0)", [0, 0, 0, 255]),
+        ("lch(100% 0 0)", [255, 255, 255, 255]),
+        ("lch(0% 0 0 / 0.5)", [0, 0, 0, 128]),
+    ];
 
-        for (s, expected) in test_data {
-            assert_eq!(expected, parse(s).unwrap().to_rgba8());
-        }
+    for (s, expected) in test_data {
+        assert_eq!(expected, parse(s).unwrap().to_rgba8());
     }
 }
 
@@ -202,7 +199,7 @@ fn lime_alpha() {
     }
 }
 
-#[cfg(all(feature = "named-colors", feature = "lab"))]
+#[cfg(feature = "named-colors")]
 #[test]
 fn invalid_format() {
     let test_data = [

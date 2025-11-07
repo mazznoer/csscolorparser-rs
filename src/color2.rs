@@ -136,7 +136,6 @@ impl Color {
         Self::from_oklaba(l, a, b, 1.0)
     }
 
-    #[cfg(feature = "lab")]
     #[deprecated = "Use [from_laba](#method.from_laba) instead."]
     /// Arguments:
     ///
@@ -148,14 +147,12 @@ impl Color {
         Self::from_laba(l, a, b, alpha)
     }
 
-    #[cfg(feature = "lab")]
     #[deprecated = "Use [to_laba](#method.to_laba) instead."]
     /// Returns: `[l, a, b, alpha]`
     pub fn to_lab(&self) -> [f32; 4] {
         self.to_laba()
     }
 
-    #[cfg(feature = "lab")]
     #[deprecated = "Use [from_lcha](#method.from_lcha) instead."]
     /// Arguments:
     ///
@@ -167,7 +164,6 @@ impl Color {
         Self::from_lcha(l, c, h, alpha)
     }
 
-    #[cfg(feature = "lab")]
     #[deprecated = "Use [to_lcha](#method.to_lcha) instead."]
     /// Returns: `[l, c, h, alpha]`
     pub fn to_lch(&self) -> [f32; 4] {

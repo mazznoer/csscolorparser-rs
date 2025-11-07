@@ -15,12 +15,11 @@ exclude = [
 ]
 
 [package.metadata.docs.rs]
-features = ["named-colors", "lab", "rust-rgb", "cint", "serde", "std"]
+features = ["named-colors", "rust-rgb", "cint", "serde", "std"]
 
 [features]
 default = ["named-colors", "std"]
 std = ["phf/std"]
-lab = []
 named-colors = ["phf"]
 rust-rgb = ["rgb"]
 

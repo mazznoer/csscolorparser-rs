@@ -15,10 +15,8 @@ pub enum ParseColorError {
     /// A CSS color string was invalid hsv format.
     InvalidHsv,
     /// A CSS color string was invalid lab format.
-    #[cfg(feature = "lab")]
     InvalidLab,
     /// A CSS color string was invalid lch format.
-    #[cfg(feature = "lab")]
     InvalidLch,
     /// A CSS color string was invalid oklab format.
     InvalidOklab,
@@ -38,9 +36,7 @@ impl fmt::Display for ParseColorError {
             Self::InvalidHsl => f.write_str("invalid hsl format"),
             Self::InvalidHwb => f.write_str("invalid hwb format"),
             Self::InvalidHsv => f.write_str("invalid hsv format"),
-            #[cfg(feature = "lab")]
             Self::InvalidLab => f.write_str("invalid lab format"),
-            #[cfg(feature = "lab")]
             Self::InvalidLch => f.write_str("invalid lch format"),
             Self::InvalidOklab => f.write_str("invalid oklab format"),
             Self::InvalidOklch => f.write_str("invalid oklch format"),

@@ -196,7 +196,6 @@ fn oklch() {
     }
 }
 
-#[cfg(feature = "lab")]
 #[test]
 fn lab() {
     let test_data = [
@@ -228,7 +227,6 @@ fn lab() {
     }
 }
 
-#[cfg(feature = "lab")]
 #[test]
 fn lch() {
     let test_data = [

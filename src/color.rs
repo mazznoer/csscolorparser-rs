@@ -8,7 +8,6 @@ use rgb::{RGB, RGBA};
 #[cfg(feature = "serde")]
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
-#[cfg(feature = "lab")]
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 
 use crate::utils::*;
@@ -148,7 +147,6 @@ impl Color {
         Self::from_oklaba(l, c * h.cos(), c * h.sin(), alpha)
     }
 
-    #[cfg(feature = "lab")]
     /// Arguments:
     ///
     /// * `l`: Lightness
@@ -160,7 +158,6 @@ impl Color {
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
-    #[cfg(feature = "lab")]
     /// Arguments:
     ///
     /// * `l`: Lightness
@@ -367,7 +364,6 @@ impl Color {
         [l, c, h, alpha]
     }
 
-    #[cfg(feature = "lab")]
     /// Returns: `[l, a, b, alpha]`
     pub fn to_laba(&self) -> [f32; 4] {
         let [r, g, b, alpha] = self.to_linear_rgba();
@@ -375,7 +371,6 @@ impl Color {
         [l, a, b, alpha.clamp(0.0, 1.0)]
     }
 
-    #[cfg(feature = "lab")]
     /// Returns: `[l, c, h, alpha]`
     pub fn to_lcha(&self) -> [f32; 4] {
         let [l, a, b, alpha] = self.to_laba();
@@ -444,7 +439,6 @@ impl Color {
         format!("oklch({l} {c} {h}{})", fmt_alpha(alpha))
     }
 
-    #[cfg(feature = "lab")]
     /// Get CSS `lab()` color representation
     pub fn to_css_lab(&self) -> String {
         let [l, a, b, alpha] = self.to_laba();
@@ -454,7 +448,6 @@ impl Color {
         format!("lab({l} {a} {b}{})", fmt_alpha(alpha))
     }
 
-    #[cfg(feature = "lab")]
     /// Get CSS `lch()` color representation
     pub fn to_css_lch(&self) -> String {
         use core::f32::consts::PI;
@@ -520,7 +513,6 @@ impl Color {
         )
     }
 
-    #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the Lab color-space. `t` in the range [0..1].
     pub fn interpolate_lab(&self, other: &Color, t: f32) -> Self {
         let [l1, a1, b1, alpha1] = self.to_laba();
@@ -533,7 +525,6 @@ impl Color {
         )
     }
 
-    #[cfg(feature = "lab")]
     /// Blend this color with the other one, in the LCH color-space. `t` in the range [0..1].
     pub fn interpolate_lch(&self, other: &Color, t: f32) -> Self {
         let [l1, c1, h1, alpha1] = self.to_lcha();

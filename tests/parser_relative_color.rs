@@ -53,7 +53,6 @@ fn parser() {
     }
 }
 
-#[cfg(feature = "lab")]
 #[test]
 fn lab() {
     let test_data = [

@@ -1,7 +1,5 @@
-#[cfg(feature = "lab")]
 use core::f32::consts::{PI, TAU};
 
-#[cfg(feature = "lab")]
 const PI_3: f32 = PI * 3.0;
 
 #[cfg(not(feature = "std"))]
@@ -184,7 +182,6 @@ pub(crate) const fn interp_angle(a0: f32, a1: f32, t: f32) -> f32 {
     (a0 + t * delta + 360.0) % 360.0
 }
 
-#[cfg(feature = "lab")]
 #[inline]
 pub(crate) const fn interp_angle_rad(a0: f32, a1: f32, t: f32) -> f32 {
     let delta = (((a1 - a0) % TAU) + PI_3) % TAU - PI;

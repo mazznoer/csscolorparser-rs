@@ -162,7 +162,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 };
                 return Err(err);
             }
-            #[cfg(feature = "lab")]
             ParseColorError::InvalidLab => {
                 // l     [0..100]
                 // a, b  [-125..125]
@@ -179,7 +178,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 };
                 return Err(err);
             }
-            #[cfg(feature = "lab")]
             ParseColorError::InvalidLch => {
                 // l [0..100]
                 // c [0..150]
@@ -271,9 +269,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
             s if s.eq_ignore_ascii_case("hsv") || s.eq_ignore_ascii_case("hsva") => {
                 ParseColorError::InvalidHsv
             }
-            #[cfg(feature = "lab")]
             s if s.eq_ignore_ascii_case("lab") => ParseColorError::InvalidLab,
-            #[cfg(feature = "lab")]
             s if s.eq_ignore_ascii_case("lch") => ParseColorError::InvalidLch,
             s if s.eq_ignore_ascii_case("oklab") => ParseColorError::InvalidOklab,
             s if s.eq_ignore_ascii_case("oklch") => ParseColorError::InvalidOklch,
@@ -365,7 +361,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 }
                 return Err(err);
             }
-            #[cfg(feature = "lab")]
             ParseColorError::InvalidLab => {
                 if let (Some((l, l_fmt)), Some((a, a_fmt)), Some((b, b_fmt))) = (
                     // lightness
@@ -390,7 +385,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 }
                 return Err(err);
             }
-            #[cfg(feature = "lab")]
             ParseColorError::InvalidLch => {
                 if let (Some((l, l_fmt)), Some((c, c_fmt)), Some(h)) = (
                     // lightness

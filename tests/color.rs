@@ -43,20 +43,17 @@ fn basic() {
     assert_eq!(c.to_hsla(), [0.0, 0.0, 0.5, 1.0]);
     assert_eq!(c.to_hwba(), [0.0, 0.5, 0.5, 1.0]);
 
-    #[cfg(feature = "lab")]
-    {
-        let c = Color::from_laba(0.0, 0.0, 0.0, 1.0);
-        assert_eq!(c.to_rgba8(), [0, 0, 0, 255]);
+    let c = Color::from_laba(0.0, 0.0, 0.0, 1.0);
+    assert_eq!(c.to_rgba8(), [0, 0, 0, 255]);
 
-        let c = Color::from_laba(100.0, 0.0, 0.0, 1.0);
-        assert_eq!(c.to_rgba8(), [255, 255, 255, 255]);
+    let c = Color::from_laba(100.0, 0.0, 0.0, 1.0);
+    assert_eq!(c.to_rgba8(), [255, 255, 255, 255]);
 
-        let c = Color::from_lcha(0.0, 0.0, 0.0, 1.0);
-        assert_eq!(c.to_rgba8(), [0, 0, 0, 255]);
+    let c = Color::from_lcha(0.0, 0.0, 0.0, 1.0);
+    assert_eq!(c.to_rgba8(), [0, 0, 0, 255]);
 
-        let c = Color::from_lcha(100.0, 0.0, 0.0, 1.0);
-        assert_eq!(c.to_rgba8(), [255, 255, 255, 255]);
-    }
+    let c = Color::from_lcha(100.0, 0.0, 0.0, 1.0);
+    assert_eq!(c.to_rgba8(), [255, 255, 255, 255]);
 
     assert_eq!(Color::default().to_rgba8(), [0, 0, 0, 255]);
 
@@ -191,16 +188,13 @@ fn convert_colors() {
         let x = Color::from_oklaba(a, b, c, d);
         assert_eq!(s, &x.to_css_hex());
 
-        #[cfg(feature = "lab")]
-        {
-            let [a, b, c, d] = col.to_laba();
-            let x = Color::from_laba(a, b, c, d);
-            assert_eq!(s, &x.to_css_hex());
+        let [a, b, c, d] = col.to_laba();
+        let x = Color::from_laba(a, b, c, d);
+        assert_eq!(s, &x.to_css_hex());
 
-            let [a, b, c, d] = col.to_lcha();
-            let x = Color::from_lcha(a, b, c, d);
-            assert_eq!(s, &x.to_css_hex());
-        }
+        let [a, b, c, d] = col.to_lcha();
+        let x = Color::from_lcha(a, b, c, d);
+        assert_eq!(s, &x.to_css_hex());
     }
 }
 
@@ -262,14 +256,11 @@ fn interpolate() {
     assert_eq!(a.interpolate_oklab(&b, 0.5).to_rgba8(), [0, 170, 191, 255]);
     assert_eq!(a.interpolate_oklab(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 
-    #[cfg(feature = "lab")]
-    {
-        assert_eq!(a.interpolate_lab(&b, 0.0).to_rgba8(), [0, 255, 0, 255]);
-        assert_eq!(a.interpolate_lab(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
+    assert_eq!(a.interpolate_lab(&b, 0.0).to_rgba8(), [0, 255, 0, 255]);
+    assert_eq!(a.interpolate_lab(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 
-        assert_eq!(a.interpolate_lch(&b, 0.0).to_rgba8(), [0, 255, 0, 255]);
-        assert_eq!(a.interpolate_lch(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
-    }
+    assert_eq!(a.interpolate_lch(&b, 0.0).to_rgba8(), [0, 255, 0, 255]);
+    assert_eq!(a.interpolate_lch(&b, 1.0).to_rgba8(), [0, 0, 255, 255]);
 }
 
 #[test]

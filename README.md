@@ -22,6 +22,8 @@
 
 ## Supported Color Format
 
+### Absolute Color
+
 * [Named colors](https://www.w3.org/TR/css-color-4/#named-colors)
 * RGB hexadecimal (with and without `#` prefix)
      + Short format `#rgb`
@@ -37,12 +39,22 @@
 * `oklch()`
 * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 
+### Relative Color
+
+Example:
+
+```text
+rgb(from red r g calc(b + 20))
+hwb(from #bad455 calc(h + 35) w b)
+hsl(from purple h s l / 0.5)
+```
+
 ## Usage
 
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.7"
+csscolorparser = "0.8"
 ```
 
 ## Examples
@@ -74,11 +86,13 @@ assert_eq!(c.to_css_hex(), "#ff00007f");
 
 ### Default
 
-* __named-colors__: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf). Can be disabled using `default-features = false`.
+* __std__: Using the standard library.
+* __named-colors__: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf).
+
+Default features can be disabled using `default-features = false`.
 
 ### Optional
 
-* __lab__: Enables parsing `lab()` and `lch()` color format.
 * __rust-rgb__: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
 * __cint__: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
 * __serde__: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.

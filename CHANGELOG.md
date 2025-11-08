@@ -1,6 +1,17 @@
 # Changelog
 
-## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.2...HEAD)
+## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.0...HEAD)
+
+## [0.8.0](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.2...v0.8.0)
+
+### Added
+
+- Support `no_std`.
+
+### Changed
+
+- Support for parsing lab format is always enabled now. Remove the `lab` cargo feature.
+- Using `phf::OrderedMap` and `uncased` to store named colors.
 
 ## [0.7.2](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.1...v0.7.2)
 

@@ -459,8 +459,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
     // Named colors
     #[cfg(feature = "named-colors")]
     if s.len() > 2 && s.len() < 21 {
-        let s = s.to_ascii_lowercase();
-        if let Some([r, g, b]) = NAMED_COLORS.get(&s) {
+        if let Some([r, g, b]) = NAMED_COLORS.get(s.into()) {
             return Ok(Color::from_rgba8(*r, *g, *b, 255));
         }
     }

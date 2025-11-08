@@ -214,9 +214,9 @@ impl Color {
     #[cfg(feature = "named-colors")]
     pub fn name(&self) -> Option<&'static str> {
         let rgb = &self.to_rgba8()[0..3];
-        for (&k, &v) in NAMED_COLORS.entries() {
+        for (&k, v) in NAMED_COLORS.entries() {
             if v == rgb {
-                return Some(k);
+                return Some(k.as_str());
             }
         }
         None

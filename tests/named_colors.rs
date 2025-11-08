@@ -5,17 +5,20 @@ fn named_colors() {
     let skip_list = ["aqua", "cyan", "fuchsia", "magenta"];
 
     for (&name, &rgb) in NAMED_COLORS.entries() {
-        let c = parse(name).unwrap();
+        let c = parse(name.as_str()).unwrap();
         assert_eq!(c.to_rgba8()[0..3], rgb);
 
-        if skip_list.contains(&name) || name.contains("gray") || name.contains("grey") {
+        if skip_list.contains(&name.as_str())
+            || name.as_str().contains("gray")
+            || name.as_str().contains("grey")
+        {
             continue;
         }
-        assert_eq!(c.name(), Some(name));
+        assert_eq!(c.name(), Some(name.as_str()));
 
         let [r, g, b] = rgb;
         let c = Color::from_rgba8(r, g, b, 255);
-        assert_eq!(c.name(), Some(name));
+        assert_eq!(c.name(), Some(name.as_str()));
     }
 
     // Case-insensitive tests

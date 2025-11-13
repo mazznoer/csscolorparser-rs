@@ -19,14 +19,6 @@
 //! * `oklch()`
 //! * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 //!
-//! ## Usage
-//!
-//! Add this to your `Cargo.toml`
-//!
-//! ```toml
-//! csscolorparser = "0.7"
-//! ```
-//!
 //! ## Examples
 //!
 //! Using [`csscolorparser::parse()`](fn.parse.html) function.
@@ -59,11 +51,11 @@
 //!
 //! ## Default Feature
 //!
-//! * `named-colors`: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf).
+//! * `std`: Using the standard library.
+//! * `named-colors`: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors).
 //!
 //! ## Optional Features
 //!
-//! * `lab`: Enables parsing `lab()` and `lch()` color format.
 //! * `rust-rgb`: Enables converting from [`rgb`](https://crates.io/crates/rgb) crate types into `Color`.
 //! * `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
 //! * `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
@@ -71,6 +63,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![no_std]
+
 #[cfg(feature = "std")]
 extern crate std;
 

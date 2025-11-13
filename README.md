@@ -87,7 +87,7 @@ assert_eq!(c.to_css_hex(), "#ff00007f");
 ### Default
 
 * __std__: Using the standard library.
-* __named-colors__: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors). Requires [`phf`](https://crates.io/crates/phf).
+* __named-colors__: Enables parsing from [named colors](https://www.w3.org/TR/css-color-4/#named-colors).
 
 Default features can be disabled using `default-features = false`.
 

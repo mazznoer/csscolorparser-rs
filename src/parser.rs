@@ -34,7 +34,6 @@ use crate::NAMED_COLORS;
 /// # }
 /// ```
 #[inline(never)]
-#[allow(clippy::needless_match)]
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     let s = s.trim();
 
@@ -282,6 +281,9 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         };
 
         let alpha = if let Some(a) = params.next() {
+            if params.next().is_some() {
+                return Err(err);
+            }
             if let Some((v, _)) = parse_percent_or_float(a) {
                 v.clamp(0.0, 1.0)
             } else {
@@ -290,10 +292,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         } else {
             1.0
         };
-
-        if params.next().is_some() {
-            return Err(err);
-        }
 
         match err {
             ParseColorError::InvalidRgb => {

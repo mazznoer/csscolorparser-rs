@@ -30,7 +30,7 @@ jobs:
         cargo build --examples --all-features
     - uses: taiki-e/install-action@cargo-hack
     - run: |
-        cargo hack build --no-private --feature-powerset --no-dev-deps --optional-deps=cint,lab,serde
+        cargo hack build --no-private --feature-powerset --no-dev-deps
 
     - name: Run tests
       run: |

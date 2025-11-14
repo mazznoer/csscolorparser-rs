@@ -24,14 +24,14 @@ cint = ["dep:cint"]
 named-colors = ["dep:phf", "dep:uncased"]
 rust-rgb = ["dep:rgb"]
 serde = ["dep:serde"]
-std = ["phf?/std"]
+std = ["phf?/std", "serde?/std"]
 
 [dependencies]
 cint = { version = "^0.3.1", optional = true }
 num-traits = { version = "0.2.19", default-features = false, features = ["libm"] }
-phf = { version = "0.13.1", optional = true, features = ["macros", "uncased"] }
+phf = { version = "0.13.1", optional = true, default-features = false, features = ["macros", "uncased"] }
 rgb = { version = "0.8.33", optional = true }
-serde = { version = "1.0.139", optional = true, features = ["derive"] }
+serde = { version = "1.0.139", optional = true, default-features = false, features = ["derive"] }
 uncased = { version = "0.9.10", optional = true, default-features = false }
 
 [dev-dependencies]

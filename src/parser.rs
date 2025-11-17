@@ -1,3 +1,4 @@
+use crate::utils::parse_value;
 use crate::utils::remap;
 use crate::{Color, ParseColorError};
 
@@ -507,59 +508,6 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     }
 }
 
-fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
-    let parse_v = |s: &str| {
-        if let Ok(value) = s.parse() {
-            return Some(value);
-        };
-        for (var, value) in variables {
-            if s.eq_ignore_ascii_case(var) {
-                return Some(value);
-            }
-        }
-        None
-    };
-
-    let s = s.trim();
-
-    if let Some(t) = parse_v(s) {
-        return Some(t);
-    }
-
-    if let Some(s) = strip_prefix(s, "calc(") {
-        if let Some(s) = s.strip_suffix(')') {
-            let mut it = s.split_ascii_whitespace();
-
-            let (Some(val1), Some(op), Some(val2)) = (it.next(), it.next(), it.next()) else {
-                return None;
-            };
-
-            if it.next().is_some() {
-                return None;
-            }
-
-            let (Some(val1), Some(val2)) = (parse_v(val1), parse_v(val2)) else {
-                return None;
-            };
-
-            match op {
-                "+" => return Some(val1 + val2),
-                "-" => return Some(val1 - val2),
-                "*" => return Some(val1 * val2),
-                "/" => {
-                    if val2 == 0.0 {
-                        return None;
-                    }
-                    return Some(val1 / val2);
-                }
-                _ => return None,
-            }
-        }
-    }
-
-    None
-}
-
 struct SplitBySpace<'a> {
     s: &'a str,
     pos: usize,
@@ -616,19 +564,6 @@ fn split_by_space(s: &str) -> SplitBySpace<'_> {
     }
 }
 
-// strip prefix ignore case
-fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
-    if prefix.len() > s.len() {
-        return None;
-    }
-    let s_start = &s[..prefix.len()];
-    if s_start.eq_ignore_ascii_case(prefix) {
-        Some(&s[prefix.len()..])
-    } else {
-        None
-    }
-}
-
 // strip suffix ignore case
 fn strip_suffix<'a>(s: &'a str, suffix: &str) -> Option<&'a str> {
     if suffix.len() > s.len() {
@@ -678,18 +613,6 @@ fn parse_angle(s: &str) -> Option<f32> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_strip_prefix() {
-        assert_eq!(strip_prefix("rgb(77)", "rgb"), Some("(77)"));
-        assert_eq!(strip_prefix("RGB(0,0)", "rgb"), Some("(0,0)"));
-        assert_eq!(strip_prefix("Hsv()", "HSV"), Some("()"));
-
-        assert_eq!(strip_prefix("", "rgb"), None);
-        assert_eq!(strip_prefix("10", "rgb"), None);
-        assert_eq!(strip_prefix("hsv(0,0)", "hsva"), None);
-        assert_eq!(strip_prefix("hsv", "hsva"), None);
-    }
 
     #[test]
     fn test_strip_suffix() {

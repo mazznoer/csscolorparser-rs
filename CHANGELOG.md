@@ -7,6 +7,7 @@
 ### Added
 
 - Support `no_std`.
+- Support parsing relative color format.
 
 ### Changed
 

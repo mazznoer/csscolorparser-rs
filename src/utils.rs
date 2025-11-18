@@ -206,11 +206,11 @@ pub(crate) const fn remap(t: f32, a: f32, b: f32, c: f32, d: f32) -> f32 {
 }
 
 #[cfg(test)]
-mod tests {
+mod t {
     use super::*;
 
     #[test]
-    fn test_normalize_angle() {
+    fn normalize_angle_() {
         let data = [
             (0.0, 0.0),
             (360.0, 0.0),
@@ -228,7 +228,7 @@ mod tests {
     }
 
     #[test]
-    fn test_interp_angle() {
+    fn interp_angle_() {
         let data = [
             ((0.0, 360.0, 0.5), 0.0),
             ((360.0, 90.0, 0.0), 0.0),

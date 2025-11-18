@@ -18,6 +18,11 @@ fn parser() {
             "rgb(from #bad455 calc(r + 10) calc(g - 15) calc(b * 0.75))",
             "#c4c540",
         ],
+        ["rgb(from #bad455 calc((r + g) / 2) b g)", "#c755d4"],
+        [
+            "rgb(from #bad455 127 100 calc(((r + g) + b) / 3))",
+            "#7f64a1",
+        ],
         // ---
         ["hwb(from #bad455 h w b)", "#bad455"],
         ["hwb(from #bad455 h b w)", "#90aa2b"],

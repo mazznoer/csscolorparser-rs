@@ -611,11 +611,11 @@ fn parse_angle(s: &str) -> Option<f32> {
 }
 
 #[cfg(test)]
-mod tests {
+mod t {
     use super::*;
 
     #[test]
-    fn test_strip_suffix() {
+    fn strip_suffix_() {
         assert_eq!(strip_suffix("45deg", "deg"), Some("45"));
         assert_eq!(strip_suffix("90DEG", "deg"), Some("90"));
         assert_eq!(strip_suffix("0.25turn", "turn"), Some("0.25"));
@@ -626,7 +626,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_percent_or_float() {
+    fn parse_percent_or_float_() {
         let test_data = [
             ("0%", Some((0.0, true))),
             ("100%", Some((1.0, true))),
@@ -645,7 +645,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_percent_or_255() {
+    fn parse_percent_or_255_() {
         let test_data = [
             ("0%", Some((0.0, true))),
             ("100%", Some((1.0, true))),
@@ -663,7 +663,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_angle() {
+    fn parse_angle_() {
         let test_data = [
             ("360", Some(360.0)),
             ("127.356", Some(127.356)),
@@ -684,7 +684,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_hex() {
+    fn parse_hex_() {
         // case-insensitive tests
         macro_rules! cmp {
             ($a:expr, $b:expr) => {
@@ -702,7 +702,7 @@ mod tests {
     }
 
     #[test]
-    fn test_split_by_space() {
+    fn split_by_space_() {
         let mut iter = split_by_space("");
         assert_eq!(iter.next(), None);
 
@@ -748,39 +748,5 @@ mod tests {
         assert_eq!(iter.next(), Some("calc(alpha + 0.25)"));
         assert_eq!(iter.next(), Some(")"));
         assert_eq!(iter.next(), None);
-    }
-
-    #[test]
-    fn test_parse_calc() {
-        let variables = [("r", 220.0), ("g", 5.0), ("b", 100.0), ("alpha", 1.0)];
-
-        assert_eq!(parse_value("0.75", variables), Some(0.75));
-        assert_eq!(parse_value("100", variables), Some(100.0));
-        assert_eq!(parse_value("g", variables), Some(5.0));
-        assert_eq!(parse_value("r", variables), Some(220.0));
-
-        assert_eq!(parse_value("calc(10 + r)", variables), Some(230.0));
-        assert_eq!(parse_value("calc(b + g)", variables), Some(105.0));
-        assert_eq!(parse_value("calc( r - 10 )", variables), Some(210.0));
-        assert_eq!(parse_value("calc(b - 50)", variables), Some(50.0));
-        assert_eq!(parse_value("calc(g * 5)", variables), Some(25.0));
-        assert_eq!(parse_value("calc(b / 5)", variables), Some(20.0));
-        assert_eq!(parse_value("calc(alpha * 0.5)", variables), Some(0.5));
-
-        assert_eq!(parse_value("calc(a * 2)", variables), None);
-        assert_eq!(parse_value("calc(l - 60)", variables), None);
-        assert_eq!(parse_value("calc(r + 10", variables), None);
-        assert_eq!(parse_value("calc(h + 10)", variables), None);
-        assert_eq!(parse_value("calc(r 10)", variables), None);
-        assert_eq!(parse_value("calc(10)", variables), None);
-
-        let variables = [("l", 75.0), ("a", 0.5), ("b", 10.0), ("alpha", 0.5)];
-
-        assert_eq!(parse_value("calc(a * 2)", variables), Some(1.0));
-        assert_eq!(parse_value("calc(l - 60)", variables), Some(15.0));
-        assert_eq!(parse_value("alpha", variables), Some(0.5));
-        assert_eq!(parse_value("calc(alpha + 0.25)", variables), Some(0.75));
-
-        assert_eq!(parse_value("calc(r + 10)", variables), None);
     }
 }

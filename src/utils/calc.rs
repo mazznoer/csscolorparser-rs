@@ -219,8 +219,30 @@ mod t {
     }
 
     #[test]
+    fn parse_calc_() {
+        fn f(s: &str) -> Option<f32> {
+            s.parse().ok()
+        }
+
+        let test_data = [
+            ("(1+3.7)", 4.7),
+            ("( 0.35 - -0.5 )", 0.85),
+            ("(2.0*(7-5))", 4.0),
+            ("((5*10) / (7+3))", 5.0),
+        ];
+        for (s, expected) in test_data {
+            assert_eq!(parse_calc(s, &f), Some(expected), "{}", s);
+        }
+
+        let invalids = ["", "5", "g", "1+7", "()", "(9)"];
+        for s in invalids {
+            assert_eq!(parse_calc(s, &f), None, "{}", s);
+        }
+    }
+
+    #[test]
     fn parse_value_() {
-        let vars = [("r", 255.0), ("g", 127.0), ("b", 0.0), ("alpha", 255.0)];
+        let vars = [("r", 255.0), ("g", 127.0), ("b", 0.0), ("alpha", 0.5)];
         let test_data = [
             // simple value
             ("130", 130.0),
@@ -233,6 +255,7 @@ mod t {
             ("calc(21.0/ 3)", 7.0),
             ("calc(r-55)", 200.0),
             ("calc(10 + g)", 137.0),
+            ("calc(alpha*1.5)", 0.75),
             // calc() negative number
             ("calc(-97+-18)", -115.0),
             ("calc( -1 * -45)", 45.0),

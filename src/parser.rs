@@ -1,5 +1,6 @@
 use crate::utils::parse_value;
 use crate::utils::remap;
+use crate::utils::ParamParser;
 use crate::{Color, ParseColorError};
 
 #[cfg(feature = "named-colors")]
@@ -46,14 +47,15 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
         Err(e) => e,
     };
 
-    if !s.is_ascii() {
-        return Err(err);
-    }
-
     if let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) {
-        let mut params = split_by_space(&s[idx + 1..]);
+        if !s.is_ascii() {
+            return Err(err);
+        }
 
-        if let Some(s) = params.next() {
+        let mut pp = ParamParser::new(&s[idx + 1..]);
+        pp.space();
+
+        if let Some(s) = pp.value() {
             if !s.eq_ignore_ascii_case("from") {
                 return Err(err);
             }
@@ -61,8 +63,10 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             return Err(err);
         };
 
+        pp.space();
+
         // parse next value as color
-        let color = if let Some(s) = params.next() {
+        let color = if let Some(s) = pp.value() {
             if let Ok(color) = parse(s) {
                 color
             } else {
@@ -72,21 +76,26 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             return Err(err);
         };
 
-        let (Some(val1), Some(val2), Some(val3)) = (params.next(), params.next(), params.next())
+        pp.space();
+
+        let (Some(val1), true, Some(val2), true, Some(val3)) =
+            (pp.value(), pp.space(), pp.value(), pp.space(), pp.value())
         else {
             return Err(err);
         };
 
-        let val4 = match params.next() {
-            Some("/") => {
-                if let (Some(alpha), None) = (params.next(), params.next()) {
-                    alpha
-                } else {
-                    return Err(err);
-                }
+        pp.space();
+
+        let val4 = if pp.is_end() {
+            "alpha"
+        } else if let (true, Some(alpha)) = (pp.slash(), pp.value()) {
+            pp.space();
+            if !pp.is_end() {
+                return Err(err);
             }
-            Some(_) => return Err(err),
-            None => "alpha",
+            alpha
+        } else {
+            return Err(err);
         };
 
         match err {
@@ -252,9 +261,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
     if let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) {
         let fname = &s[..idx].trim_end();
-        let mut params = s[idx + 1..]
-            .split(&[',', '/'])
-            .flat_map(str::split_ascii_whitespace);
 
         let err = match fname {
             s if s.eq_ignore_ascii_case("rgb") || s.eq_ignore_ascii_case("rgba") => {
@@ -276,13 +282,32 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
             _ => return Err(ParseColorError::InvalidFunction),
         };
 
-        let (Some(val0), Some(val1), Some(val2)) = (params.next(), params.next(), params.next())
-        else {
+        let s = &s[idx + 1..];
+
+        if !s.is_ascii() {
+            return Err(err);
+        }
+
+        let mut pp = ParamParser::new(s);
+        pp.space();
+
+        let (Some(val0), true, Some(val1), true, Some(val2)) = (
+            pp.value(),
+            pp.comma_or_space(),
+            pp.value(),
+            pp.comma_or_space(),
+            pp.value(),
+        ) else {
             return Err(err);
         };
 
-        let alpha = if let Some(a) = params.next() {
-            if params.next().is_some() {
+        let is_space = pp.space();
+
+        let alpha = if pp.is_end() {
+            1.0
+        } else if let (true, Some(a)) = (pp.comma_or_slash() || is_space, pp.value()) {
+            pp.space();
+            if !pp.is_end() {
                 return Err(err);
             }
             if let Some((v, _)) = parse_percent_or_float(a) {
@@ -291,7 +316,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 return Err(err);
             }
         } else {
-            1.0
+            return Err(err);
         };
 
         match err {
@@ -508,62 +533,6 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
     }
 }
 
-struct SplitBySpace<'a> {
-    s: &'a str,
-    pos: usize,
-    inside: usize,
-}
-
-impl<'a> Iterator for SplitBySpace<'a> {
-    type Item = &'a str;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.pos >= self.s.len() {
-            return None;
-        }
-
-        let start = self.pos;
-        let mut found_value = false;
-
-        for (i, c) in self.s[self.pos..].chars().enumerate() {
-            if c.is_whitespace() && self.inside == 0 {
-                if found_value {
-                    let end = self.pos + i;
-                    self.pos = end + 1;
-                    return Some(&self.s[start..end]);
-                }
-                self.pos += 1;
-                return self.next();
-            } else if c == '(' {
-                self.inside += 1;
-                found_value = true;
-            } else if c == ')' {
-                if self.inside > 0 {
-                    self.inside -= 1;
-                }
-                found_value = true;
-            } else if !c.is_whitespace() {
-                found_value = true;
-            }
-        }
-
-        if found_value {
-            self.pos = self.s.len();
-            Some(&self.s[start..])
-        } else {
-            None
-        }
-    }
-}
-
-fn split_by_space(s: &str) -> SplitBySpace<'_> {
-    SplitBySpace {
-        s,
-        pos: 0,
-        inside: 0,
-    }
-}
-
 // strip suffix ignore case
 fn strip_suffix<'a>(s: &'a str, suffix: &str) -> Option<&'a str> {
     if suffix.len() > s.len() {
@@ -699,54 +668,5 @@ mod t {
         cmp!("f0eB", "F0Eb");
         cmp!("abcdef", "ABCDEF");
         cmp!("Ff03E0cB", "fF03e0Cb");
-    }
-
-    #[test]
-    fn split_by_space_() {
-        let mut iter = split_by_space("");
-        assert_eq!(iter.next(), None);
-
-        let mut iter = split_by_space("   ");
-        assert_eq!(iter.next(), None);
-
-        let mut iter = split_by_space(" (   ) ");
-        assert_eq!(iter.next(), Some("(   )"));
-        assert_eq!(iter.next(), None);
-
-        let mut iter = split_by_space(" x ");
-        assert_eq!(iter.next(), Some("x"));
-        assert_eq!(iter.next(), None);
-
-        let s = "pink";
-        let mut iter = split_by_space(s);
-        assert_eq!(iter.next(), Some("pink"));
-        assert_eq!(iter.next(), None);
-
-        let s = ") (ab cd) (";
-        let mut iter = split_by_space(s);
-        assert_eq!(iter.next(), Some(")"));
-        assert_eq!(iter.next(), Some("(ab cd)"));
-        assert_eq!(iter.next(), Some("("));
-        assert_eq!(iter.next(), None);
-
-        let s = "  plum teal f(1, 2, 3) abc  ";
-        let mut iter = split_by_space(s);
-        assert_eq!(iter.next(), Some("plum"));
-        assert_eq!(iter.next(), Some("teal"));
-        assert_eq!(iter.next(), Some("f(1, 2, 3)"));
-        assert_eq!(iter.next(), Some("abc"));
-        assert_eq!(iter.next(), None);
-
-        let s = "from rgb(from red r g calc(b + 15) / 0.75) h w b / calc(alpha + 0.25) )";
-        let mut iter = split_by_space(s);
-        assert_eq!(iter.next(), Some("from"));
-        assert_eq!(iter.next(), Some("rgb(from red r g calc(b + 15) / 0.75)"));
-        assert_eq!(iter.next(), Some("h"));
-        assert_eq!(iter.next(), Some("w"));
-        assert_eq!(iter.next(), Some("b"));
-        assert_eq!(iter.next(), Some("/"));
-        assert_eq!(iter.next(), Some("calc(alpha + 0.25)"));
-        assert_eq!(iter.next(), Some(")"));
-        assert_eq!(iter.next(), None);
     }
 }

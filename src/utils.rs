@@ -1,8 +1,10 @@
 mod calc;
 mod helper;
+mod param;
 
 pub use calc::*;
 pub use helper::*;
+pub use param::*;
 
 use core::f32::consts::{PI, TAU};
 

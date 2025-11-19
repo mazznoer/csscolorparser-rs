@@ -76,11 +76,13 @@ fn invalid() {
     let test_data = [
         "rgb(from)",
         "rgb(from #f00)",
+        "rgb(from #abx 255 0 0)",
         "rgb(from #f00 r g)",
         "rgb(from #f00 r g b 0.5)",
         "hwb(from #f00 h w b alpha)",
         "rgb(from #f00 r g b / alpha 10)",
         "hsl(from #f00 h s x)",
+        "rgb(from hwb(from hsv(90 0.5 v) h w b) 0 0 0)",
     ];
     for s in test_data {
         assert!(parse(s).is_err(), "{:?}", s);

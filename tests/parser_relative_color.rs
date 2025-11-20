@@ -83,6 +83,16 @@ fn invalid() {
         "rgb(from #f00 r g b / alpha 10)",
         "hsl(from #f00 h s x)",
         "rgb(from hwb(from hsv(90 0.5 v) h w b) 0 0 0)",
+        // non ascii
+        "rgb(ā #f00 r g b)",
+        "rgb(from â r g b)",
+        "rgb(from #f00 æ g b)",
+        "rgb(from #f00 r g b / æ)",
+        "rgb(from #f00 r calc(ã+15) b)",
+        "rgb(from #f00 calc(1* (r-æ)) g b)",
+        "rgb(from #f00 r g b / 1 ã)",
+        "rgbà(from #f00 r g b)",
+        "æç(from #f00 r g b)",
     ];
     for s in test_data {
         assert!(parse(s).is_err(), "{:?}", s);

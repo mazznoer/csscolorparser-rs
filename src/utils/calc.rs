@@ -170,52 +170,73 @@ mod t {
     fn calc_parser() {
         let s = "78+0.573";
         let mut p = CalcParser::new(s);
+        assert_eq!(p.operator(), None);
         assert_eq!(p.operand(), Some("78"));
+        assert_eq!(p.operand(), None);
         assert_eq!(p.operator(), Some(b'+'));
+        assert_eq!(p.operator(), None);
         assert_eq!(p.operand(), Some("0.573"));
+        assert_eq!(p.operator(), None);
+        assert_eq!(p.operand(), None);
         assert!(p.is_end());
+        assert_eq!(p.parse(), None);
 
-        let s = "g-100";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operand(), Some("g"));
-        assert_eq!(p.operator(), Some(b'-'));
-        assert_eq!(p.operand(), Some("100"));
-        assert!(p.is_end());
+        #[rustfmt::skip]
+        let test_data = [
+            (
+                "78+0.573",
+                ("78", b'+', "0.573"),
+            ),
+            (
+                "g-100",
+                ("g", b'-', "100"),
+            ),
+            (
+                " 9 * alpha  ",
+                ("9", b'*', "alpha"),
+            ),
+            (
+                "alpha/2",
+                ("alpha", b'/', "2"),
+            ),
+            (
+                "-360+-55.07",
+                ("-360", b'+', "-55.07"),
+            ),
+            (
+                "-7--5",
+                ("-7", b'-', "-5"),
+            ),
+            (
+                "h+(4*0.75)",
+                ("h", b'+', "(4*0.75)"),
+            ),
+            (
+                "(0.35*r) / (alpha - 10)",
+                ("(0.35*r)", b'/', "(alpha - 10)"),
+            ),
+        ];
+        for (s, expected) in test_data {
+            let mut p = CalcParser::new(s);
+            assert_eq!(p.parse(), Some(expected), "{:?}", s);
+            assert!(p.is_end(), "{:?}", s);
+        }
 
-        let s = "9 * alpha";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operand(), Some("9"));
-        assert_eq!(p.operator(), Some(b'*'));
-        assert_eq!(p.operand(), Some("alpha"));
-        assert!(p.is_end());
-
-        let s = "alpha/2";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operand(), Some("alpha"));
-        assert_eq!(p.operator(), Some(b'/'));
-        assert_eq!(p.operand(), Some("2"));
-        assert!(p.is_end());
-
-        let s = "-360+-55.07";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operand(), Some("-360"));
-        assert_eq!(p.operator(), Some(b'+'));
-        assert_eq!(p.operand(), Some("-55.07"));
-        assert!(p.is_end());
-
-        let s = "h+(4*0.75)";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operand(), Some("h"));
-        assert_eq!(p.operator(), Some(b'+'));
-        assert_eq!(p.operand(), Some("(4*0.75)"));
-        assert!(p.is_end());
-
-        let s = "(0.35*r) / (alpha - 10)";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operand(), Some("(0.35*r)"));
-        assert_eq!(p.operator(), Some(b'/'));
-        assert_eq!(p.operand(), Some("(alpha - 10)"));
-        assert!(p.is_end());
+        #[rustfmt::skip]
+        let invalids = [
+            "",
+            " ",
+            "5",
+            "g+",
+            "-",
+            "7---3",
+            "*3+2",
+            "4+5/",
+        ];
+        for s in invalids {
+            let mut p = CalcParser::new(s);
+            assert_eq!(p.parse(), None, "{:?}", s);
+        }
     }
 
     #[test]
@@ -229,14 +250,34 @@ mod t {
             ("( 0.35 - -0.5 )", 0.85),
             ("(2.0*(7-5))", 4.0),
             ("((5*10) / (7+3))", 5.0),
+            ("(0.5 * (5 + (7 * (9 - (3 * (1 + 1))))))", 13.0),
         ];
         for (s, expected) in test_data {
-            assert_eq!(parse_calc(s, &f), Some(expected), "{}", s);
+            assert_eq!(parse_calc(s, &f), Some(expected), "{:?}", s);
         }
 
-        let invalids = ["", "5", "g", "1+7", "()", "(9)"];
+        let invalids = [
+            "",
+            "5",
+            "g",
+            "1+7",
+            "()",
+            "(())",
+            "(())",
+            "(()+(1*5))",
+            "(9)",
+            "(4/0)",
+            "(1-8",
+            "7+0.3)",
+            "(5+(3*2)",
+            "((5-1)",
+            "((1+2))",
+            "(5+(1+2/3))",
+            "(4+5(1*3))",
+            "((1+2)1*5)",
+        ];
         for s in invalids {
-            assert_eq!(parse_calc(s, &f), None, "{}", s);
+            assert_eq!(parse_calc(s, &f), None, "{:?}", s);
         }
     }
 
@@ -251,8 +292,8 @@ mod t {
             // calc() simple
             ("calc(4+5.5)", 9.5),
             ("calc( 10 - 7 )", 3.0),
-            ("calc(2.5 *2)", 5.0),
-            ("calc(21.0/ 3)", 7.0),
+            ("CALC(2.5 *2)", 5.0),
+            ("CaLc(21.0/ 3)", 7.0),
             ("calc(r-55)", 200.0),
             ("calc(10 + g)", 137.0),
             ("calc(alpha*1.5)", 0.75),
@@ -268,7 +309,7 @@ mod t {
             ("calc((r + g) / 2)", 191.0),
         ];
         for (s, expected) in test_data {
-            assert_eq!(parse_value(s, vars), Some(expected), "{}", s);
+            assert_eq!(parse_value(s, vars), Some(expected), "{:?}", s);
         }
 
         let invalids = [
@@ -291,7 +332,7 @@ mod t {
             "calc(5 + (2 - ab))",
         ];
         for s in invalids {
-            assert_eq!(parse_value(s, vars), None, "{}", s);
+            assert_eq!(parse_value(s, vars), None, "{:?}", s);
         }
     }
 }

@@ -55,32 +55,28 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
         let mut pp = ParamParser::new(&s[idx + 1..]);
         pp.space();
 
-        if let Some(s) = pp.value() {
-            if !s.eq_ignore_ascii_case("from") {
-                return Err(err);
-            }
-        } else {
+        #[rustfmt::skip]
+        let (
+            Some(from),  true,
+            Some(color), true,
+            Some(val1),  true,
+            Some(val2),  true,
+            Some(val3),
+        ) = (
+            pp.value(), pp.space(),
+            pp.value(), pp.space(),
+            pp.value(), pp.space(),
+            pp.value(), pp.space(),
+            pp.value(),
+        ) else {
             return Err(err);
         };
 
-        pp.space();
-
-        // parse next value as color
-        let color = if let Some(s) = pp.value() {
-            if let Ok(color) = parse(s) {
-                color
-            } else {
-                return Err(err);
-            }
-        } else {
+        if !from.eq_ignore_ascii_case("from") {
             return Err(err);
-        };
+        }
 
-        pp.space();
-
-        let (Some(val1), true, Some(val2), true, Some(val3)) =
-            (pp.value(), pp.space(), pp.value(), pp.space(), pp.value())
-        else {
+        let Ok(color) = parse(color) else {
             return Err(err);
         };
 
@@ -88,11 +84,9 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
 
         let val4 = if pp.is_end() {
             "alpha"
-        } else if let (true, Some(alpha)) = (pp.slash(), pp.value()) {
-            pp.space();
-            if !pp.is_end() {
-                return Err(err);
-            }
+        } else if let (true, Some(alpha), _, true) =
+            (pp.slash(), pp.value(), pp.space(), pp.is_end())
+        {
             alpha
         } else {
             return Err(err);
@@ -305,11 +299,12 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
         let alpha = if pp.is_end() {
             1.0
-        } else if let (true, Some(a)) = (pp.comma_or_slash() || is_space, pp.value()) {
-            pp.space();
-            if !pp.is_end() {
-                return Err(err);
-            }
+        } else if let (true, Some(a), _, true) = (
+            pp.comma_or_slash() || is_space,
+            pp.value(),
+            pp.space(),
+            pp.is_end(),
+        ) {
             if let Some((v, _)) = parse_percent_or_float(a) {
                 v.clamp(0.0, 1.0)
             } else {

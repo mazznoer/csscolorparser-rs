@@ -42,5 +42,9 @@ name = "named_colors"
 required-features = ["named-colors"]
 
 [[example]]
+name = "cli"
+required-features = ["named-colors"]
+
+[[example]]
 name = "named-colors"
 required-features = ["named-colors"]

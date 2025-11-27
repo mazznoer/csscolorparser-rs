@@ -1,6 +1,17 @@
 # Changelog
 
-## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.0...HEAD)
+## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.1...HEAD)
+
+## [0.8.1](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.0...v0.8.1)
+
+### Changed
+
+- Improvements in parser code.
+- improvements of `calc()` parser for relative color format.
+
+### Fixed
+
+- Require `phf` only if needed.
 
 ## [0.8.0](https://github.com/mazznoer/csscolorparser-rs/compare/v0.7.2...v0.8.0)
 

@@ -58,8 +58,8 @@ Doesn't support percentage.
 
 ```[OPERAND] [OPERATOR] [OPERAND]```
 
-`OPERATOR` is one of `+`, `-`, `*` or `/`
 `OPERAND` can be a number, a variable (`r`, `g`, `b`, `alpha` etc. depends on color function) or another expression wrapped in parenthesis.
+`OPERATOR` is one of `+`, `-`, `*` or `/`.
 
 ##### Not Supported
 

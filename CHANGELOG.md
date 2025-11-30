@@ -2,6 +2,10 @@
 
 ## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.1...HEAD)
 
+### Changed
+
+- Parse `none` value in absolute color format.
+
 ## [0.8.1](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.0...v0.8.1)
 
 ### Changed

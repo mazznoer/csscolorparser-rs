@@ -199,6 +199,36 @@ fn lime_alpha() {
     }
 }
 
+#[test]
+fn none_value() {
+    let test_data = [
+        ["rgb(none none none)", "#000000"],
+        ["hwb(none none none)", "#ff0000"],
+        ["hsl(none none none)", "#000000"],
+        ["lab(none none none)", "#000000"],
+        ["lch(none none none)", "#000000"],
+        ["oklab(none none none)", "#000000"],
+        ["oklch(none none none)", "#000000"],
+        ["rgb(255 0 255 / none)", "#ff00ff00"],
+        ["rgb(90 none 210)", "#5a00d2"],
+        ["rgb(255 none 50%)", "#ff0080"],
+        ["rgb(none 50% 127)", "#00807f"],
+        ["rgb(90 35% none)", "#5a5900"],
+        ["hwb(none 60% 0%)", "#ff9999"],
+        ["hwb(137 55% none)", "#8cffad"],
+        ["hsl(none 45% 55%)", "#c05959"],
+        ["lab(50% -75 none)", "#009275"],
+        ["lch(50% 100 none)", "#ff007b"], // xxx
+        ["oklab(60% none -0.17)", "#5a76e4"],
+        ["oklch(60% 0.2 none)", "#d7397b"],
+    ];
+    for [s, hex] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{:?}", s);
+        assert_eq!(c.unwrap().to_css_hex(), hex, "{:?}", s);
+    }
+}
+
 #[cfg(feature = "named-colors")]
 #[test]
 fn invalid_format() {
@@ -210,8 +240,8 @@ fn invalid_format() {
         "rgb(255,0,0",
         "rgb(0,255,8s)",
         "rgb(100%,z9%,75%)",
-        "rgb(255,0,0%)",  // mix format
-        "rgb(70%,30%,0)", // mix format
+        //"rgb(255,0,0%)",  // mix format
+        //"rgb(70%,30%,0)", // mix format
         "rgb(255 0 0 0 0)",
         "rgb(255 0 0 0 / 0)",
         "rgb(,255,0,0)",
@@ -227,14 +257,14 @@ fn invalid_format() {
         "hsl(Xturn 100% 50%)",
         "hsl(Zgrad 100% 50%)",
         "hsl(180 1 x%)",
-        "hsl(360,0%,0)", // mix format
+        //"hsl(360,0%,0)", // mix format
         "hsla(360)",
         "hwb(Xrad,50%,50%)",
         "hwb(270 0% 0% 0% 0%)",
-        "hwb(360,0,20%)", // mix format
+        //"hwb(360,0,20%)", // mix format
         "hsv(120 100% 100% 1 50%)",
         "hsv(120 XXX 100%)",
-        "hsv(120,100%,0.5)", //mix format
+        //"hsv(120,100%,0.5)", //mix format
         "lab(100%,0)",
         "lab(100% 0 X)",
         "lch(100%,0)",

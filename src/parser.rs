@@ -316,7 +316,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
         match err {
             ParseColorError::InvalidRgb => {
-                if let (Some((r, r_fmt)), Some((g, g_fmt)), Some((b, b_fmt))) = (
+                if let (Some(r), Some(g), Some(b)) = (
                     // red
                     parse_percent_or_255(val0),
                     // green
@@ -324,19 +324,17 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // blue
                     parse_percent_or_255(val2),
                 ) {
-                    if r_fmt == g_fmt && g_fmt == b_fmt {
-                        return Ok(Color {
-                            r: r.clamp(0.0, 1.0),
-                            g: g.clamp(0.0, 1.0),
-                            b: b.clamp(0.0, 1.0),
-                            a: alpha,
-                        });
-                    }
+                    return Ok(Color {
+                        r: r.clamp(0.0, 1.0),
+                        g: g.clamp(0.0, 1.0),
+                        b: b.clamp(0.0, 1.0),
+                        a: alpha,
+                    });
                 }
                 return Err(err);
             }
             ParseColorError::InvalidHsl => {
-                if let (Some(h), Some((s, s_fmt)), Some((l, l_fmt))) = (
+                if let (Some(h), Some((s, _)), Some((l, _))) = (
                     // hue
                     parse_angle(val0),
                     // saturation
@@ -344,14 +342,12 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // lightness
                     parse_percent_or_float(val2),
                 ) {
-                    if s_fmt == l_fmt {
-                        return Ok(Color::from_hsla(h, s, l, alpha));
-                    }
+                    return Ok(Color::from_hsla(h, s, l, alpha));
                 }
                 return Err(err);
             }
             ParseColorError::InvalidHwb => {
-                if let (Some(h), Some((w, w_fmt)), Some((b, b_fmt))) = (
+                if let (Some(h), Some((w, _)), Some((b, _))) = (
                     // hue
                     parse_angle(val0),
                     // whiteness
@@ -359,14 +355,12 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // blackness
                     parse_percent_or_float(val2),
                 ) {
-                    if w_fmt == b_fmt {
-                        return Ok(Color::from_hwba(h, w, b, alpha));
-                    }
+                    return Ok(Color::from_hwba(h, w, b, alpha));
                 }
                 return Err(err);
             }
             ParseColorError::InvalidHsv => {
-                if let (Some(h), Some((s, s_fmt)), Some((v, v_fmt))) = (
+                if let (Some(h), Some((s, _)), Some((v, _))) = (
                     // hue
                     parse_angle(val0),
                     // saturation
@@ -374,9 +368,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // value
                     parse_percent_or_float(val2),
                 ) {
-                    if s_fmt == v_fmt {
-                        return Ok(Color::from_hsva(h, s, v, alpha));
-                    }
+                    return Ok(Color::from_hsva(h, s, v, alpha));
                 }
                 return Err(err);
             }
@@ -542,18 +534,27 @@ fn strip_suffix<'a>(s: &'a str, suffix: &str) -> Option<&'a str> {
 }
 
 fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
+    if s.eq_ignore_ascii_case("none") {
+        return Some((0.0, false));
+    }
     s.strip_suffix('%')
         .and_then(|s| s.parse().ok().map(|t: f32| (t / 100.0, true)))
         .or_else(|| s.parse().ok().map(|t| (t, false)))
 }
 
-fn parse_percent_or_255(s: &str) -> Option<(f32, bool)> {
+fn parse_percent_or_255(s: &str) -> Option<f32> {
+    if s.eq_ignore_ascii_case("none") {
+        return Some(0.0);
+    }
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f32| (t / 100.0, true)))
-        .or_else(|| s.parse().ok().map(|t: f32| (t / 255.0, false)))
+        .and_then(|s| s.parse().ok().map(|t: f32| t / 100.0))
+        .or_else(|| s.parse().ok().map(|t: f32| t / 255.0))
 }
 
 fn parse_angle(s: &str) -> Option<f32> {
+    if s.eq_ignore_ascii_case("none") {
+        return Some(0.0);
+    }
     strip_suffix(s, "deg")
         .and_then(|s| s.parse().ok())
         .or_else(|| {
@@ -611,13 +612,13 @@ mod t {
     #[test]
     fn parse_percent_or_255_() {
         let test_data = [
-            ("0%", Some((0.0, true))),
-            ("100%", Some((1.0, true))),
-            ("50%", Some((0.5, true))),
-            ("-100%", Some((-1.0, true))),
-            ("0", Some((0.0, false))),
-            ("255", Some((1.0, false))),
-            ("127.5", Some((0.5, false))),
+            ("0%", Some(0.0)),
+            ("100%", Some(1.0)),
+            ("50%", Some(0.5)),
+            ("-100%", Some(-1.0)),
+            ("0", Some(0.0)),
+            ("255", Some(1.0)),
+            ("127.5", Some(0.5)),
             ("%", None),
             ("255x", None),
         ];

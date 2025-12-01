@@ -110,7 +110,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::new(r / 255.0, g / 255.0, b / 255.0, a));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidHwb => {
                 // h     [0..360]
@@ -126,7 +125,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_hwba(h, w / 100.0, b / 100.0, a));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidHsl => {
                 // h     [0..360]
@@ -147,7 +145,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                         a,
                     ));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidHsv => {
                 // h     [0..360]
@@ -163,7 +160,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_hsva(h, s / 100.0, v / 100.0, a));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidLab => {
                 // l     [0..100]
@@ -179,7 +175,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidLch => {
                 // l [0..100]
@@ -196,7 +191,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidOklab => {
                 // l     [0..1]
@@ -212,7 +206,6 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
                 };
-                return Err(err);
             }
             ParseColorError::InvalidOklch => {
                 // l [0..1]
@@ -234,10 +227,10 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                         a,
                     ));
                 };
-                return Err(err);
             }
             _ => unreachable!(),
         }
+        return Err(err);
     }
 
     unreachable!();
@@ -331,7 +324,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         a: alpha,
                     });
                 }
-                return Err(err);
             }
             ParseColorError::InvalidHsl => {
                 if let (Some(h), Some((s, _)), Some((l, _))) = (
@@ -344,7 +336,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_hsla(h, s, l, alpha));
                 }
-                return Err(err);
             }
             ParseColorError::InvalidHwb => {
                 if let (Some(h), Some((w, _)), Some((b, _))) = (
@@ -357,7 +348,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_hwba(h, w, b, alpha));
                 }
-                return Err(err);
             }
             ParseColorError::InvalidHsv => {
                 if let (Some(h), Some((s, _)), Some((v, _))) = (
@@ -370,10 +360,9 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ) {
                     return Ok(Color::from_hsva(h, s, v, alpha));
                 }
-                return Err(err);
             }
             ParseColorError::InvalidLab => {
-                if let (Some((l, l_fmt)), Some((a, a_fmt)), Some((b, b_fmt))) = (
+                if let (Some((l, l_pct)), Some((a, a_pct)), Some((b, b_pct))) = (
                     // lightness
                     parse_percent_or_float(val0),
                     // a
@@ -381,23 +370,22 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // b
                     parse_percent_or_float(val2),
                 ) {
-                    let l = if l_fmt { l * 100.0 } else { l };
-                    let a = if a_fmt {
+                    let l = if l_pct { l * 100.0 } else { l };
+                    let a = if a_pct {
                         remap(a, -1.0, 1.0, -125.0, 125.0)
                     } else {
                         a
                     };
-                    let b = if b_fmt {
+                    let b = if b_pct {
                         remap(b, -1.0, 1.0, -125.0, 125.0)
                     } else {
                         b
                     };
                     return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
                 }
-                return Err(err);
             }
             ParseColorError::InvalidLch => {
-                if let (Some((l, l_fmt)), Some((c, c_fmt)), Some(h)) = (
+                if let (Some((l, l_pct)), Some((c, c_pct)), Some(h)) = (
                     // lightness
                     parse_percent_or_float(val0),
                     // chroma
@@ -405,8 +393,8 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // hue
                     parse_angle(val2),
                 ) {
-                    let l = if l_fmt { l * 100.0 } else { l };
-                    let c = if c_fmt { c * 150.0 } else { c };
+                    let l = if l_pct { l * 100.0 } else { l };
+                    let c = if c_pct { c * 150.0 } else { c };
                     return Ok(Color::from_lcha(
                         l.max(0.0),
                         c.max(0.0),
@@ -414,10 +402,9 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         alpha,
                     ));
                 }
-                return Err(err);
             }
             ParseColorError::InvalidOklab => {
-                if let (Some((l, _)), Some((a, a_fmt)), Some((b, b_fmt))) = (
+                if let (Some((l, _)), Some((a, a_pct)), Some((b, b_pct))) = (
                     // lightness
                     parse_percent_or_float(val0),
                     // a
@@ -425,22 +412,21 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // b
                     parse_percent_or_float(val2),
                 ) {
-                    let a = if a_fmt {
+                    let a = if a_pct {
                         remap(a, -1.0, 1.0, -0.4, 0.4)
                     } else {
                         a
                     };
-                    let b = if b_fmt {
+                    let b = if b_pct {
                         remap(b, -1.0, 1.0, -0.4, 0.4)
                     } else {
                         b
                     };
                     return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
                 }
-                return Err(err);
             }
             ParseColorError::InvalidOklch => {
-                if let (Some((l, _)), Some((c, c_fmt)), Some(h)) = (
+                if let (Some((l, _)), Some((c, c_pct)), Some(h)) = (
                     // lightness
                     parse_percent_or_float(val0),
                     // chroma
@@ -448,7 +434,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // hue
                     parse_angle(val2),
                 ) {
-                    let c = if c_fmt { c * 0.4 } else { c };
+                    let c = if c_pct { c * 0.4 } else { c };
                     return Ok(Color::from_oklcha(
                         l.max(0.0),
                         c.max(0.0),
@@ -456,10 +442,10 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         alpha,
                     ));
                 }
-                return Err(err);
             }
             _ => unreachable!(),
         }
+        return Err(err);
     }
 
     // Hex format without prefix '#'
@@ -593,6 +579,8 @@ mod t {
     #[test]
     fn parse_percent_or_float_() {
         let test_data = [
+            ("none", Some((0.0, false))),
+            ("NONE", Some((0.0, false))),
             ("0%", Some((0.0, true))),
             ("100%", Some((1.0, true))),
             ("50%", Some((0.5, true))),
@@ -612,6 +600,8 @@ mod t {
     #[test]
     fn parse_percent_or_255_() {
         let test_data = [
+            ("none", Some(0.0)),
+            ("NONE", Some(0.0)),
             ("0%", Some(0.0)),
             ("100%", Some(1.0)),
             ("50%", Some(0.5)),
@@ -630,6 +620,8 @@ mod t {
     #[test]
     fn parse_angle_() {
         let test_data = [
+            ("none", Some(0.0)),
+            ("NONE", Some(0.0)),
             ("360", Some(360.0)),
             ("127.356", Some(127.356)),
             ("+120deg", Some(120.0)),

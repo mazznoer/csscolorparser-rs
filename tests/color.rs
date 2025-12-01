@@ -10,7 +10,7 @@ fn basic() {
     assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
     assert_eq!(c.to_css_hex(), "#ff0000");
     assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
-    assert_eq!(c.to_string(), "RGBA(1,0,0,1)");
+    assert_eq!(c.to_string(), "#ff0000");
     assert_eq!(c.to_hsva(), [0.0, 1.0, 1.0, 1.0]);
     assert_eq!(c.to_hsla(), [0.0, 1.0, 0.5, 1.0]);
     assert_eq!(c.to_hwba(), [0.0, 0.0, 0.0, 1.0]);
@@ -21,7 +21,7 @@ fn basic() {
     assert_eq!(c.to_rgba8(), [255, 0, 0, 128]);
     assert_eq!(c.to_css_hex(), "#ff000080");
     assert_eq!(c.to_css_rgb(), "rgb(255 0 0 / 50%)");
-    assert_eq!(c.to_string(), "RGBA(1,0,0,0.5)");
+    assert_eq!(c.to_string(), "#ff000080");
 
     let c = Color::new(0.0, 1.0, 0.0, 1.0);
     assert_eq!(c.to_hsva(), [120.0, 1.0, 1.0, 1.0]);

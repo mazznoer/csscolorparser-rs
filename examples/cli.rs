@@ -11,7 +11,7 @@ fn main() {
                 let [r, g, b, _] = c.to_rgba8();
                 let name = if let Some(s) = c.name() { s } else { "-" };
                 println!("    \x1B[48;2;{r};{g};{b}m        \x1B[49m");
-                println!("    {}", c.to_css_hex());
+                println!("    {}", c);
                 println!("    {}", c.to_css_rgb());
                 println!("    {}", c.to_css_hwb());
                 println!("    {}", c.to_css_hsl());

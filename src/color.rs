@@ -381,12 +381,7 @@ impl Color {
 
     /// Get CSS RGB hexadecimal color representation
     pub fn to_css_hex(&self) -> String {
-        let [r, g, b, a] = self.to_rgba8();
-        if a < 255 {
-            format!("#{r:02x}{g:02x}{b:02x}{a:02x}")
-        } else {
-            format!("#{r:02x}{g:02x}{b:02x}")
-        }
+        self.to_string()
     }
 
     /// Get CSS `rgb()` color representation
@@ -551,7 +546,12 @@ impl Default for Color {
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "RGBA({},{},{},{})", self.r, self.g, self.b, self.a)
+        let [r, g, b, a] = self.to_rgba8();
+        if a < 255 {
+            write!(f, "#{r:02x}{g:02x}{b:02x}{a:02x}")
+        } else {
+            write!(f, "#{r:02x}{g:02x}{b:02x}")
+        }
     }
 }
 
@@ -669,7 +669,7 @@ impl From<RGBA<f32>> for Color {
 #[cfg(feature = "serde")]
 impl Serialize for Color {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(&self.to_css_hex())
+        serializer.collect_str(self)
     }
 }
 

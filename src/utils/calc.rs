@@ -95,7 +95,7 @@ impl<'a> CalcParser<'a> {
     }
 }
 
-pub fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
+pub fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f32; 4]> {
     let parse_v = |s: &str| -> Option<f32> {
         if let Ok(value) = s.parse() {
             return Some(value);
@@ -108,15 +108,28 @@ pub fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
         None
     };
 
-    if let Some(t) = parse_v(s) {
-        return Some(t);
+    let mut result = [0.0; 4];
+    let mut i = 0;
+
+    for s in values {
+        if let Some(t) = parse_v(s) {
+            result[i] = t;
+            i += 1;
+            continue;
+        }
+
+        if let Some(s) = strip_prefix(s, "calc") {
+            if let Some(t) = parse_calc(s, &parse_v) {
+                result[i] = t;
+                i += 1;
+                continue;
+            }
+        }
+
+        return None;
     }
 
-    if let Some(s) = strip_prefix(s, "calc") {
-        return parse_calc(s, &parse_v);
-    }
-
-    None
+    Some(result)
 }
 
 fn parse_calc<F>(s: &str, f: &F) -> Option<f32>
@@ -282,7 +295,14 @@ mod t {
     }
 
     #[test]
-    fn parse_value_() {
+    fn parse_values_() {
+        fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
+            if let Some([t, ..]) = parse_values([s; 4], variables) {
+                return Some(t);
+            }
+            None
+        }
+
         let vars = [("r", 255.0), ("g", 127.0), ("b", 0.0), ("alpha", 0.5)];
         let test_data = [
             // simple value

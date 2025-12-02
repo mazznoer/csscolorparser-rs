@@ -1,4 +1,4 @@
-use crate::utils::parse_value;
+use crate::utils::parse_values;
 use crate::utils::remap;
 use crate::utils::ParamParser;
 use crate::{Color, ParseColorError};
@@ -92,6 +92,8 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             return Err(err);
         };
 
+        let values = [val1, val2, val3, val4];
+
         match err {
             ParseColorError::InvalidRgb => {
                 // r, g, b [0..255]
@@ -102,12 +104,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                     ("b", color.b * 255.0),
                     ("alpha", color.a),
                 ];
-                if let (Some(r), Some(g), Some(b), Some(a)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([r, g, b, a]) = parse_values(values, variables) {
                     return Ok(Color::new(r / 255.0, g / 255.0, b / 255.0, a));
                 };
             }
@@ -117,12 +114,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [h, w, b, a] = color.to_hwba();
                 let variables = [("h", h), ("w", w * 100.0), ("b", b * 100.0), ("alpha", a)];
-                if let (Some(h), Some(w), Some(b), Some(a)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([h, w, b, a]) = parse_values(values, variables) {
                     return Ok(Color::from_hwba(h, w / 100.0, b / 100.0, a));
                 };
             }
@@ -132,12 +124,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [h, s, l, a] = color.to_hsla();
                 let variables = [("h", h), ("s", s * 100.0), ("l", l * 100.0), ("alpha", a)];
-                if let (Some(h), Some(s), Some(l), Some(a)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([h, s, l, a]) = parse_values(values, variables) {
                     return Ok(Color::from_hsla(
                         h,
                         (s / 100.0).clamp(0.0, 1.0),
@@ -152,12 +139,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [h, s, v, a] = color.to_hsva();
                 let variables = [("h", h), ("s", s * 100.0), ("v", v * 100.0), ("alpha", a)];
-                if let (Some(h), Some(s), Some(v), Some(a)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([h, s, v, a]) = parse_values(values, variables) {
                     return Ok(Color::from_hsva(h, s / 100.0, v / 100.0, a));
                 };
             }
@@ -167,12 +149,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [l, a, b, alpha] = color.to_laba();
                 let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-                if let (Some(l), Some(a), Some(b), Some(alpha)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([l, a, b, alpha]) = parse_values(values, variables) {
                     return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
                 };
             }
@@ -183,12 +160,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [l, c, h, a] = color.to_lcha();
                 let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-                if let (Some(l), Some(c), Some(h), Some(a)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([l, c, h, a]) = parse_values(values, variables) {
                     return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
                 };
             }
@@ -198,12 +170,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [l, a, b, alpha] = color.to_oklaba();
                 let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-                if let (Some(l), Some(a), Some(b), Some(alpha)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([l, a, b, alpha]) = parse_values(values, variables) {
                     return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
                 };
             }
@@ -214,12 +181,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
                 // alpha [0..1]
                 let [l, c, h, a] = color.to_oklcha();
                 let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-                if let (Some(l), Some(c), Some(h), Some(a)) = (
-                    parse_value(val1, variables),
-                    parse_value(val2, variables),
-                    parse_value(val3, variables),
-                    parse_value(val4, variables),
-                ) {
+                if let Some([l, c, h, a]) = parse_values(values, variables) {
                     return Ok(Color::from_oklcha(
                         l.max(0.0),
                         c.max(0.0),

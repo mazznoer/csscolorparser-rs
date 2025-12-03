@@ -2,6 +2,13 @@ use core::convert::TryFrom;
 use core::fmt;
 use core::str::FromStr;
 
+use alloc::format;
+use alloc::string::String;
+use alloc::string::ToString;
+
+#[cfg(not(feature = "std"))]
+use num_traits::float::Float;
+
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};
 
@@ -9,16 +16,8 @@ use rgb::{RGB, RGBA};
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
-
 use crate::utils::*;
 use crate::{parse, ParseColorError};
-
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-
-#[cfg(not(feature = "std"))]
-use num_traits::float::Float;
 
 #[cfg(feature = "named-colors")]
 use crate::NAMED_COLORS;
@@ -714,13 +713,13 @@ fn fmt_alpha(alpha: f32) -> String {
 }
 
 #[cfg(test)]
-mod tests {
+mod t {
     #[cfg(any(feature = "serde", feature = "rust-rgb"))]
     use super::*;
 
     #[cfg(feature = "rust-rgb")]
     #[test]
-    fn test_convert_rust_rgb_to_color() {
+    fn rust_rgb() {
         let rgb = RGB::new(0.0, 0.5, 1.0);
         assert_eq!(Color::new(0.0, 0.5, 1.0, 1.0), Color::from(rgb));
 
@@ -730,21 +729,40 @@ mod tests {
 
     #[cfg(feature = "serde")]
     #[test]
-    fn test_serde_serialize_to_hex() {
-        let color = Color::new(1.0, 1.0, 0.5, 0.5);
-        serde_test::assert_ser_tokens(&color, &[serde_test::Token::Str("#ffff8080")]);
+    fn serde_serialize() {
+        let test_data = [
+            "#000000",
+            "#ffffff",
+            "#71fe15",
+            "#d6e3c9",
+            "#ff000000",
+            "#ffff8080",
+            "#6b9fa203",
+            "#0e5e0be6",
+            "#84f9a716",
+        ];
+        for s in test_data {
+            let color = parse(s).unwrap();
+            serde_test::assert_ser_tokens(&color, &[serde_test::Token::Str(s)]);
+        }
     }
 
-    #[cfg(all(feature = "serde", feature = "named-colors"))]
+    #[cfg(feature = "serde")]
     #[test]
-    fn test_serde_deserialize_from_string() {
-        let named = Color::new(1.0, 1.0, 0.0, 1.0);
-        serde_test::assert_de_tokens(&named, &[serde_test::Token::Str("yellow")]);
+    fn serde_deserialize() {
+        let col = Color::new(0.0, 1.0, 0.0, 1.0);
+        serde_test::assert_de_tokens(&col, &[serde_test::Token::Str("#00ff00")]);
+        serde_test::assert_de_tokens(&col, &[serde_test::Token::Str("rgb(0 255 0)")]);
 
-        let hex = Color::new(0.0, 1.0, 0.0, 1.0);
-        serde_test::assert_de_tokens(&hex, &[serde_test::Token::Str("#00ff00ff")]);
+        #[cfg(feature = "named-colors")]
+        {
+            serde_test::assert_de_tokens(&col, &[serde_test::Token::Str("lime")]);
 
-        let rgb = Color::new(0.0, 1.0, 0.0, 1.0);
-        serde_test::assert_de_tokens(&rgb, &[serde_test::Token::Str("rgba(0,255,0,1)")]);
+            let col = Color::new(1.0, 0.0, 0.0, 1.0);
+            serde_test::assert_de_tokens(&col, &[serde_test::Token::Str("red")]);
+
+            let col = Color::new(1.0, 1.0, 0.0, 1.0);
+            serde_test::assert_de_tokens(&col, &[serde_test::Token::Str("yellow")]);
+        }
     }
 }

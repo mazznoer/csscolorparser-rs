@@ -52,22 +52,68 @@ fn parser() {
             "oklch(from #bad455 calc(l - 0.15) calc(c * 0.7) h)",
             "#8fa150",
         ],
-    ];
-    for [s, hex] in test_data {
-        assert_eq!(parse(s).unwrap().to_css_hex(), hex, "{:?}", s);
-    }
-}
-
-#[test]
-fn lab() {
-    let test_data = [
+        // ---
         ["lab(from #bad455 l a b)", "#bad455"],
         ["lab(from #bad455 l a b / calc(alpha / 2))", "#bad45580"],
+        // ---
         ["lch(from #bad455 l c h)", "#bad455"],
         ["lch(from #bad455 l c h / calc(alpha * 0.5))", "#bad45580"],
     ];
     for [s, hex] in test_data {
         assert_eq!(parse(s).unwrap().to_css_hex(), hex, "{:?}", s);
+    }
+
+    let test_data = [
+        "#ffffff",
+        "#000000",
+        "#71fe15",
+        "#d6e3c9",
+        "#2a7719",
+        "#b53717",
+        "#5b0b8d",
+        "#aff632",
+        "#65ec8d",
+        "#d35493",
+        "#289e5f",
+        "#b46152",
+        "#e0afee",
+        "#ac2be4",
+        "#233490",
+        "#1afbc5",
+        "#e41755",
+        "#e052ee",
+        "#4d1b5e",
+        "#230cde",
+        "#f8a243",
+        "#a130d1",
+        "#b38373",
+        "#6b9fa203",
+        "#0e5e0be6",
+        "#84f9a716",
+        "#48651550",
+        "#1adc2cf4",
+        "#c191a31c",
+        "#a25518c5",
+        "#cb33f2c9",
+        "#89b21d36",
+        "#cbb97f3e",
+    ];
+    for hex in test_data {
+        let p = [
+            format!("rgb(from {hex} r g b)"),
+            format!("hwb(from {hex} h w b / alpha)"),
+            format!("hsl(from {hex} h s l)"),
+            format!("hsv(from {hex} h s v)"),
+            format!("lab(from {hex} l a b)"),
+            format!("lch(from {hex} l c h)"),
+            format!("oklab(from {hex} l a b)"),
+            format!("oklch(from {hex} l c h)"),
+        ];
+        for s in p {
+            let c = parse(&s);
+            assert!(c.is_ok(), "{:?}", s);
+            assert_eq!(hex, c.unwrap().to_css_hex());
+        }
     }
 }
 

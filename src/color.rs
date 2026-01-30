@@ -386,7 +386,7 @@ impl Color {
     /// Get CSS `rgb()` color representation
     pub fn to_css_rgb(&self) -> String {
         let [r, g, b, _] = self.to_rgba8();
-        format!("rgb({r} {g} {b}{})", fmt_alpha(self.a))
+        format!("rgb({r} {g} {b}{})", AlphaFmt(self.a))
     }
 
     /// Get CSS `hsl()` color representation
@@ -399,7 +399,7 @@ impl Color {
         };
         let s = (s * 100.0 + 0.5).floor();
         let l = (l * 100.0 + 0.5).floor();
-        format!("hsl({h} {s}% {l}%{})", fmt_alpha(alpha))
+        format!("hsl({h} {s}% {l}%{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `hwb()` color representation
@@ -412,7 +412,7 @@ impl Color {
         };
         let w = (w * 100.0 + 0.5).floor();
         let b = (b * 100.0 + 0.5).floor();
-        format!("hwb({h} {w}% {b}%{})", fmt_alpha(alpha))
+        format!("hwb({h} {w}% {b}%{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `oklab()` color representation
@@ -421,7 +421,7 @@ impl Color {
         let l = fmt_float(l, 3);
         let a = fmt_float(a, 3);
         let b = fmt_float(b, 3);
-        format!("oklab({l} {a} {b}{})", fmt_alpha(alpha))
+        format!("oklab({l} {a} {b}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `oklch()` color representation
@@ -430,7 +430,7 @@ impl Color {
         let l = fmt_float(l, 3);
         let c = fmt_float(c, 3);
         let h = fmt_float(normalize_angle(h.to_degrees()), 2);
-        format!("oklch({l} {c} {h}{})", fmt_alpha(alpha))
+        format!("oklch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `lab()` color representation
@@ -439,7 +439,7 @@ impl Color {
         let l = fmt_float(l, 2);
         let a = fmt_float(a, 2);
         let b = fmt_float(b, 2);
-        format!("lab({l} {a} {b}{})", fmt_alpha(alpha))
+        format!("lab({l} {a} {b}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `lch()` color representation
@@ -458,7 +458,7 @@ impl Color {
         let l = fmt_float(l, 2);
         let c = fmt_float(c, 2);
         let h = fmt_float(to_degrees(h), 2);
-        format!("lch({l} {c} {h}{})", fmt_alpha(alpha))
+        format!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
@@ -702,14 +702,6 @@ impl Visitor<'_> for ColorVisitor {
 fn fmt_float(t: f32, precision: usize) -> String {
     let s = format!("{t:.precision$}");
     s.trim_end_matches('0').trim_end_matches('.').to_string()
-}
-
-fn fmt_alpha(alpha: f32) -> String {
-    if alpha < 1.0 {
-        format!(" / {}%", (alpha.max(0.0) * 100.0 + 0.5).floor())
-    } else {
-        "".into()
-    }
 }
 
 #[cfg(test)]

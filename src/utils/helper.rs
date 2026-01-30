@@ -1,3 +1,5 @@
+use core::fmt;
+
 // Strip prefix ignore case.
 pub fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
     if prefix.len() > s.len() {
@@ -8,6 +10,19 @@ pub fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
         Some(&s[prefix.len()..])
     } else {
         None
+    }
+}
+
+pub(crate) struct AlphaFmt(pub f32);
+
+impl fmt::Display for AlphaFmt {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let t = (self.0.clamp(0.0, 1.0) * 100.0 + 0.5) as u8;
+        if t < 100 {
+            write!(f, " / {t}%")
+        } else {
+            Ok(())
+        }
     }
 }
 

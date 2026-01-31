@@ -1,5 +1,8 @@
 use core::fmt;
 
+#[cfg(not(feature = "std"))]
+use num_traits::float::Float;
+
 // Strip prefix ignore case.
 pub fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
     if prefix.len() > s.len() {

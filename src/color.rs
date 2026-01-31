@@ -392,11 +392,7 @@ impl Color {
     /// Get CSS `hsl()` color representation
     pub fn to_css_hsl(&self) -> String {
         let [h, s, l, alpha] = self.to_hsla();
-        let h = if h.is_nan() {
-            "none".into()
-        } else {
-            fmt_float(h, 2)
-        };
+        let h = FloatFmt(h);
         let s = (s * 100.0 + 0.5).floor();
         let l = (l * 100.0 + 0.5).floor();
         format!("hsl({h} {s}% {l}%{})", AlphaFmt(alpha))
@@ -405,11 +401,7 @@ impl Color {
     /// Get CSS `hwb()` color representation
     pub fn to_css_hwb(&self) -> String {
         let [h, w, b, alpha] = self.to_hwba();
-        let h = if h.is_nan() {
-            "none".into()
-        } else {
-            fmt_float(h, 2)
-        };
+        let h = FloatFmt(h);
         let w = (w * 100.0 + 0.5).floor();
         let b = (b * 100.0 + 0.5).floor();
         format!("hwb({h} {w}% {b}%{})", AlphaFmt(alpha))
@@ -418,27 +410,27 @@ impl Color {
     /// Get CSS `oklab()` color representation
     pub fn to_css_oklab(&self) -> String {
         let [l, a, b, alpha] = self.to_oklaba();
-        let l = fmt_float(l, 3);
-        let a = fmt_float(a, 3);
-        let b = fmt_float(b, 3);
+        let l = FloatFmt(l);
+        let a = FloatFmt(a);
+        let b = FloatFmt(b);
         format!("oklab({l} {a} {b}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `oklch()` color representation
     pub fn to_css_oklch(&self) -> String {
         let [l, c, h, alpha] = self.to_oklcha();
-        let l = fmt_float(l, 3);
-        let c = fmt_float(c, 3);
-        let h = fmt_float(normalize_angle(h.to_degrees()), 2);
+        let l = FloatFmt(l);
+        let c = FloatFmt(c);
+        let h = FloatFmt(normalize_angle(h.to_degrees()));
         format!("oklch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `lab()` color representation
     pub fn to_css_lab(&self) -> String {
         let [l, a, b, alpha] = self.to_laba();
-        let l = fmt_float(l, 2);
-        let a = fmt_float(a, 2);
-        let b = fmt_float(b, 2);
+        let l = FloatFmt(l);
+        let a = FloatFmt(a);
+        let b = FloatFmt(b);
         format!("lab({l} {a} {b}{})", AlphaFmt(alpha))
     }
 
@@ -455,9 +447,9 @@ impl Color {
         }
 
         let [l, c, h, alpha] = self.to_lcha();
-        let l = fmt_float(l, 2);
-        let c = fmt_float(c, 2);
-        let h = fmt_float(to_degrees(h), 2);
+        let l = FloatFmt(l);
+        let c = FloatFmt(c);
+        let h = FloatFmt(to_degrees(h));
         format!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
@@ -697,11 +689,6 @@ impl Visitor<'_> for ColorVisitor {
     {
         Color::from_str(v).map_err(serde::de::Error::custom)
     }
-}
-
-fn fmt_float(t: f32, precision: usize) -> String {
-    let s = format!("{t:.precision$}");
-    s.trim_end_matches('0').trim_end_matches('.').to_string()
 }
 
 #[cfg(test)]

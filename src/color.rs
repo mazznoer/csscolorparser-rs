@@ -335,6 +335,7 @@ impl Color {
         ]
     }
 
+    #[deprecated]
     /// Returns: `[r, g, b, a]`
     ///
     /// * Red, green, blue and alpha in the range [0..255]

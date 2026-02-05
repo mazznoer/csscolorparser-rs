@@ -15,7 +15,6 @@ fn basic() {
     assert_eq!(c.to_hsla(), [0.0, 1.0, 0.5, 1.0]);
     assert_eq!(c.to_hwba(), [0.0, 0.0, 0.0, 1.0]);
     assert_eq!(c.to_linear_rgba(), [1.0, 0.0, 0.0, 1.0]);
-    assert_eq!(c.to_linear_rgba_u8(), [255, 0, 0, 255]);
 
     let c = Color::new(1.0, 0.0, 0.0, 0.5);
     assert_eq!(c.to_rgba8(), [255, 0, 0, 128]);

@@ -70,7 +70,6 @@ extern crate std;
 extern crate alloc;
 
 mod color;
-mod color2;
 pub use color::Color;
 
 mod error;

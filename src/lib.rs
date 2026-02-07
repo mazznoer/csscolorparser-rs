@@ -78,6 +78,9 @@ pub use error::ParseColorError;
 mod parser;
 pub use parser::parse;
 
+mod parse_colors;
+pub use parse_colors::{parse_colors, ParseColors, ParseColorsError};
+
 #[cfg(feature = "named-colors")]
 mod named_colors;
 #[cfg(feature = "named-colors")]

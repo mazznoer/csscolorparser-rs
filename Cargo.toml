@@ -41,6 +41,10 @@ serde_test = "1.0.139"
 name = "named_colors"
 required-features = ["named-colors"]
 
+[[test]]
+name = "parse_colors"
+required-features = ["named-colors"]
+
 [[example]]
 name = "cli"
 required-features = ["named-colors"]

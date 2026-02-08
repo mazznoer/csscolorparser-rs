@@ -1,4 +1,4 @@
-use csscolorparser::{parse, Color, NAMED_COLORS};
+use csscolorparser::{Color, NAMED_COLORS, parse};
 
 #[test]
 fn named_colors() {

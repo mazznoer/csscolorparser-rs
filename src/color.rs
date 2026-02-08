@@ -13,11 +13,11 @@ use num_traits::float::Float;
 use rgb::{RGB, RGBA};
 
 #[cfg(feature = "serde")]
-use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 use crate::utils::*;
-use crate::{parse, ParseColorError};
+use crate::{ParseColorError, parse};
 
 #[cfg(feature = "named-colors")]
 use crate::NAMED_COLORS;

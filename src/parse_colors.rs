@@ -1,6 +1,6 @@
 use core::{error, fmt};
 
-use crate::{parse, Color, ParseColorError};
+use crate::{Color, ParseColorError, parse};
 
 /// Error wrapper
 #[derive(Debug, Clone, Eq, PartialEq)]

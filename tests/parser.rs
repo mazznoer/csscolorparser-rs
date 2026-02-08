@@ -1,4 +1,4 @@
-use csscolorparser::{parse, Color};
+use csscolorparser::{Color, parse};
 
 #[test]
 fn parser() {

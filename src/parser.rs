@@ -1,6 +1,6 @@
+use crate::utils::ParamParser;
 use crate::utils::parse_values;
 use crate::utils::remap;
-use crate::utils::ParamParser;
 use crate::{Color, ParseColorError};
 
 #[cfg(feature = "named-colors")]
@@ -417,10 +417,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
     // Named colors
     #[cfg(feature = "named-colors")]
-    if s.len() > 2 && s.len() < 21 {
-        if let Some([r, g, b]) = NAMED_COLORS.get(s.into()) {
-            return Ok(Color::from_rgba8(*r, *g, *b, 255));
-        }
+    if s.len() > 2
+        && s.len() < 21
+        && let Some([r, g, b]) = NAMED_COLORS.get(s.into())
+    {
+        return Ok(Color::from_rgba8(*r, *g, *b, 255));
     }
 
     Err(ParseColorError::InvalidUnknown)

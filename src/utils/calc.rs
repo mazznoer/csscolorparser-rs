@@ -118,12 +118,12 @@ pub fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f
             continue;
         }
 
-        if let Some(s) = strip_prefix(s, "calc") {
-            if let Some(t) = parse_calc(s, &parse_v) {
-                result[i] = t;
-                i += 1;
-                continue;
-            }
+        if let Some(s) = strip_prefix(s, "calc")
+            && let Some(t) = parse_calc(s, &parse_v)
+        {
+            result[i] = t;
+            i += 1;
+            continue;
         }
 
         return None;
@@ -136,39 +136,39 @@ fn parse_calc<F>(s: &str, f: &F) -> Option<f32>
 where
     F: Fn(&str) -> Option<f32>,
 {
-    if let Some(s) = s.strip_prefix('(') {
-        if let Some(s) = s.strip_suffix(')') {
-            let mut p = CalcParser::new(s);
-            let (va, op, vb) = p.parse()?;
+    if let Some(s) = s.strip_prefix('(')
+        && let Some(s) = s.strip_suffix(')')
+    {
+        let mut p = CalcParser::new(s);
+        let (va, op, vb) = p.parse()?;
 
-            let va = if let Some(v) = f(va) {
-                v
-            } else if let Some(v) = parse_calc(va, f) {
-                v
-            } else {
-                return None;
-            };
+        let va = if let Some(v) = f(va) {
+            v
+        } else if let Some(v) = parse_calc(va, f) {
+            v
+        } else {
+            return None;
+        };
 
-            let vb = if let Some(v) = f(vb) {
-                v
-            } else if let Some(v) = parse_calc(vb, f) {
-                v
-            } else {
-                return None;
-            };
+        let vb = if let Some(v) = f(vb) {
+            v
+        } else if let Some(v) = parse_calc(vb, f) {
+            v
+        } else {
+            return None;
+        };
 
-            match op {
-                b'+' => return Some(va + vb),
-                b'-' => return Some(va - vb),
-                b'*' => return Some(va * vb),
-                b'/' => {
-                    if vb == 0.0 {
-                        return None;
-                    }
-                    return Some(va / vb);
+        match op {
+            b'+' => return Some(va + vb),
+            b'-' => return Some(va - vb),
+            b'*' => return Some(va * vb),
+            b'/' => {
+                if vb == 0.0 {
+                    return None;
                 }
-                _ => unreachable!(),
+                return Some(va / vb);
             }
+            _ => unreachable!(),
         }
     }
 

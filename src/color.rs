@@ -7,7 +7,7 @@ use alloc::string::String;
 use alloc::string::ToString;
 
 #[cfg(not(feature = "std"))]
-use num_traits::float::Float;
+use num_traits::float::Float as _;
 
 #[cfg(feature = "rust-rgb")]
 use rgb::{RGB, RGBA};

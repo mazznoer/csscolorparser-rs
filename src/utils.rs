@@ -11,7 +11,7 @@ use core::f32::consts::{PI, TAU};
 const PI_3: f32 = PI * 3.0;
 
 #[cfg(not(feature = "std"))]
-use num_traits::float::Float;
+use num_traits::float::Float as _;
 
 #[allow(clippy::excessive_precision)]
 pub(crate) fn oklab_to_linear_rgb(l: f32, a: f32, b: f32) -> [f32; 3] {

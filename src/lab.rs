@@ -1,5 +1,5 @@
 #[cfg(not(feature = "std"))]
-use num_traits::float::Float;
+use num_traits::float::Float as _;
 
 // Constants for D65 white point (normalized to Y=1.0)
 const D65_X: f32 = 0.95047;

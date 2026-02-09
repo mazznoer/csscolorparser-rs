@@ -58,3 +58,35 @@ fn basic() {
         assert!(p.next().is_none());
     }
 }
+
+#[test]
+fn invalid_colors() {
+    fn ps(s: &str) -> String {
+        let res: Result<Vec<_>, _> = parse_colors(s).collect();
+        res.unwrap_err().to_string()
+    }
+
+    #[rustfmt::skip]
+    let invalid = [
+        [
+            "rgb(0,0)",
+            "invalid rgb format: \"rgb(0,0)\"",
+        ],
+        [
+            "rgb(0 0 0),#ffx",
+            "invalid hex format: \"#ffx\"",
+        ],
+        [
+            "#0f9, hwb(95 0.3 0.7),§ü¥,#f00",
+            "invalid unknown format: \"§ü¥\"",
+        ],
+        [
+            "π, #ff0",
+            "invalid unknown format: \"π\"",
+        ],
+    ];
+
+    for [s, err] in invalid {
+        assert_eq!(ps(s), err, "{:?}", s);
+    }
+}

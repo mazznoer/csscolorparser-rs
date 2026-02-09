@@ -1,7 +1,7 @@
 use core::fmt;
 
 #[cfg(not(feature = "std"))]
-use num_traits::float::Float;
+use num_traits::float::Float as _;
 
 // Strip prefix ignore case.
 pub fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {

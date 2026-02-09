@@ -2,6 +2,19 @@
 
 ## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.1...HEAD)
 
+### Added
+
+- `parse_colors()` for parsing string containing multiple colors separated by comma.
+
+### Changed
+
+- Deprecate `Color.to_linear_rgba_u8()`
+- Set Rust edition to 2024
+
+### Removed
+
+- Old deprecated methods.
+
 ## [0.8.2]
 
 ### Changed

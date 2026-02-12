@@ -52,7 +52,7 @@ fn basic() {
             }
             assert!(c.is_ok());
             let c = c.unwrap();
-            assert_eq!(c.to_css_hex(), hex);
+            assert_eq!(c.to_css_hex().to_string(), hex);
         }
 
         assert!(p.next().is_none());

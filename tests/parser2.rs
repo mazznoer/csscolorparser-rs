@@ -37,7 +37,7 @@ fn hex() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_hex());
+        assert_eq!(s, c.to_css_hex().to_string());
     }
 }
 
@@ -68,7 +68,7 @@ fn rgb() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_rgb());
+        assert_eq!(s, c.to_css_rgb().to_string());
     }
 }
 
@@ -99,7 +99,7 @@ fn hsl() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_hsl());
+        assert_eq!(s, c.to_css_hsl().to_string());
     }
 }
 
@@ -130,7 +130,7 @@ fn hwb() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_hwb());
+        assert_eq!(s, c.to_css_hwb().to_string());
     }
 }
 
@@ -161,7 +161,7 @@ fn oklab() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_oklab());
+        assert_eq!(s, c.to_css_oklab().to_string());
     }
 }
 
@@ -192,7 +192,7 @@ fn oklch() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_oklch());
+        assert_eq!(s, c.to_css_oklch().to_string());
     }
 }
 
@@ -223,7 +223,7 @@ fn lab() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_lab());
+        assert_eq!(s, c.to_css_lab().to_string());
     }
 }
 
@@ -254,6 +254,6 @@ fn lch() {
     ];
     for s in test_data {
         let c = parse(s).unwrap();
-        assert_eq!(s, c.to_css_lch());
+        assert_eq!(s, c.to_css_lch().to_string());
     }
 }

@@ -29,8 +29,8 @@
 //!
 //! assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
 //! assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-//! assert_eq!(c.to_css_hex(), "#ff0000");
-//! assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
+//! assert_eq!(c.to_css_hex().to_string(), "#ff0000");
+//! assert_eq!(c.to_css_rgb().to_string(), "rgb(255 0 0)");
 //! # Ok(())
 //! # }
 //! ```
@@ -44,7 +44,7 @@
 //! let c: Color = "#ff00007f".parse()?;
 //!
 //! assert_eq!(c.to_rgba8(), [255, 0, 0, 127]);
-//! assert_eq!(c.to_css_hex(), "#ff00007f");
+//! assert_eq!(c.to_css_hex().to_string(), "#ff00007f");
 //! # Ok(())
 //! # }
 //! ```
@@ -67,8 +67,6 @@
 #[cfg(feature = "std")]
 extern crate std;
 
-extern crate alloc;
-
 mod color;
 pub use color::Color;
 
@@ -90,5 +88,6 @@ pub use named_colors::NAMED_COLORS;
 mod cint;
 
 mod lab;
-
 mod utils;
+
+pub(crate) use utils::opaque_display;

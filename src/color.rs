@@ -2,10 +2,6 @@ use core::convert::TryFrom;
 use core::fmt;
 use core::str::FromStr;
 
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
 
@@ -16,6 +12,7 @@ use rgb::{RGB, RGBA};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
+use crate::opaque_display;
 use crate::utils::*;
 use crate::{ParseColorError, parse};
 
@@ -179,8 +176,8 @@ impl Color {
     ///
     /// assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
     /// assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-    /// assert_eq!(c.to_css_hex(), "#ff0000");
-    /// assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
+    /// assert_eq!(c.to_css_hex().to_string(), "#ff0000");
+    /// assert_eq!(c.to_css_rgb().to_string(), "rgb(255 0 0)");
     /// # Ok(())
     /// # }
     /// ```
@@ -380,63 +377,63 @@ impl Color {
     }
 
     /// Get CSS RGB hexadecimal color representation
-    pub fn to_css_hex(&self) -> String {
-        self.to_string()
+    pub fn to_css_hex(&self) -> impl fmt::Display {
+        self
     }
 
     /// Get CSS `rgb()` color representation
-    pub fn to_css_rgb(&self) -> String {
+    pub fn to_css_rgb(&self) -> impl fmt::Display {
         let [r, g, b, _] = self.to_rgba8();
-        format!("rgb({r} {g} {b}{})", AlphaFmt(self.a))
+        opaque_display!("rgb({r} {g} {b}{})", AlphaFmt(self.a))
     }
 
     /// Get CSS `hsl()` color representation
-    pub fn to_css_hsl(&self) -> String {
+    pub fn to_css_hsl(&self) -> impl fmt::Display {
         let [h, s, l, alpha] = self.to_hsla();
         let h = FloatFmt(h);
         let s = (s * 100.0 + 0.5).floor();
         let l = (l * 100.0 + 0.5).floor();
-        format!("hsl({h} {s}% {l}%{})", AlphaFmt(alpha))
+        opaque_display!("hsl({h} {s}% {l}%{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `hwb()` color representation
-    pub fn to_css_hwb(&self) -> String {
+    pub fn to_css_hwb(&self) -> impl fmt::Display {
         let [h, w, b, alpha] = self.to_hwba();
         let h = FloatFmt(h);
         let w = (w * 100.0 + 0.5).floor();
         let b = (b * 100.0 + 0.5).floor();
-        format!("hwb({h} {w}% {b}%{})", AlphaFmt(alpha))
+        opaque_display!("hwb({h} {w}% {b}%{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `oklab()` color representation
-    pub fn to_css_oklab(&self) -> String {
+    pub fn to_css_oklab(&self) -> impl fmt::Display {
         let [l, a, b, alpha] = self.to_oklaba();
         let l = FloatFmt(l);
         let a = FloatFmt(a);
         let b = FloatFmt(b);
-        format!("oklab({l} {a} {b}{})", AlphaFmt(alpha))
+        opaque_display!("oklab({l} {a} {b}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `oklch()` color representation
-    pub fn to_css_oklch(&self) -> String {
+    pub fn to_css_oklch(&self) -> impl fmt::Display {
         let [l, c, h, alpha] = self.to_oklcha();
         let l = FloatFmt(l);
         let c = FloatFmt(c);
         let h = FloatFmt(normalize_angle(h.to_degrees()));
-        format!("oklch({l} {c} {h}{})", AlphaFmt(alpha))
+        opaque_display!("oklch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `lab()` color representation
-    pub fn to_css_lab(&self) -> String {
+    pub fn to_css_lab(&self) -> impl fmt::Display {
         let [l, a, b, alpha] = self.to_laba();
         let l = FloatFmt(l);
         let a = FloatFmt(a);
         let b = FloatFmt(b);
-        format!("lab({l} {a} {b}{})", AlphaFmt(alpha))
+        opaque_display!("lab({l} {a} {b}{})", AlphaFmt(alpha))
     }
 
     /// Get CSS `lch()` color representation
-    pub fn to_css_lch(&self) -> String {
+    pub fn to_css_lch(&self) -> impl fmt::Display {
         use core::f32::consts::PI;
 
         fn to_degrees(t: f32) -> f32 {
@@ -451,7 +448,7 @@ impl Color {
         let l = FloatFmt(l);
         let c = FloatFmt(c);
         let h = FloatFmt(to_degrees(h));
-        format!("lch({l} {c} {h}{})", AlphaFmt(alpha))
+        opaque_display!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
@@ -560,14 +557,6 @@ impl TryFrom<&str> for Color {
 
     fn try_from(s: &str) -> Result<Self, Self::Error> {
         parse(s)
-    }
-}
-
-impl TryFrom<String> for Color {
-    type Error = ParseColorError;
-
-    fn try_from(s: String) -> Result<Self, Self::Error> {
-        parse(s.as_ref())
     }
 }
 

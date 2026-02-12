@@ -225,7 +225,7 @@ fn none_value() {
     for [s, hex] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{:?}", s);
-        assert_eq!(c.unwrap().to_css_hex(), hex, "{:?}", s);
+        assert_eq!(c.unwrap().to_css_hex().to_string(), hex, "{:?}", s);
     }
 }
 

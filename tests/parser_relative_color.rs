@@ -60,7 +60,7 @@ fn parser() {
         ["lch(from #bad455 l c h / calc(alpha * 0.5))", "#bad45580"],
     ];
     for [s, hex] in test_data {
-        assert_eq!(parse(s).unwrap().to_css_hex(), hex, "{:?}", s);
+        assert_eq!(parse(s).unwrap().to_css_hex().to_string(), hex, "{:?}", s);
     }
 
     let test_data = [
@@ -112,7 +112,7 @@ fn parser() {
         for s in p {
             let c = parse(&s);
             assert!(c.is_ok(), "{:?}", s);
-            assert_eq!(hex, c.unwrap().to_css_hex());
+            assert_eq!(hex, c.unwrap().to_css_hex().to_string());
         }
     }
 }

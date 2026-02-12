@@ -8,8 +8,8 @@ fn basic() {
     assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
     assert_eq!(c.to_rgba16(), [65535, 0, 0, 65535]);
     assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-    assert_eq!(c.to_css_hex(), "#ff0000");
-    assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
+    assert_eq!(c.to_css_hex().to_string(), "#ff0000");
+    assert_eq!(c.to_css_rgb().to_string(), "rgb(255 0 0)");
     assert_eq!(c.to_string(), "#ff0000");
     assert_eq!(c.to_hsva(), [0.0, 1.0, 1.0, 1.0]);
     assert_eq!(c.to_hsla(), [0.0, 1.0, 0.5, 1.0]);
@@ -18,8 +18,8 @@ fn basic() {
 
     let c = Color::new(1.0, 0.0, 0.0, 0.5);
     assert_eq!(c.to_rgba8(), [255, 0, 0, 128]);
-    assert_eq!(c.to_css_hex(), "#ff000080");
-    assert_eq!(c.to_css_rgb(), "rgb(255 0 0 / 50%)");
+    assert_eq!(c.to_css_hex().to_string(), "#ff000080");
+    assert_eq!(c.to_css_rgb().to_string(), "rgb(255 0 0 / 50%)");
     assert_eq!(c.to_string(), "#ff000080");
 
     let c = Color::new(0.0, 1.0, 0.0, 1.0);
@@ -106,13 +106,10 @@ fn parser() {
     let test_data = ["#71fe15", "#d6e3c9", "#2a7719", "#b53717", "#5b0b8d"];
     for s in test_data {
         let c = Color::from_str(s).unwrap();
-        assert_eq!(c.to_css_hex(), s);
+        assert_eq!(c.to_css_hex().to_string(), s);
 
         let c = Color::try_from(s).unwrap();
-        assert_eq!(c.to_css_hex(), s);
-
-        let c = Color::try_from(s.to_string()).unwrap();
-        assert_eq!(c.to_css_hex(), s);
+        assert_eq!(c.to_css_hex().to_string(), s);
     }
 }
 
@@ -129,15 +126,15 @@ fn convert_colors() {
         Color::from_hsla(120.0, 0.3, 0.2, 1.0),
     ];
     for (i, col) in colors.iter().enumerate() {
-        println!("{i} -> {}, {}", &col.to_css_hex(), &col.to_css_rgb());
+        println!("{i} -> {}, {}", col.to_css_hex(), col.to_css_rgb());
 
         let [a, b, c, d] = col.to_linear_rgba();
         let x = Color::from_linear_rgba(a, b, c, d);
-        assert_eq!(&col.to_css_hex(), &x.to_css_hex());
+        assert_eq!(&col.to_css_hex().to_string(), &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_oklaba();
         let x = Color::from_oklaba(a, b, c, d);
-        assert_eq!(&col.to_css_hex(), &x.to_css_hex());
+        assert_eq!(&col.to_css_hex().to_string(), &x.to_css_hex().to_string());
     }
 
     let data = &[
@@ -161,39 +158,39 @@ fn convert_colors() {
     ];
     for s in data {
         let col = csscolorparser::parse(s).unwrap();
-        assert_eq!(s, &col.to_css_hex());
+        assert_eq!(s, &col.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_rgba8();
         let x = Color::from_rgba8(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_hsva();
         let x = Color::from_hsva(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_hsla();
         let x = Color::from_hsla(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_hwba();
         let x = Color::from_hwba(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_linear_rgba();
         let x = Color::from_linear_rgba(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_oklaba();
         let x = Color::from_oklaba(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_laba();
         let x = Color::from_laba(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
 
         let [a, b, c, d] = col.to_lcha();
         let x = Color::from_lcha(a, b, c, d);
-        assert_eq!(s, &x.to_css_hex());
+        assert_eq!(s, &x.to_css_hex().to_string());
     }
 }
 

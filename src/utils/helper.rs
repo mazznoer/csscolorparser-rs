@@ -58,6 +58,28 @@ impl fmt::Display for FloatFmt {
     }
 }
 
+pub(crate) struct OpaqueDisplay<F>(pub F);
+
+impl<F> fmt::Display for OpaqueDisplay<F>
+where
+    F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
+{
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        (self.0)(f)
+    }
+}
+
+macro_rules! opaque_display {
+    ($($arg:tt)*) => {
+        $crate::utils::OpaqueDisplay(move |f: &mut ::core::fmt::Formatter<'_>| -> ::core::fmt::Result {
+            f.write_fmt(format_args!($($arg)*))
+        })
+    };
+}
+
+pub(crate) use opaque_display;
+
 #[cfg(test)]
 mod t {
     use super::*;

@@ -17,8 +17,8 @@ use crate::NAMED_COLORS;
 ///
 /// assert_eq!(c.to_array(), [1.0, 1.0, 0.0, 1.0]);
 /// assert_eq!(c.to_rgba8(), [255, 255, 0, 255]);
-/// assert_eq!(c.to_css_hex(), "#ffff00");
-/// assert_eq!(c.to_css_rgb(), "rgb(255 255 0)");
+/// assert_eq!(c.to_css_hex().to_string(), "#ffff00");
+/// assert_eq!(c.to_css_rgb().to_string(), "rgb(255 255 0)");
 /// # Ok(())
 /// # }
 /// ```
@@ -30,8 +30,8 @@ use crate::NAMED_COLORS;
 ///
 /// assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
 /// assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-/// assert_eq!(c.to_css_hex(), "#ff0000");
-/// assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
+/// assert_eq!(c.to_css_hex().to_string(), "#ff0000");
+/// assert_eq!(c.to_css_rgb().to_string(), "rgb(255 0 0)");
 /// # Ok(())
 /// # }
 /// ```

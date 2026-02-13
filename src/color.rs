@@ -544,6 +544,15 @@ impl fmt::Display for Color {
     }
 }
 
+impl std::hash::Hash for Color {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.r.to_bits().hash(state);
+        self.g.to_bits().hash(state);
+        self.b.to_bits().hash(state);
+        self.a.to_bits().hash(state);
+    }
+}
+
 impl FromStr for Color {
     type Err = ParseColorError;
 

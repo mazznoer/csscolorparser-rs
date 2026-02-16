@@ -377,18 +377,18 @@ impl Color {
     }
 
     /// Get CSS RGB hexadecimal color representation
-    pub fn to_css_hex(&self) -> impl fmt::Display {
-        self
+    pub fn to_css_hex(&self) -> impl fmt::Display + fmt::Debug {
+        opaque_display!("{}", self)
     }
 
     /// Get CSS `rgb()` color representation
-    pub fn to_css_rgb(&self) -> impl fmt::Display {
+    pub fn to_css_rgb(&self) -> impl fmt::Display + fmt::Debug {
         let [r, g, b, _] = self.to_rgba8();
         opaque_display!("rgb({r} {g} {b}{})", AlphaFmt(self.a))
     }
 
     /// Get CSS `hsl()` color representation
-    pub fn to_css_hsl(&self) -> impl fmt::Display {
+    pub fn to_css_hsl(&self) -> impl fmt::Display + fmt::Debug {
         let [h, s, l, alpha] = self.to_hsla();
         let h = FloatFmt(h);
         let s = (s * 100.0 + 0.5).floor();
@@ -397,7 +397,7 @@ impl Color {
     }
 
     /// Get CSS `hwb()` color representation
-    pub fn to_css_hwb(&self) -> impl fmt::Display {
+    pub fn to_css_hwb(&self) -> impl fmt::Display + fmt::Debug {
         let [h, w, b, alpha] = self.to_hwba();
         let h = FloatFmt(h);
         let w = (w * 100.0 + 0.5).floor();
@@ -406,7 +406,7 @@ impl Color {
     }
 
     /// Get CSS `oklab()` color representation
-    pub fn to_css_oklab(&self) -> impl fmt::Display {
+    pub fn to_css_oklab(&self) -> impl fmt::Display + fmt::Debug {
         let [l, a, b, alpha] = self.to_oklaba();
         let l = FloatFmt(l);
         let a = FloatFmt(a);
@@ -415,7 +415,7 @@ impl Color {
     }
 
     /// Get CSS `oklch()` color representation
-    pub fn to_css_oklch(&self) -> impl fmt::Display {
+    pub fn to_css_oklch(&self) -> impl fmt::Display + fmt::Debug {
         let [l, c, h, alpha] = self.to_oklcha();
         let l = FloatFmt(l);
         let c = FloatFmt(c);
@@ -424,7 +424,7 @@ impl Color {
     }
 
     /// Get CSS `lab()` color representation
-    pub fn to_css_lab(&self) -> impl fmt::Display {
+    pub fn to_css_lab(&self) -> impl fmt::Display + fmt::Debug {
         let [l, a, b, alpha] = self.to_laba();
         let l = FloatFmt(l);
         let a = FloatFmt(a);
@@ -433,7 +433,7 @@ impl Color {
     }
 
     /// Get CSS `lch()` color representation
-    pub fn to_css_lch(&self) -> impl fmt::Display {
+    pub fn to_css_lch(&self) -> impl fmt::Display + fmt::Debug {
         use core::f32::consts::PI;
 
         fn to_degrees(t: f32) -> f32 {

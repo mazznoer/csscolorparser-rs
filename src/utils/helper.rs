@@ -70,6 +70,16 @@ where
     }
 }
 
+impl<F> fmt::Debug for OpaqueDisplay<F>
+where
+    F: Fn(&mut fmt::Formatter<'_>) -> fmt::Result,
+{
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!("\"{}\"", self))
+    }
+}
+
 macro_rules! opaque_display {
     ($($arg:tt)*) => {
         $crate::utils::OpaqueDisplay(move |f: &mut ::core::fmt::Formatter<'_>| -> ::core::fmt::Result {

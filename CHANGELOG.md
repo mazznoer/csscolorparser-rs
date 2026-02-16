@@ -8,6 +8,7 @@
 
 ### Changed
 
+- `Color.to_css_*()` return `impl fmt::Display + fmt::Debug`
 - Deprecate `Color.to_linear_rgba_u8()`
 - Set Rust edition to 2024
 

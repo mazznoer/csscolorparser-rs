@@ -46,9 +46,9 @@ impl fmt::Display for FloatFmt {
         // Determine precision based on the integer fractional part
         let precision = if fract == 0 {
             0
-        } else if !fract.is_multiple_of(10) {
+        } else if fract % 10 != 0 {
             3
-        } else if !fract.is_multiple_of(100) {
+        } else if fract % 100 != 0 {
             2
         } else {
             1

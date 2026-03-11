@@ -64,7 +64,7 @@ jobs:
       - name: Install MSRV toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: "1.76"
+          toolchain: "1.81"
       - run: cargo check --verbose --all-features
       - run: cargo test --verbose --all-features
       - run: cargo test --verbose --no-default-features

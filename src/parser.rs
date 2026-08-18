@@ -288,7 +288,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 }
             }
             ParseColorError::InvalidHsl => {
-                if let (Some(h), Some((s, _)), Some((l, _))) = (
+                if let (Some(h), Some((s, s_pct)), Some((l, l_pct))) = (
                     // hue
                     parse_angle(val0),
                     // saturation
@@ -296,11 +296,15 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // lightness
                     parse_percent_or_float(val2),
                 ) {
+                    // A bare number is on the 0..100 scale (CSS Color 4), while a
+                    // percentage is already scaled to 0..1 by parse_percent_or_float.
+                    let s = if s_pct { s } else { s / 100.0 };
+                    let l = if l_pct { l } else { l / 100.0 };
                     return Ok(Color::from_hsla(h, s, l, alpha));
                 }
             }
             ParseColorError::InvalidHwb => {
-                if let (Some(h), Some((w, _)), Some((b, _))) = (
+                if let (Some(h), Some((w, w_pct)), Some((b, b_pct))) = (
                     // hue
                     parse_angle(val0),
                     // whiteness
@@ -308,11 +312,15 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // blackness
                     parse_percent_or_float(val2),
                 ) {
+                    // A bare number is on the 0..100 scale (CSS Color 4), while a
+                    // percentage is already scaled to 0..1 by parse_percent_or_float.
+                    let w = if w_pct { w } else { w / 100.0 };
+                    let b = if b_pct { b } else { b / 100.0 };
                     return Ok(Color::from_hwba(h, w, b, alpha));
                 }
             }
             ParseColorError::InvalidHsv => {
-                if let (Some(h), Some((s, _)), Some((v, _))) = (
+                if let (Some(h), Some((s, s_pct)), Some((v, v_pct))) = (
                     // hue
                     parse_angle(val0),
                     // saturation
@@ -320,6 +328,10 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // value
                     parse_percent_or_float(val2),
                 ) {
+                    // A bare number is on the 0..100 scale, while a percentage is
+                    // already scaled to 0..1 by parse_percent_or_float.
+                    let s = if s_pct { s } else { s / 100.0 };
+                    let v = if v_pct { v } else { v / 100.0 };
                     return Ok(Color::from_hsva(h, s, v, alpha));
                 }
             }

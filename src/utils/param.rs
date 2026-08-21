@@ -16,11 +16,10 @@ impl<'a> ParamParser<'a> {
             return None;
         }
 
-        match self.s.as_bytes()[self.idx] {
-            b' ' => return None,
-            b',' => return None,
-            b'/' => return None,
-            _ => (),
+        let b = self.s.as_bytes()[self.idx];
+
+        if b.is_ascii_whitespace() || b == b',' || b == b'/' {
+            return None;
         }
 
         let start = self.idx;
@@ -41,7 +40,7 @@ impl<'a> ParamParser<'a> {
                     }
                     self.idx += 1;
                 }
-                b' ' | b',' | b'/' => {
+                b if b.is_ascii_whitespace() || b == b',' || b == b'/' => {
                     if nesting == 0 {
                         // delimiter is *outside* parentheses
                         break;
@@ -55,11 +54,15 @@ impl<'a> ParamParser<'a> {
         Some(&self.s[start..self.idx])
     }
 
-    // Consume one or more spaces.
-    // Returns true if space is found, false otherwise.
+    // Consume one or more ASCII whitespace characters.
+    // Returns `true` if at least one was found, `false` otherwise.
     pub fn space(&mut self) -> bool {
         let mut found = false;
-        while self.idx < self.s.len() && self.s.as_bytes()[self.idx] == b' ' {
+        while self.idx < self.s.len() {
+            let b = self.s.as_bytes()[self.idx];
+            if !b.is_ascii_whitespace() {
+                break;
+            }
             self.idx += 1;
             found = true;
         }
@@ -76,7 +79,7 @@ impl<'a> ParamParser<'a> {
         while self.idx < self.s.len() {
             let ch = self.s.as_bytes()[self.idx];
             match ch {
-                b' ' => {
+                b if b.is_ascii_whitespace() => {
                     found_space = true;
                     self.idx += 1;
                 }
@@ -105,7 +108,7 @@ impl<'a> ParamParser<'a> {
         while self.idx < self.s.len() {
             let ch = self.s.as_bytes()[self.idx];
             match ch {
-                b' ' => {
+                b if b.is_ascii_whitespace() => {
                     self.idx += 1;
                 }
                 b',' | b'/' => {
@@ -132,7 +135,7 @@ impl<'a> ParamParser<'a> {
         while self.idx < self.s.len() {
             let ch = self.s.as_bytes()[self.idx];
             match ch {
-                b' ' => {
+                b if b.is_ascii_whitespace() => {
                     self.idx += 1;
                 }
                 b'/' => {

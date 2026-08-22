@@ -126,6 +126,7 @@ fn red() {
         "hsv(0 100% 100%)",
         "oklab(0.62796, 0.22486, 0.12585)",
         "oklch(0.62796, 0.25768, 29.23388)",
+        &nested_color(32),
     ];
 
     let red = [255, 0, 0, 255];
@@ -293,6 +294,8 @@ fn invalid_format() {
         "\u{1F602}",
         "#\u{1F602}",
         "rgb(\u{1F602},\u{1F602},\u{1F602})",
+        &nested_color(33),
+        &nested_color(51),
     ];
 
     for s in test_data {
@@ -326,4 +329,12 @@ fn invalid_format() {
         let c = parse(s);
         assert_eq!(c.unwrap_err().to_string(), err_msg, "{:?}", s);
     }
+}
+
+fn nested_color(depth: usize) -> String {
+    let mut s = String::from("#ff0000");
+    for _ in 0..depth {
+        s = format!("rgb(from {s} r g b)");
+    }
+    s
 }

@@ -450,7 +450,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 }
 
 fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
-    if !s.is_ascii() {
+    if s.bytes().any(|b| !b.is_ascii_hexdigit()) {
         return Err(ParseColorError::InvalidHex);
     }
 
@@ -475,10 +475,6 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
 
         Ok(Color::from_rgba8(r, g, b, a))
     } else if n == 6 || n == 8 {
-        if s.bytes().any(|b| !b.is_ascii_hexdigit()) {
-            return Err(ParseColorError::InvalidHex);
-        }
-
         let r = u8::from_str_radix(&s[0..2], 16).map_err(|_| ParseColorError::InvalidHex)?;
         let g = u8::from_str_radix(&s[2..4], 16).map_err(|_| ParseColorError::InvalidHex)?;
         let b = u8::from_str_radix(&s[4..6], 16).map_err(|_| ParseColorError::InvalidHex)?;

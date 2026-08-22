@@ -2,6 +2,8 @@
 
 use super::strip_prefix;
 
+const MAX_DEPTH: usize = 32;
+
 struct CalcParser<'a> {
     s: &'a str,
     idx: usize,
@@ -124,7 +126,7 @@ pub fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f
         }
 
         if let Some(s) = strip_prefix(s, "calc") {
-            if let Some(t) = parse_calc(s, &parse_v) {
+            if let Some(t) = parse_calc(s, &parse_v, 0) {
                 result[i] = t;
                 i += 1;
                 continue;
@@ -137,10 +139,14 @@ pub fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f
     Some(result)
 }
 
-fn parse_calc<F>(s: &str, f: &F) -> Option<f32>
+fn parse_calc<F>(s: &str, f: &F, depth: usize) -> Option<f32>
 where
     F: Fn(&str) -> Option<f32>,
 {
+    if depth > MAX_DEPTH {
+        return None;
+    }
+
     if let Some(s) = s.strip_prefix('(') {
         if let Some(s) = s.strip_suffix(')') {
             let mut p = CalcParser::new(s);
@@ -148,7 +154,7 @@ where
 
             let va = if let Some(v) = f(va) {
                 v
-            } else if let Some(v) = parse_calc(va, f) {
+            } else if let Some(v) = parse_calc(va, f, depth + 1) {
                 v
             } else {
                 return None;
@@ -156,7 +162,7 @@ where
 
             let vb = if let Some(v) = f(vb) {
                 v
-            } else if let Some(v) = parse_calc(vb, f) {
+            } else if let Some(v) = parse_calc(vb, f, depth + 1) {
                 v
             } else {
                 return None;
@@ -271,7 +277,7 @@ mod t {
             ("(0.5 * (5 + (7 * (9 - (3 * (1 + 1))))))", 13.0),
         ];
         for (s, expected) in test_data {
-            assert_eq!(parse_calc(s, &f), Some(expected), "{:?}", s);
+            assert_eq!(parse_calc(s, &f, 0), Some(expected), "{:?}", s);
         }
 
         let invalids = [
@@ -295,7 +301,7 @@ mod t {
             "((1+2)1*5)",
         ];
         for s in invalids {
-            assert_eq!(parse_calc(s, &f), None, "{:?}", s);
+            assert_eq!(parse_calc(s, &f, 0), None, "{:?}", s);
         }
     }
 

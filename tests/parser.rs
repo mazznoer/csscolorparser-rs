@@ -56,6 +56,7 @@ fn equal() {
         ("hwb(194 50% 20%)", "hwb(194 50 20)"),
         ("rgb(255, 165, 0)", "hsl(38.824 100% 50%)"),
         ("#7654CD", "rgb(46.27% 32.94% 80.39%)"),
+        (&nested_calc(32), "#a26400"),
         //#[cfg(feature = "lab")]
         //("#7654CD", "lab(44.36% 36.05 -58.99)"),
     ];
@@ -296,6 +297,8 @@ fn invalid_format() {
         "rgb(\u{1F602},\u{1F602},\u{1F602})",
         &nested_color(33),
         &nested_color(51),
+        &nested_calc(33),
+        &nested_calc(51),
         // nan & infinite number
         "rgb(nan 0 0)",
         "oklch(0.5 0.1 nan)",
@@ -342,4 +345,12 @@ fn nested_color(depth: usize) -> String {
         s = format!("rgb(from {s} r g b)");
     }
     s
+}
+
+fn nested_calc(depth: usize) -> String {
+    let mut s = String::from("(3 - 1)");
+    for _ in 0..depth {
+        s = format!("(5 + {s})");
+    }
+    format!("rgb(from #000 calc{s} 100 0)")
 }

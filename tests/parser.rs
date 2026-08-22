@@ -296,6 +296,11 @@ fn invalid_format() {
         "rgb(\u{1F602},\u{1F602},\u{1F602})",
         &nested_color(33),
         &nested_color(51),
+        // nan & infinite number
+        "rgb(nan 0 0)",
+        "oklch(0.5 0.1 nan)",
+        "rgb(inf 0 0)",
+        "hsl(1e400deg 100% 50%)",
     ];
 
     for s in test_data {

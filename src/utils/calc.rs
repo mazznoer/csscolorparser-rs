@@ -99,8 +99,11 @@ impl<'a> CalcParser<'a> {
 
 pub fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f32; 4]> {
     let parse_v = |s: &str| -> Option<f32> {
-        if let Ok(value) = s.parse() {
-            return Some(value);
+        if let Ok(value) = s.parse::<f32>() {
+            if value.is_finite() {
+                return Some(value);
+            }
+            return None;
         };
         for (var, value) in variables {
             if s.eq_ignore_ascii_case(var) {
@@ -352,6 +355,10 @@ mod t {
             "calc(5 + (1.5))",
             "calc(5 + (1.5 * 2 / 3))",
             "calc(5 + (2 - ab))",
+            "calc(nan)",
+            "calc(1 + inf)",
+            "calc(1 + infinity)",
+            "calc(2 - (3 + 1e400))",
         ];
         for s in invalids {
             assert_eq!(parse_value(s, vars), None, "{:?}", s);

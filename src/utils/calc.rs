@@ -47,7 +47,12 @@ impl<'a> CalcParser<'a> {
                     }
                     self.idx += 1;
                 }
-                b'+' | b'-' | b'*' | b'/' | b' ' => {
+                b if b.is_ascii_whitespace()
+                    || b == b'+'
+                    || b == b'-'
+                    || b == b'*'
+                    || b == b'/' =>
+                {
                     if nesting == 0 {
                         // operator is *outside* parentheses
                         break;
@@ -78,8 +83,8 @@ impl<'a> CalcParser<'a> {
     }
 
     fn is_end(&mut self) -> bool {
-        // Consume all spaces until other character is found.
-        while self.idx < self.s.len() && self.s.as_bytes()[self.idx] == b' ' {
+        // Consume all ascii whitespace characters
+        while self.idx < self.s.len() && self.s.as_bytes()[self.idx].is_ascii_whitespace() {
             self.idx += 1;
         }
         self.idx >= self.s.len()
@@ -238,6 +243,14 @@ mod t {
             (
                 "(0.35*r) / (alpha - 10)",
                 ("(0.35*r)", b'/', "(alpha - 10)"),
+            ),
+            (
+                "255\t/\n2 \t \n ",
+                ("255", b'/', "2"),
+            ),
+            (
+                "0.05\r*\x0C25 \r \x0C ",
+                ("0.05", b'*', "25"),
             ),
         ];
         for (s, expected) in test_data {

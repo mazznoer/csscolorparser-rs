@@ -1,3 +1,5 @@
+#![allow(clippy::question_mark)]
+
 use super::strip_prefix;
 
 const MAX_DEPTH: usize = 32;

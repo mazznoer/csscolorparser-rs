@@ -6,6 +6,8 @@ use crate::{Color, ParseColorError};
 #[cfg(feature = "named-colors")]
 use crate::NAMED_COLORS;
 
+const MAX_DEPTH: usize = 32;
+
 /// Parse CSS color string
 ///
 /// # Examples
@@ -37,6 +39,14 @@ use crate::NAMED_COLORS;
 /// ```
 #[inline(never)]
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
+    parse_all(s, 0)
+}
+
+fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
+    if depth > MAX_DEPTH {
+        return Err(ParseColorError::InvalidUnknown);
+    }
+
     let s = s.trim();
 
     let err = match parse_abs(s) {
@@ -76,7 +86,7 @@ pub fn parse(s: &str) -> Result<Color, ParseColorError> {
             return Err(err);
         }
 
-        let Ok(color) = parse(color) else {
+        let Ok(color) = parse_all(color, depth + 1) else {
             return Err(err);
         };
 

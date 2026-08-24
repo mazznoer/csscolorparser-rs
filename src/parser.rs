@@ -437,7 +437,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 }
 
 fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
-    if !s.is_ascii() {
+    if s.bytes().any(|b| !b.is_ascii_hexdigit()) {
         return Err(ParseColorError::InvalidHex);
     }
 

@@ -294,6 +294,11 @@ fn invalid_format() {
         &nested_color(99),
         &nested_calc(33),
         &nested_calc(99),
+        // nan & infinite number
+        "rgb(nan 0 0)",
+        "oklch(0.5 0.1 nan)",
+        "rgb(inf 0 0)",
+        "hsl(1e400deg 100% 50%)",
     ];
 
     for s in test_data {

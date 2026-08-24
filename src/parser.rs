@@ -496,8 +496,18 @@ fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
         return Some((0.0, false));
     }
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f32| (t / 100.0, true)))
-        .or_else(|| s.parse().ok().map(|t| (t, false)))
+        .and_then(|s| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| (t / 100.0, true))
+        })
+        .or_else(|| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t| (t, false))
+        })
 }
 
 fn parse_percent_or_255(s: &str) -> Option<f32> {
@@ -505,8 +515,18 @@ fn parse_percent_or_255(s: &str) -> Option<f32> {
         return Some(0.0);
     }
     s.strip_suffix('%')
-        .and_then(|s| s.parse().ok().map(|t: f32| t / 100.0))
-        .or_else(|| s.parse().ok().map(|t: f32| t / 255.0))
+        .and_then(|s| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t / 100.0)
+        })
+        .or_else(|| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t / 255.0)
+        })
 }
 
 fn parse_angle(s: &str) -> Option<f32> {
@@ -514,23 +534,26 @@ fn parse_angle(s: &str) -> Option<f32> {
         return Some(0.0);
     }
     strip_suffix(s, "deg")
-        .and_then(|s| s.parse().ok())
+        .and_then(|s| s.parse().ok().filter(|t: &f32| t.is_finite()))
         .or_else(|| {
             strip_suffix(s, "grad")
                 .and_then(|s| s.parse().ok())
+                .filter(|t: &f32| t.is_finite())
                 .map(|t: f32| t * 360.0 / 400.0)
         })
         .or_else(|| {
             strip_suffix(s, "rad")
                 .and_then(|s| s.parse().ok())
+                .filter(|t: &f32| t.is_finite())
                 .map(|t: f32| t.to_degrees())
         })
         .or_else(|| {
             strip_suffix(s, "turn")
                 .and_then(|s| s.parse().ok())
+                .filter(|t: &f32| t.is_finite())
                 .map(|t: f32| t * 360.0)
         })
-        .or_else(|| s.parse().ok())
+        .or_else(|| s.parse().ok().filter(|t: &f32| t.is_finite()))
 }
 
 #[cfg(test)]
@@ -563,6 +586,12 @@ mod t {
             ("-23.7", Some((-23.7, false))),
             ("%", None),
             ("1x", None),
+            ("nan", None),
+            ("inf", None),
+            ("1e400", None),
+            ("nan%", None),
+            ("inf%", None),
+            ("1e400%", None),
         ];
         for (s, expected) in test_data {
             assert_eq!(parse_percent_or_float(s), expected);
@@ -583,6 +612,12 @@ mod t {
             ("127.5", Some(0.5)),
             ("%", None),
             ("255x", None),
+            ("nan", None),
+            ("inf", None),
+            ("1e400", None),
+            ("nan%", None),
+            ("inf%", None),
+            ("1e400%", None),
         ];
         for (s, expected) in test_data {
             assert_eq!(parse_percent_or_255(s), expected);
@@ -606,6 +641,9 @@ mod t {
             ("O", None),
             ("Odeg", None),
             ("rad", None),
+            ("nan", None),
+            ("inf", None),
+            ("1e400", None),
         ];
         for (s, expected) in test_data {
             assert_eq!(parse_angle(s), expected);

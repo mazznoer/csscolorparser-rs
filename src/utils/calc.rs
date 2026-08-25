@@ -104,7 +104,7 @@ impl<'a> CalcParser<'a> {
     }
 }
 
-pub fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f32; 4]> {
+pub(crate) fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f32; 4]> {
     let parse_v = |s: &str| -> Option<f32> {
         if let Ok(value) = s.parse::<f32>() {
             if value.is_finite() {

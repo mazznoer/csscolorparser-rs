@@ -1,4 +1,4 @@
-pub struct ParamParser<'a> {
+pub(crate) struct ParamParser<'a> {
     s: &'a str,
     idx: usize,
 }

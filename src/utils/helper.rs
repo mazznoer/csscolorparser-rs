@@ -4,7 +4,7 @@ use core::fmt;
 use num_traits::float::Float as _;
 
 // Strip prefix ignore case.
-pub fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
+pub(crate) fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
     if prefix.len() > s.len() {
         return None;
     }

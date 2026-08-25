@@ -2,9 +2,9 @@ mod calc;
 mod helper;
 mod param;
 
-pub use calc::*;
-pub use helper::*;
-pub use param::*;
+pub(crate) use calc::*;
+pub(crate) use helper::*;
+pub(crate) use param::*;
 
 use core::f32::consts::{PI, TAU};
 

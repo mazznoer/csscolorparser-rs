@@ -16,6 +16,20 @@
 
 - Old deprecated methods.
 
+## [0.8.4]
+
+### Fixed
+
+- Reject invalid hex format with plus sign.
+- Reject NaN and infinite values.
+- Limit relative color depth to 32.
+
+## [0.8.3]
+
+### Changed
+
+- Set Rust version in Cargo.toml to 1.85.
+
 ## [0.8.2]
 
 ### Changed

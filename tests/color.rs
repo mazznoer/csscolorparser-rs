@@ -98,6 +98,10 @@ fn basic() {
 
     let c = Color::new(1.23, 0.5, -0.01, 1.01).clamp();
     assert_eq!([c.r, c.g, c.b, c.a], [1.0, 0.5, 0.0, 1.0]);
+
+    // NaN converted to zero
+    let c = Color::new(f32::NAN, f32::INFINITY, f32::NEG_INFINITY, 0.7093).clamp();
+    assert_eq!([c.r, c.g, c.b, c.a], [0.0, 1.0, 0.0, 0.7093]);
 }
 
 #[test]

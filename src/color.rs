@@ -189,10 +189,26 @@ impl Color {
     #[must_use = "method returns a new Color and does not mutate the original Color"]
     pub const fn clamp(&self) -> Self {
         Self {
-            r: self.r.clamp(0.0, 1.0),
-            g: self.g.clamp(0.0, 1.0),
-            b: self.b.clamp(0.0, 1.0),
-            a: self.a.clamp(0.0, 1.0),
+            r: if self.r.is_nan() {
+                0.0
+            } else {
+                self.r.clamp(0.0, 1.0)
+            },
+            g: if self.g.is_nan() {
+                0.0
+            } else {
+                self.g.clamp(0.0, 1.0)
+            },
+            b: if self.b.is_nan() {
+                0.0
+            } else {
+                self.b.clamp(0.0, 1.0)
+            },
+            a: if self.a.is_nan() {
+                0.0
+            } else {
+                self.a.clamp(0.0, 1.0)
+            },
         }
     }
 

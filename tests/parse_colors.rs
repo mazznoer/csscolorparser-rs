@@ -22,7 +22,7 @@ fn basic() {
             vec!["#aa33ff"],
         ),
         (
-            "red, #bad455,ab9",
+            ",red, #bad455,ab9,",
             vec!["#ff0000", "#bad455", "#aabb99"],
         ),
         (
@@ -36,6 +36,10 @@ fn basic() {
         (
             "red, #0ff, âßï, rgb(0,0,255)",
             vec!["#ff0000", "#00ffff", "", "#0000ff"],
+        ),
+        (
+            "#0f0,\t#00f\n,\r #ff0",
+            vec!["#00ff00", "#0000ff", "#ffff00"],
         ),
     ];
 
@@ -88,5 +92,27 @@ fn invalid_colors() {
 
     for [s, err] in invalid {
         assert_eq!(ps(s), err, "{:?}", s);
+    }
+
+    let invalid2 = [
+        "rgb(from rgb(from rgb(255, 0, 0) r g b), #0f0",
+        "rgb(from rgb(from rgb(255,0,0) r g b))), #0f0",
+        "rgb((255, 0, 0), #0f0",
+    ];
+
+    for s in invalid2 {
+        let mut p = parse_colors(s);
+
+        let item = p.next();
+        assert!(item.is_some());
+        let item = item.unwrap();
+        assert!(item.is_err());
+
+        let item = p.next();
+        assert!(item.is_some());
+        let item = item.unwrap().unwrap();
+        assert_eq!(item.to_rgba8(), [0, 255, 0, 255]);
+
+        assert!(p.next().is_none());
     }
 }

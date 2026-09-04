@@ -463,7 +463,7 @@ impl Color {
         let [l, c, h, alpha] = self.to_lcha();
         let l = FloatFmt(l);
         let c = FloatFmt(c);
-        let h = FloatFmt(to_degrees(h));
+        let h = FloatFmt(normalize_angle(to_degrees(h)));
         opaque_display!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 

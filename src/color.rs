@@ -19,7 +19,7 @@ use crate::{ParseColorError, parse};
 #[cfg(feature = "named-colors")]
 use crate::NAMED_COLORS;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 /// The color
 pub struct Color {
     /// Red

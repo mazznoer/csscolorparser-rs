@@ -1,4 +1,3 @@
-use core::convert::TryFrom;
 use csscolorparser::Color;
 
 #[test]

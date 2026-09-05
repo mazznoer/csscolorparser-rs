@@ -1,4 +1,4 @@
-use csscolorparser::parse_colors;
+use csscolorparser::{ParseColorError, parse_colors};
 
 #[test]
 fn basic() {
@@ -93,6 +93,41 @@ fn invalid_colors() {
     for [s, err] in invalid {
         assert_eq!(ps(s), err, "{:?}", s);
     }
+
+    // ---
+
+    #[rustfmt::skip]
+    let test_data = [
+        (
+            "rgb(0, 255, 0), #ff000x, #00f",
+            " #ff000x",
+            ParseColorError::InvalidHex,
+        ),
+        (
+            "rgb(0, 255, 0), rgb(0, 0) , #00f",
+            " rgb(0, 0) ",
+            ParseColorError::InvalidRgb,
+        ),
+        (
+            "#0f9, hwb(95 0.3 0.7),§ü¥,#f00",
+            "§ü¥",
+            ParseColorError::InvalidUnknown,
+        ),
+        (
+            "π, #ff0",
+            "π",
+            ParseColorError::InvalidUnknown,
+        ),
+    ];
+
+    for (input, s, err) in test_data {
+        let res: Result<Vec<_>, _> = parse_colors(input).collect();
+        let e = res.unwrap_err();
+        assert_eq!(e.source, err);
+        assert_eq!(e.color, s);
+    }
+
+    // ---
 
     let invalid2 = [
         "rgb(from rgb(from rgb(255, 0, 0) r g b), #0f0",

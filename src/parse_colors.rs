@@ -1,23 +1,28 @@
-use core::{error, fmt};
+use core::error::Error;
+use core::fmt;
 
 use crate::{Color, ParseColorError, parse};
 
 /// Error wrapper
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct ParseColorsError<'a> {
-    /// The error
-    pub err: ParseColorError,
     /// The invalid string slice
-    pub s: &'a str,
+    pub color: &'a str,
+    /// The original error
+    pub source: ParseColorError,
 }
 
 impl fmt::Display for ParseColorsError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {:?}", self.err, self.s)
+        write!(f, "{}: {:?}", self.source, self.color)
     }
 }
 
-impl error::Error for ParseColorsError<'_> {}
+impl Error for ParseColorsError<'_> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(&self.source)
+    }
+}
 
 /// Iterator
 #[derive(Debug, Clone)]
@@ -42,7 +47,7 @@ impl<'a> Iterator for ParseColors<'a> {
                 if s.trim().is_empty() {
                     return self.next();
                 }
-                return Some(parse(s).map_err(|err| ParseColorsError { err, s }));
+                return Some(parse(s).map_err(|source| ParseColorsError { source, color: s }));
             } else if c == '(' {
                 self.inside = true;
             } else if c == ')' {
@@ -54,7 +59,7 @@ impl<'a> Iterator for ParseColors<'a> {
         if s.trim().is_empty() {
             return None;
         }
-        Some(parse(s).map_err(|err| ParseColorsError { err, s }))
+        Some(parse(s).map_err(|source| ParseColorsError { source, color: s }))
     }
 }
 

@@ -54,6 +54,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         Ok(c) => return Ok(c),
         Err(e @ ParseColorError::InvalidHex) => return Err(e),
         Err(e @ ParseColorError::InvalidFunction) => return Err(e),
+        Err(e @ ParseColorError::InvalidColor) => return Err(e),
         Err(e @ ParseColorError::InvalidUnknown) => return Err(e),
         Err(e) => e,
     };
@@ -239,6 +240,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
             s if s.eq_ignore_ascii_case("lch") => ParseColorError::InvalidLch,
             s if s.eq_ignore_ascii_case("oklab") => ParseColorError::InvalidOklab,
             s if s.eq_ignore_ascii_case("oklch") => ParseColorError::InvalidOklch,
+            s if s.eq_ignore_ascii_case("color") => ParseColorError::InvalidColor,
             _ => return Err(ParseColorError::InvalidFunction),
         };
 
@@ -250,6 +252,21 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
         let mut pp = ParamParser::new(s);
         pp.space();
+
+        let mut color_func = "";
+
+        if err == ParseColorError::InvalidColor {
+            if let Some(s) = pp.value() {
+                if s.eq_ignore_ascii_case("srgb") {
+                    color_func = "srgb";
+                    pp.space();
+                } else {
+                    return Err(err);
+                }
+            } else {
+                return Err(err);
+            };
+        }
 
         let (Some(val0), true, Some(val1), true, Some(val2)) = (
             pp.value(),
@@ -426,6 +443,24 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         h.to_radians(),
                         alpha,
                     ));
+                }
+            }
+            ParseColorError::InvalidColor => {
+                match color_func {
+                    "srgb" => {
+                        if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
+                            // red
+                            parse_percent_or_float(val0),
+                            // green
+                            parse_percent_or_float(val1),
+                            // blue
+                            parse_percent_or_float(val2),
+                        ) {
+                            return Ok(Color { r, g, b, a: alpha });
+                        }
+                    }
+                    // TODO
+                    _ => unreachable!(),
                 }
             }
             _ => unreachable!(),

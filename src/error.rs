@@ -22,6 +22,8 @@ pub enum ParseColorError {
     InvalidOklab,
     /// A CSS color string was invalid oklch format.
     InvalidOklch,
+    /// A CSS color string was invalid color format.
+    InvalidColor,
     /// A CSS color string was invalid color function.
     InvalidFunction,
     /// A CSS color string was invalid unknown format.
@@ -40,6 +42,7 @@ impl fmt::Display for ParseColorError {
             Self::InvalidLch => f.write_str("invalid lch format"),
             Self::InvalidOklab => f.write_str("invalid oklab format"),
             Self::InvalidOklch => f.write_str("invalid oklch format"),
+            Self::InvalidColor => f.write_str("invalid color format"),
             Self::InvalidFunction => f.write_str("invalid color function"),
             Self::InvalidUnknown => f.write_str("invalid unknown format"),
         }

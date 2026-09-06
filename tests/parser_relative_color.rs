@@ -58,6 +58,9 @@ fn parser() {
         // ---
         ["lch(from #bad455 l c h)", "#bad455"],
         ["lch(from #bad455 l c h / calc(alpha * 0.5))", "#bad45580"],
+        // ---
+        ["color(from #f00 srgb r g b)", "#ff0000"],
+        ["color(from #f00 srgb r g b / 0.5)", "#ff000080"],
     ];
     for [s, hex] in test_data {
         assert_eq!(parse(s).unwrap().to_css_hex().to_string(), hex, "{:?}", s);

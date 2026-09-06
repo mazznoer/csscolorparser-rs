@@ -54,7 +54,6 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         Ok(c) => return Ok(c),
         Err(e @ ParseColorError::InvalidHex) => return Err(e),
         Err(e @ ParseColorError::InvalidFunction) => return Err(e),
-        Err(e @ ParseColorError::InvalidColor) => return Err(e),
         Err(e @ ParseColorError::InvalidUnknown) => return Err(e),
         Err(e) => e,
     };
@@ -71,12 +70,34 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         let (
             Some(from),  true,
             Some(color), true,
-            Some(val1),  true,
-            Some(val2),  true,
-            Some(val3),
         ) = (
             pp.value(), pp.space(),
             pp.value(), pp.space(),
+        ) else {
+            return Err(err);
+        };
+
+        let mut color_func = "";
+
+        if err == ParseColorError::InvalidColor {
+            if let Some(s) = pp.value() {
+                if s.eq_ignore_ascii_case("srgb") {
+                    color_func = "srgb";
+                    pp.space();
+                } else {
+                    return Err(err);
+                }
+            } else {
+                return Err(err);
+            };
+        }
+
+        #[rustfmt::skip]
+        let (
+            Some(val1), true,
+            Some(val2), true,
+            Some(val3),
+        ) = (
             pp.value(), pp.space(),
             pp.value(), pp.space(),
             pp.value(),
@@ -201,6 +222,23 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                         a,
                     ));
                 };
+            }
+            ParseColorError::InvalidColor => {
+                match color_func {
+                    "srgb" => {
+                        // r, g, b, alpha [0..1]
+                        let variables = [
+                            ("r", color.r),
+                            ("g", color.g),
+                            ("b", color.b),
+                            ("alpha", color.a),
+                        ];
+                        if let Some([r, g, b, a]) = parse_values(values, variables) {
+                            return Ok(Color::new(r, g, b, a));
+                        };
+                    }
+                    _ => unreachable!(),
+                }
             }
             _ => unreachable!(),
         }

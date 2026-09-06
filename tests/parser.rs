@@ -245,6 +245,8 @@ fn none_value() {
 #[cfg(feature = "named-colors")]
 #[test]
 fn invalid_format() {
+    use csscolorparser::ParseColorError::*;
+
     let test_data = [
         "",
         "bloodred",
@@ -321,29 +323,31 @@ fn invalid_format() {
 
     #[rustfmt::skip]
     let test_data = [
-        ("#78afzd",          "invalid hex format"),
-        ("rgb(xx,yy,xx)",    "invalid rgb format"),
-        ("rgb(255,0)",       "invalid rgb format"),
-        ("hsl(0,100%,2o%)",  "invalid hsl format"),
-        ("hsv(360)",         "invalid hsv format"),
-        ("hwb(270,0%,0%,x)", "invalid hwb format"),
-        ("lab(0%)",          "invalid lab format"),
-        ("lch(0%)",          "invalid lch format"),
-        ("oklab(9 20)",      "invalid oklab format"),
-        ("oklch()",          "invalid oklch format"),
-        ("cmyk(0,0,0,0)",    "invalid color function"),
-        ("blood",            "invalid unknown format"),
-        ("rgb(255,0,0",      "invalid unknown format"),
-        ("x£",               "invalid unknown format"),
-        ("x£x",              "invalid unknown format"),
-        ("xxx£x",            "invalid unknown format"),
-        ("xxxxx£x",          "invalid unknown format"),
-        ("\u{1F602}",        "invalid unknown format"),
+        ("#78afzd",          InvalidHex),
+        ("rgb(xx,yy,xx)",    InvalidRgb),
+        ("rgb(255,0)",       InvalidRgb),
+        ("hsl(0,100%,2o%)",  InvalidHsl),
+        ("hsv(360)",         InvalidHsv),
+        ("hwb(270,0%,0%,x)", InvalidHwb),
+        ("lab(0%)",          InvalidLab),
+        ("lch(0%)",          InvalidLch),
+        ("oklab(9 20)",      InvalidOklab),
+        ("oklch()",          InvalidOklch),
+        ("color(srgb 1 0)",  InvalidColor),
+        ("color(rgb 1 0 0)", InvalidColor),
+        ("cmyk(0,0,0,0)",    InvalidFunction),
+        ("dark",             InvalidUnknown),
+        ("rgb(255,0,0",      InvalidUnknown),
+        ("x£",               InvalidUnknown),
+        ("x£x",              InvalidUnknown),
+        ("xxx£x",            InvalidUnknown),
+        ("xxxxx£x",          InvalidUnknown),
+        ("\u{1F602}",        InvalidUnknown),
     ];
 
-    for (s, err_msg) in test_data {
+    for (s, err) in test_data {
         let c = parse(s);
-        assert_eq!(c.unwrap_err().to_string(), err_msg, "{:?}", s);
+        assert_eq!(c.unwrap_err(), err, "{:?}", s);
     }
 }
 

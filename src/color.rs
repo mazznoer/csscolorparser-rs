@@ -449,20 +449,10 @@ impl Color {
 
     /// Get CSS `lch()` color representation
     pub fn to_css_lch(&self) -> impl fmt::Display + fmt::Debug + '_ {
-        use core::f32::consts::PI;
-
-        fn to_degrees(t: f32) -> f32 {
-            if t > 0.0 {
-                t / PI * 180.0
-            } else {
-                360.0 - (t.abs() / PI) * 180.0
-            }
-        }
-
         let [l, c, h, alpha] = self.to_lcha();
         let l = FloatFmt(l);
         let c = FloatFmt(c);
-        let h = FloatFmt(normalize_angle(to_degrees(h)));
+        let h = FloatFmt(normalize_angle(h.to_degrees()));
         opaque_display!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 

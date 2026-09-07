@@ -259,3 +259,46 @@ fn lch() {
         assert_eq!(hex, c.to_css_hex().to_string());
     }
 }
+
+#[test]
+fn color_srgb() {
+    let test_data = [
+        ["#ceead2", "color(srgb 0.807 0.919 0.824)"],
+        ["#08b44a", "color(srgb 0.031 0.706 0.292)"],
+        ["#9db111", "color(srgb 0.614 0.695 0.068)"],
+        ["#f2c834", "color(srgb 0.949 0.784 0.203)"],
+        ["#d91ca1", "color(srgb 0.851 0.109 0.633)"],
+        ["#4f1881", "color(srgb 0.309 0.094 0.506)"],
+        ["#cb38fd", "color(srgb 0.798 0.22 0.992)"],
+        ["#a3500f", "color(srgb 0.64 0.313 0.057)"],
+        ["#25e487", "color(srgb 0.144 0.894 0.529)"],
+        ["#63c79c", "color(srgb 0.387 0.781 0.61)"],
+        ["#ab0ceb", "color(srgb 0.67 0.049 0.923)"],
+        ["#19ac2b", "color(srgb 0.099 0.674 0.169)"],
+        ["#ee1da6", "color(srgb 0.933 0.113 0.652)"],
+        ["#3ef684", "color(srgb 0.243 0.966 0.519)"],
+        ["#0922b9", "color(srgb 0.034 0.134 0.725)"],
+        ["#c5f4f2", "color(srgb 0.774 0.955 0.948)"],
+        ["#c268f6", "color(srgb 0.762 0.406 0.966)"],
+        ["#21384d", "color(srgb 0.128 0.22 0.302)"],
+        ["#0671e2", "color(srgb 0.025 0.442 0.887)"],
+        ["#85c2f4", "color(srgb 0.523 0.759 0.957)"],
+        ["#858e9b", "color(srgb 0.52 0.555 0.608)"],
+        // --- With alpha
+        ["#3351fa85", "color(srgb 0.2 0.318 0.979 / 52%)"],
+        ["#f08177bf", "color(srgb 0.942 0.504 0.466 / 75%)"],
+        ["#fdb5861a", "color(srgb 0.994 0.709 0.525 / 10%)"],
+        ["#7d5c58ed", "color(srgb 0.491 0.362 0.344 / 93%)"],
+        ["#3168c980", "color(srgb 0.193 0.407 0.79 / 50%)"],
+        ["#cc3ff196", "color(srgb 0.8 0.248 0.945 / 59%)"],
+        ["#9db3e7f7", "color(srgb 0.615 0.702 0.907 / 97%)"],
+        ["#0a414a12", "color(srgb 0.038 0.253 0.29 / 7%)"],
+        ["#d6f54eab", "color(srgb 0.838 0.962 0.307 / 67%)"],
+        ["#1ad90d59", "color(srgb 0.103 0.852 0.052 / 35%)"],
+    ];
+    for [hex, srgb] in test_data {
+        let c = parse(srgb).unwrap();
+        assert_eq!(srgb, c.to_css_color_srgb().to_string());
+        assert_eq!(hex, c.to_css_hex().to_string());
+    }
+}

@@ -43,7 +43,7 @@ name = "named_colors"
 required-features = ["named-colors"]
 
 [[test]]
-name = "parse_colors"
+name = "multiple_colors"
 required-features = ["named-colors"]
 
 [[example]]

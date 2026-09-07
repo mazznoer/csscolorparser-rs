@@ -456,6 +456,15 @@ impl Color {
         opaque_display!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
+    /// Get CSS `color(srgb ...)` color representation
+    pub const fn to_css_color_srgb(&self) -> impl fmt::Display + fmt::Debug + '_ {
+        let r = FloatFmt(self.r);
+        let g = FloatFmt(self.g);
+        let b = FloatFmt(self.b);
+        let a = AlphaFmt(self.a);
+        opaque_display!("color(srgb {r} {g} {b}{a})")
+    }
+
     /// Blend this color with the other one, in the RGB color-space. `t` in the range [0..1].
     pub const fn interpolate_rgb(&self, other: &Color, t: f32) -> Self {
         Self {

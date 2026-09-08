@@ -1,16 +1,30 @@
 # Changelog
 
-## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.8.1...HEAD)
+## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.9.0...HEAD)
+
+## [0.9.0]
 
 ### Added
 
 - `parse_colors()` for parsing string containing multiple colors separated by comma.
+- Supports for:
+    - `color(srgb ...)`
+    - `color(srgb-linear ...)`
+    - `color(from ... srgb ...)`
+    - `color(from ... srgb-linear ...)`
+- `Color.to_css_color_srgb()`
 
 ### Changed
 
+- `Color` is now `Copy`
 - `Color.to_css_*()` return `impl fmt::Display + fmt::Debug`
+- `Color.clamp()`: converts NaN to zero.
 - Deprecate `Color.to_linear_rgba_u8()`
 - Set Rust edition to 2024
+
+### Fixed
+
+- `lab()`, `lch()`, `hsl()`, `hwb()` parsing.
 
 ### Removed
 

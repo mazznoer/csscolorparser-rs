@@ -402,7 +402,7 @@ impl Color {
     }
 
     /// Get CSS `hsl()` color representation
-    pub const fn to_css_hsl(&self) -> impl fmt::Display + fmt::Debug + '_ {
+    pub fn to_css_hsl(&self) -> impl fmt::Display + fmt::Debug + '_ {
         let [h, s, l, alpha] = self.to_hsla();
         let h = FloatFmt(h);
         let s = (s * 100.0 + 0.5).floor();
@@ -411,7 +411,7 @@ impl Color {
     }
 
     /// Get CSS `hwb()` color representation
-    pub const fn to_css_hwb(&self) -> impl fmt::Display + fmt::Debug + '_ {
+    pub fn to_css_hwb(&self) -> impl fmt::Display + fmt::Debug + '_ {
         let [h, w, b, alpha] = self.to_hwba();
         let h = FloatFmt(h);
         let w = (w * 100.0 + 0.5).floor();

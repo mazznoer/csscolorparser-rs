@@ -8,6 +8,12 @@ use crate::NAMED_COLORS;
 
 const MAX_DEPTH: usize = 32;
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+enum ColorFunc {
+    Srgb,
+    SrgbLinear,
+}
+
 /// Parse CSS color string
 ///
 /// # Examples
@@ -77,19 +83,21 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             return Err(err);
         };
 
-        let mut color_func = "";
+        let mut color_func = ColorFunc::Srgb;
 
         if err == ParseColorError::InvalidColor {
             if let Some(s) = pp.value() {
                 if s.eq_ignore_ascii_case("srgb") {
-                    color_func = "srgb";
-                    pp.space();
+                    // srgb
+                } else if s.eq_ignore_ascii_case("srgb-linear") {
+                    color_func = ColorFunc::SrgbLinear;
                 } else {
                     return Err(err);
                 }
             } else {
                 return Err(err);
             };
+            pp.space();
         }
 
         #[rustfmt::skip]
@@ -225,7 +233,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             }
             ParseColorError::InvalidColor => {
                 match color_func {
-                    "srgb" => {
+                    ColorFunc::Srgb => {
                         // r, g, b, alpha [0..1]
                         let variables = [
                             ("r", color.r),
@@ -237,7 +245,18 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                             return Ok(Color::new(r, g, b, a));
                         };
                     }
-                    _ => unreachable!(),
+                    ColorFunc::SrgbLinear => {
+                        // r, g, b, alpha [0..1]
+                        let variables = [
+                            ("r", color.r),
+                            ("g", color.g),
+                            ("b", color.b),
+                            ("alpha", color.a),
+                        ];
+                        if let Some([r, g, b, a]) = parse_values(values, variables) {
+                            return Ok(Color::from_linear_rgba(r, g, b, a));
+                        };
+                    } // TODO
                 }
             }
             _ => unreachable!(),
@@ -291,19 +310,21 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         let mut pp = ParamParser::new(s);
         pp.space();
 
-        let mut color_func = "";
+        let mut color_func = ColorFunc::Srgb;
 
         if err == ParseColorError::InvalidColor {
             if let Some(s) = pp.value() {
                 if s.eq_ignore_ascii_case("srgb") {
-                    color_func = "srgb";
-                    pp.space();
+                    // srgb
+                } else if s.eq_ignore_ascii_case("srgb-linear") {
+                    color_func = ColorFunc::SrgbLinear;
                 } else {
                     return Err(err);
                 }
             } else {
                 return Err(err);
             };
+            pp.space();
         }
 
         let (Some(val0), true, Some(val1), true, Some(val2)) = (
@@ -485,7 +506,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
             }
             ParseColorError::InvalidColor => {
                 match color_func {
-                    "srgb" => {
+                    ColorFunc::Srgb => {
                         if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                             // red
                             parse_percent_or_float(val0),
@@ -497,8 +518,18 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                             return Ok(Color { r, g, b, a: alpha });
                         }
                     }
-                    // TODO
-                    _ => unreachable!(),
+                    ColorFunc::SrgbLinear => {
+                        if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
+                            // red
+                            parse_percent_or_float(val0),
+                            // green
+                            parse_percent_or_float(val1),
+                            // blue
+                            parse_percent_or_float(val2),
+                        ) {
+                            return Ok(Color::from_linear_rgba(r, g, b, alpha));
+                        }
+                    } // TODO
                 }
             }
             _ => unreachable!(),

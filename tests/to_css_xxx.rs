@@ -302,3 +302,28 @@ fn color_srgb() {
         assert_eq!(hex, c.to_css_hex().to_string());
     }
 }
+
+#[test]
+fn color_srgb_linear() {
+    let test_data = [
+        ["#5e3fca", "color(srgb-linear 0.111 0.05 0.593)"],
+        ["#d2470d", "color(srgb-linear 0.646 0.063 0.004)"],
+        ["#64d2fb", "color(srgb-linear 0.128 0.643 0.965)"],
+        ["#a1a122", "color(srgb-linear 0.356 0.357 0.016)"],
+        ["#93d06b", "color(srgb-linear 0.291 0.628 0.146)"],
+        ["#4aa667", "color(srgb-linear 0.069 0.382 0.136)"],
+        ["#fccb38", "color(srgb-linear 0.97 0.599 0.04)"],
+        ["#dc59d4", "color(srgb-linear 0.713 0.1 0.658)"],
+        ["#d1a8f8", "color(srgb-linear 0.635 0.394 0.942)"],
+        ["#8af6a3", "color(srgb-linear 0.254 0.918 0.366)"],
+        ["#a214e2", "color(srgb-linear 0.36 0.007 0.764)"],
+        ["#fca7fb", "color(srgb-linear 0.974 0.388 0.969)"],
+        ["#f1b89f", "color(srgb-linear 0.877 0.479 0.345)"],
+        ["#d7febd", "color(srgb-linear 0.68 0.991 0.511)"],
+        ["#855ba2", "color(srgb-linear 0.235 0.105 0.362)"],
+    ];
+    for [hex, srgb_linear] in test_data {
+        let c = parse(srgb_linear).unwrap();
+        assert_eq!(hex, c.to_css_hex().to_string());
+    }
+}

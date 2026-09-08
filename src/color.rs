@@ -11,7 +11,6 @@ use rgb::{RGB, RGBA};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
-use crate::opaque_display;
 use crate::utils::*;
 use crate::{ParseColorError, parse};
 
@@ -392,18 +391,18 @@ impl Color {
     }
 
     /// Get CSS RGB hexadecimal color representation
-    pub fn to_css_hex(&self) -> impl fmt::Display + fmt::Debug + '_ {
+    pub const fn to_css_hex(&self) -> impl fmt::Display + fmt::Debug + '_ {
         opaque_display!("{}", self)
     }
 
     /// Get CSS `rgb()` color representation
-    pub fn to_css_rgb(&self) -> impl fmt::Display + fmt::Debug + '_ {
+    pub const fn to_css_rgb(&self) -> impl fmt::Display + fmt::Debug + '_ {
         let [r, g, b, _] = self.to_rgba8();
         opaque_display!("rgb({r} {g} {b}{})", AlphaFmt(self.a))
     }
 
     /// Get CSS `hsl()` color representation
-    pub fn to_css_hsl(&self) -> impl fmt::Display + fmt::Debug + '_ {
+    pub const fn to_css_hsl(&self) -> impl fmt::Display + fmt::Debug + '_ {
         let [h, s, l, alpha] = self.to_hsla();
         let h = FloatFmt(h);
         let s = (s * 100.0 + 0.5).floor();
@@ -412,7 +411,7 @@ impl Color {
     }
 
     /// Get CSS `hwb()` color representation
-    pub fn to_css_hwb(&self) -> impl fmt::Display + fmt::Debug + '_ {
+    pub const fn to_css_hwb(&self) -> impl fmt::Display + fmt::Debug + '_ {
         let [h, w, b, alpha] = self.to_hwba();
         let h = FloatFmt(h);
         let w = (w * 100.0 + 0.5).floor();

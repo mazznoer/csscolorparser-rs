@@ -17,6 +17,8 @@
 //! * `lch()`
 //! * `oklab()`
 //! * `oklch()`
+//! * `color(srgb ...)`
+//! * `color(srgb-linear ...)`
 //! * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 //!
 //! ## Examples
@@ -89,5 +91,3 @@ mod cint;
 
 mod lab;
 mod utils;
-
-pub(crate) use utils::opaque_display;

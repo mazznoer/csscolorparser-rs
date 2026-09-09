@@ -43,7 +43,6 @@ enum ColorFunc {
 /// # Ok(())
 /// # }
 /// ```
-#[inline(never)]
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     parse_all(s, 0)
 }
@@ -247,12 +246,8 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     }
                     ColorFunc::SrgbLinear => {
                         // r, g, b, alpha [0..1]
-                        let variables = [
-                            ("r", color.r),
-                            ("g", color.g),
-                            ("b", color.b),
-                            ("alpha", color.a),
-                        ];
+                        let [r, g, b, a] = color.to_linear_rgba();
+                        let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
                         if let Some([r, g, b, a]) = parse_values(values, variables) {
                             return Ok(Color::from_linear_rgba(r, g, b, a));
                         };

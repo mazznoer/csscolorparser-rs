@@ -37,6 +37,8 @@
 * `lch()`
 * `oklab()`
 * `oklch()`
+* `color(srgb ...)`
+* `color(srgb-linear ...)`
 * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 
 ### Relative Color
@@ -84,7 +86,7 @@ hwb(from rgb(from rgb(100% 0% 50%) r g 75) calc(h+25) w b)
 Add this to your `Cargo.toml`
 
 ```toml
-csscolorparser = "0.8"
+csscolorparser = "0.9"
 ```
 
 ## Examples
@@ -96,8 +98,8 @@ let c = csscolorparser::parse("rgb(100%,0%,0%)")?;
 
 assert_eq!(c.to_array(), [1.0, 0.0, 0.0, 1.0]);
 assert_eq!(c.to_rgba8(), [255, 0, 0, 255]);
-assert_eq!(c.to_css_hex(), "#ff0000");
-assert_eq!(c.to_css_rgb(), "rgb(255 0 0)");
+assert_eq!(c.to_css_hex().to_string(), "#ff0000");
+assert_eq!(c.to_css_rgb().to_string(), "rgb(255 0 0)");
 assert_eq!(c.name(), Some("red"));
 ```
 
@@ -109,7 +111,7 @@ use csscolorparser::Color;
 let c: Color = "#ff00007f".parse()?;
 
 assert_eq!(c.to_rgba8(), [255, 0, 0, 127]);
-assert_eq!(c.to_css_hex(), "#ff00007f");
+assert_eq!(c.to_css_hex().to_string(), "#ff00007f");
 ```
 
 ## Features

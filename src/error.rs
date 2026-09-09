@@ -4,29 +4,29 @@ use core::fmt;
 /// An error which can be returned when parsing a CSS color string.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum ParseColorError {
-    /// A CSS color string was invalid hex format.
+    /// Invalid hexadecimal format.
     InvalidHex,
-    /// A CSS color string was invalid rgb format.
+    /// Invalid `rgb()` / `rgba()` format.
     InvalidRgb,
-    /// A CSS color string was invalid hsl format.
+    /// Invalid `hsl()` / `hsla()` format.
     InvalidHsl,
-    /// A CSS color string was invalid hwb format.
+    /// Invalid `hwb()` format.
     InvalidHwb,
-    /// A CSS color string was invalid hsv format.
+    /// Invalid `hsv()` format.
     InvalidHsv,
-    /// A CSS color string was invalid lab format.
+    /// Invalid `lab()` format.
     InvalidLab,
-    /// A CSS color string was invalid lch format.
+    /// Invalid `lch()` format.
     InvalidLch,
-    /// A CSS color string was invalid oklab format.
+    /// Invalid `oklab()` format.
     InvalidOklab,
-    /// A CSS color string was invalid oklch format.
+    /// Invalid `oklch()` format.
     InvalidOklch,
-    /// A CSS color string was invalid color format.
+    /// Invalid `color()` format.
     InvalidColor,
-    /// A CSS color string was invalid color function.
+    /// Unrecognized color function.
     InvalidFunction,
-    /// A CSS color string was invalid unknown format.
+    /// Unknown or unrecognized color format / named color.
     InvalidUnknown,
 }
 

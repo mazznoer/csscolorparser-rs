@@ -63,7 +63,18 @@ impl<'a> Iterator for ParseColors<'a> {
     }
 }
 
-/// Parse multiple colors separated by comma.
+/// Parse string of multiple colors separated by comma.
+///
+/// ```rust
+/// let input = "#2e8b57, rgb(255, 138, 75), gold, xyz(0.756, 0.18, 0.93), hwb(300 63% 13%)";
+///
+/// for res in csscolorparser::parse_colors(input) {
+///     match res {
+///         Ok(col) => println!("{col}"),
+///         Err(err) => println!("{err}"),
+///     }
+/// }
+/// ```
 pub const fn parse_colors(s: &str) -> ParseColors<'_> {
     ParseColors {
         s,

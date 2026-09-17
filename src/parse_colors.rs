@@ -75,6 +75,7 @@ impl<'a> Iterator for ParseColors<'a> {
 ///     }
 /// }
 /// ```
+#[inline]
 pub const fn parse_colors(s: &str) -> ParseColors<'_> {
     ParseColors {
         s,

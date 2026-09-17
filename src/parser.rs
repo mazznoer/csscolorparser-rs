@@ -43,6 +43,7 @@ enum ColorFunc {
 /// # Ok(())
 /// # }
 /// ```
+#[inline]
 pub fn parse(s: &str) -> Result<Color, ParseColorError> {
     parse_all(s, 0)
 }

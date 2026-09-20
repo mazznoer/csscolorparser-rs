@@ -16,6 +16,86 @@ pub(crate) fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
     }
 }
 
+// strip suffix ignore case
+pub(crate) fn strip_suffix<'a>(s: &'a str, suffix: &str) -> Option<&'a str> {
+    if suffix.len() > s.len() {
+        return None;
+    }
+    let s_end = &s[s.len() - suffix.len()..];
+    if s_end.eq_ignore_ascii_case(suffix) {
+        Some(&s[..s.len() - suffix.len()])
+    } else {
+        None
+    }
+}
+
+pub(crate) fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
+    if s.eq_ignore_ascii_case("none") {
+        return Some((0.0, false));
+    }
+    s.strip_suffix('%')
+        .and_then(|s| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| (t / 100.0, true))
+        })
+        .or_else(|| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t| (t, false))
+        })
+}
+
+pub(crate) fn parse_percent_or_255(s: &str) -> Option<f32> {
+    if s.eq_ignore_ascii_case("none") {
+        return Some(0.0);
+    }
+    s.strip_suffix('%')
+        .and_then(|s| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t / 100.0)
+        })
+        .or_else(|| {
+            s.parse()
+                .ok()
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t / 255.0)
+        })
+}
+
+pub(crate) fn parse_angle(s: &str) -> Option<f32> {
+    if s.eq_ignore_ascii_case("none") {
+        return Some(0.0);
+    }
+    strip_suffix(s, "deg")
+        .and_then(|s| s.parse().ok().filter(|t: &f32| t.is_finite()))
+        .or_else(|| {
+            strip_suffix(s, "grad")
+                .and_then(|s| s.parse().ok())
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t * 360.0 / 400.0)
+        })
+        .or_else(|| {
+            strip_suffix(s, "rad")
+                .and_then(|s| s.parse().ok())
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t.to_degrees())
+        })
+        .or_else(|| {
+            strip_suffix(s, "turn")
+                .and_then(|s| s.parse().ok())
+                .filter(|t: &f32| t.is_finite())
+                .map(|t: f32| t * 360.0)
+        })
+        .or_else(|| s.parse().ok().filter(|t: &f32| t.is_finite()))
+}
+
+// ---
+
 pub(crate) struct AlphaFmt(pub f32);
 
 impl fmt::Display for AlphaFmt {
@@ -104,5 +184,95 @@ mod t {
         assert_eq!(strip_prefix("10", "rgb"), None);
         assert_eq!(strip_prefix("hsv(0,0)", "hsva"), None);
         assert_eq!(strip_prefix("hsv", "hsva"), None);
+    }
+
+    #[test]
+    fn strip_suffix_() {
+        assert_eq!(strip_suffix("45deg", "deg"), Some("45"));
+        assert_eq!(strip_suffix("90DEG", "deg"), Some("90"));
+        assert_eq!(strip_suffix("0.25turn", "turn"), Some("0.25"));
+        assert_eq!(strip_suffix("1.0Turn", "turn"), Some("1.0"));
+
+        assert_eq!(strip_suffix("", "deg"), None);
+        assert_eq!(strip_suffix("90", "deg"), None);
+    }
+
+    #[test]
+    fn parse_percent_or_float_() {
+        let test_data = [
+            ("none", Some((0.0, false))),
+            ("NONE", Some((0.0, false))),
+            ("0%", Some((0.0, true))),
+            ("100%", Some((1.0, true))),
+            ("50%", Some((0.5, true))),
+            ("0", Some((0.0, false))),
+            ("1", Some((1.0, false))),
+            ("0.5", Some((0.5, false))),
+            ("100.0", Some((100.0, false))),
+            ("-23.7", Some((-23.7, false))),
+            ("%", None),
+            ("1x", None),
+            ("nan", None),
+            ("inf", None),
+            ("1e400", None),
+            ("nan%", None),
+            ("inf%", None),
+            ("1e400%", None),
+        ];
+        for (s, expected) in test_data {
+            assert_eq!(parse_percent_or_float(s), expected);
+        }
+    }
+
+    #[test]
+    fn parse_percent_or_255_() {
+        let test_data = [
+            ("none", Some(0.0)),
+            ("NONE", Some(0.0)),
+            ("0%", Some(0.0)),
+            ("100%", Some(1.0)),
+            ("50%", Some(0.5)),
+            ("-100%", Some(-1.0)),
+            ("0", Some(0.0)),
+            ("255", Some(1.0)),
+            ("127.5", Some(0.5)),
+            ("%", None),
+            ("255x", None),
+            ("nan", None),
+            ("inf", None),
+            ("1e400", None),
+            ("nan%", None),
+            ("inf%", None),
+            ("1e400%", None),
+        ];
+        for (s, expected) in test_data {
+            assert_eq!(parse_percent_or_255(s), expected);
+        }
+    }
+
+    #[test]
+    fn parse_angle_() {
+        let test_data = [
+            ("none", Some(0.0)),
+            ("NONE", Some(0.0)),
+            ("360", Some(360.0)),
+            ("127.356", Some(127.356)),
+            ("+120deg", Some(120.0)),
+            ("90deg", Some(90.0)),
+            ("-127deg", Some(-127.0)),
+            ("100grad", Some(90.0)),
+            ("1.5707963267948966rad", Some(90.0)),
+            ("0.25turn", Some(90.0)),
+            ("-0.25turn", Some(-90.0)),
+            ("O", None),
+            ("Odeg", None),
+            ("rad", None),
+            ("nan", None),
+            ("inf", None),
+            ("1e400", None),
+        ];
+        for (s, expected) in test_data {
+            assert_eq!(parse_angle(s), expected);
+        }
     }
 }

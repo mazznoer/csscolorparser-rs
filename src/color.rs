@@ -11,6 +11,7 @@ use rgb::{RGB, RGBA};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
+use crate::lab::{linear_rgb_to_xyz_d50, xyz_d50_to_linear_rgb};
 use crate::utils::*;
 use crate::{ParseColorError, parse};
 
@@ -160,6 +161,12 @@ impl Color {
     /// * `alpha`: Alpha [0..1]
     pub fn from_lcha(l: f32, c: f32, h: f32, alpha: f32) -> Self {
         Self::from_laba(l, c * h.cos(), c * h.sin(), alpha)
+    }
+
+    /// XYZ D50
+    pub fn from_xyz_d50(x: f32, y: f32, z: f32, alpha: f32) -> Self {
+        let [r, g, b] = xyz_d50_to_linear_rgb(x, y, z);
+        Self::from_linear_rgba(r, g, b, alpha)
     }
 
     /// Create color from CSS color string.
@@ -388,6 +395,13 @@ impl Color {
         let c = (a * a + b * b).sqrt();
         let h = b.atan2(a);
         [l, c, h, alpha.clamp(0.0, 1.0)]
+    }
+
+    /// Returns: `[x, y, z, alpha]`
+    pub fn to_xyz_d50(&self) -> [f32; 4] {
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let [x, y, z] = linear_rgb_to_xyz_d50(r, g, b);
+        [x, y, z, alpha]
     }
 
     /// Get CSS RGB hexadecimal color representation

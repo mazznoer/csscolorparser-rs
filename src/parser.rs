@@ -13,6 +13,7 @@ const MAX_DEPTH: usize = 32;
 enum ColorFunc {
     Srgb,
     SrgbLinear,
+    XyzD50,
 }
 
 /// Parse CSS color string
@@ -92,6 +93,8 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // srgb
                 } else if s.eq_ignore_ascii_case("srgb-linear") {
                     color_func = ColorFunc::SrgbLinear;
+                } else if s.eq_ignore_ascii_case("xyz-d50") {
+                    color_func = ColorFunc::XyzD50;
                 } else {
                     return Err(err);
                 }
@@ -253,7 +256,15 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                         if let Some([r, g, b, a]) = parse_values(values, variables) {
                             return Ok(Color::from_linear_rgba(r, g, b, a));
                         };
-                    } // TODO
+                    }
+                    ColorFunc::XyzD50 => {
+                        // x, y, z, alpha [0..1]
+                        let [x, y, z, a] = color.to_xyz_d50();
+                        let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
+                        if let Some([x, y, z, a]) = parse_values(values, variables) {
+                            return Ok(Color::from_xyz_d50(x, y, z, a));
+                        };
+                    }
                 }
             }
             _ => unreachable!(),
@@ -315,6 +326,8 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                     // srgb
                 } else if s.eq_ignore_ascii_case("srgb-linear") {
                     color_func = ColorFunc::SrgbLinear;
+                } else if s.eq_ignore_ascii_case("xyz-d50") {
+                    color_func = ColorFunc::XyzD50;
                 } else {
                     return Err(err);
                 }
@@ -526,7 +539,19 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         ) {
                             return Ok(Color::from_linear_rgba(r, g, b, alpha));
                         }
-                    } // TODO
+                    }
+                    ColorFunc::XyzD50 => {
+                        if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
+                            // x
+                            parse_percent_or_float(val0),
+                            // y
+                            parse_percent_or_float(val1),
+                            // z
+                            parse_percent_or_float(val2),
+                        ) {
+                            return Ok(Color::from_xyz_d50(x, y, z, alpha));
+                        }
+                    }
                 }
             }
             _ => unreachable!(),

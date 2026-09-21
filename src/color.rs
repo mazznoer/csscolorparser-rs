@@ -13,6 +13,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 use crate::lab::{linear_rgb_to_xyz_d50, xyz_d50_to_linear_rgb};
 use crate::utils::*;
+use crate::utils::{linear_rgb_to_xyz_d65, xyz_d65_to_linear_rgb};
 use crate::{ParseColorError, parse};
 
 #[cfg(feature = "named-colors")]
@@ -166,6 +167,12 @@ impl Color {
     /// XYZ D50
     pub fn from_xyz_d50(x: f32, y: f32, z: f32, alpha: f32) -> Self {
         let [r, g, b] = xyz_d50_to_linear_rgb(x, y, z);
+        Self::from_linear_rgba(r, g, b, alpha)
+    }
+
+    /// XYZ D65
+    pub fn from_xyz_d65(x: f32, y: f32, z: f32, alpha: f32) -> Self {
+        let [r, g, b] = xyz_d65_to_linear_rgb(x, y, z);
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
@@ -401,6 +408,13 @@ impl Color {
     pub fn to_xyz_d50(&self) -> [f32; 4] {
         let [r, g, b, alpha] = self.to_linear_rgba();
         let [x, y, z] = linear_rgb_to_xyz_d50(r, g, b);
+        [x, y, z, alpha]
+    }
+
+    /// Returns: `[x, y, z, alpha]`
+    pub fn to_xyz_d65(&self) -> [f32; 4] {
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let [x, y, z] = linear_rgb_to_xyz_d65(r, g, b);
         [x, y, z, alpha]
     }
 

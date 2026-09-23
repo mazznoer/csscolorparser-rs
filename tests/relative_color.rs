@@ -154,6 +154,34 @@ fn parser() {
 }
 
 #[test]
+fn none_value() {
+    let test_data = [
+        ["#000000", "rgb(from #bad455 none none none)"],
+        ["#ff0000", "hwb(from #bad455 none none none)"],
+        ["#000000", "hsl(from #bad455 none none none)"],
+        ["#000000", "lab(from #bad455 none none none)"],
+        ["#000000", "lch(from #bad455 none none none)"],
+        ["#000000", "oklab(from #bad455 none none none)"],
+        ["#000000", "oklch(from #bad455 none none none)"],
+        // color(...)
+        ["#000000", "color(from #bad455 srgb none none none)"],
+        ["#000000", "color(from #bad455 srgb-linear none none none)"],
+        ["#000000", "color(from #bad455 xyz none none none)"],
+        ["#000000", "color(from #bad455 xyz-d65 none none none)"],
+        ["#000000", "color(from #bad455 xyz-d50 none none none)"],
+        // Alpha
+        ["#00000000", "rgb(from #bad455 none none none / none)"],
+        [
+            "#00000000",
+            "color(from #bad455 srgb none none none / none)",
+        ],
+    ];
+    for [hex, s] in test_data {
+        assert_eq!(hex, parse(&s).unwrap().to_string(), "{:?}", s);
+    }
+}
+
+#[test]
 fn invalid() {
     let test_data = [
         "rgb(from)",

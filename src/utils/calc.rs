@@ -124,6 +124,12 @@ pub(crate) fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Op
     let mut i = 0;
 
     for s in values {
+        if s.eq_ignore_ascii_case("none") {
+            result[i] = 0.0;
+            i += 1;
+            continue;
+        }
+
         if let Some(t) = parse_v(s) {
             result[i] = t;
             i += 1;
@@ -333,6 +339,7 @@ mod t {
             ("130", 130.0),
             ("-0.5", -0.5),
             ("g", 127.0),
+            ("none", 0.0),
             // calc() simple
             ("calc(4+5.5)", 9.5),
             ("calc( 10 - 7 )", 3.0),

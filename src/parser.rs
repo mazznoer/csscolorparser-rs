@@ -1,7 +1,7 @@
 use crate::utils::ParamParser;
 use crate::utils::parse_values;
 use crate::utils::remap;
-use crate::utils::{parse_angle, parse_percent_or_255, parse_percent_or_float};
+use crate::utils::{parse_angle, parse_percent_or_float};
 use crate::{Color, ParseColorError};
 
 #[cfg(feature = "named-colors")]
@@ -381,14 +381,17 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
         match err {
             ParseColorError::InvalidRgb => {
-                if let (Some(r), Some(g), Some(b)) = (
+                if let (Some((r, r_pct)), Some((g, g_pct)), Some((b, b_pct))) = (
                     // red
-                    parse_percent_or_255(val0),
+                    parse_percent_or_float(val0),
                     // green
-                    parse_percent_or_255(val1),
+                    parse_percent_or_float(val1),
                     // blue
-                    parse_percent_or_255(val2),
+                    parse_percent_or_float(val2),
                 ) {
+                    let r = if r_pct { r } else { r / 255.0 };
+                    let g = if g_pct { g } else { g / 255.0 };
+                    let b = if b_pct { b } else { b / 255.0 };
                     return Ok(Color {
                         r: r.clamp(0.0, 1.0),
                         g: g.clamp(0.0, 1.0),
@@ -644,7 +647,7 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
 
 #[cfg(test)]
 mod t {
-    use super::*;
+    use super::parse_hex;
 
     #[test]
     fn parse_hex_() {

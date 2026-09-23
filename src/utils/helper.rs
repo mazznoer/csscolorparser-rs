@@ -48,25 +48,6 @@ pub(crate) fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
         })
 }
 
-pub(crate) fn parse_percent_or_255(s: &str) -> Option<f32> {
-    if s.eq_ignore_ascii_case("none") {
-        return Some(0.0);
-    }
-    s.strip_suffix('%')
-        .and_then(|s| {
-            s.parse()
-                .ok()
-                .filter(|t: &f32| t.is_finite())
-                .map(|t: f32| t / 100.0)
-        })
-        .or_else(|| {
-            s.parse()
-                .ok()
-                .filter(|t: &f32| t.is_finite())
-                .map(|t: f32| t / 255.0)
-        })
-}
-
 pub(crate) fn parse_angle(s: &str) -> Option<f32> {
     if s.eq_ignore_ascii_case("none") {
         return Some(0.0);
@@ -221,32 +202,6 @@ mod t {
         ];
         for (s, expected) in test_data {
             assert_eq!(parse_percent_or_float(s), expected);
-        }
-    }
-
-    #[test]
-    fn parse_percent_or_255_() {
-        let test_data = [
-            ("none", Some(0.0)),
-            ("NONE", Some(0.0)),
-            ("0%", Some(0.0)),
-            ("100%", Some(1.0)),
-            ("50%", Some(0.5)),
-            ("-100%", Some(-1.0)),
-            ("0", Some(0.0)),
-            ("255", Some(1.0)),
-            ("127.5", Some(0.5)),
-            ("%", None),
-            ("255x", None),
-            ("nan", None),
-            ("inf", None),
-            ("1e400", None),
-            ("nan%", None),
-            ("inf%", None),
-            ("1e400%", None),
-        ];
-        for (s, expected) in test_data {
-            assert_eq!(parse_percent_or_255(s), expected);
         }
     }
 

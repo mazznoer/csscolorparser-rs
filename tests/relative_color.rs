@@ -1,6 +1,92 @@
 use csscolorparser::parse;
 
 #[test]
+fn basic() {
+    let hexs = [
+        // Solid
+        "#ffffff",
+        "#000000",
+        "#71fe15",
+        "#d6e3c9",
+        "#2a7719",
+        "#b53717",
+        "#5b0b8d",
+        "#aff632",
+        "#65ec8d",
+        "#d35493",
+        "#289e5f",
+        "#b46152",
+        "#e0afee",
+        "#ac2be4",
+        "#233490",
+        "#1afbc5",
+        "#e41755",
+        "#e052ee",
+        "#4d1b5e",
+        "#230cde",
+        "#f8a243",
+        "#a130d1",
+        "#b38373",
+        "",
+        // Transparent
+        "#6b9fa203",
+        "#0e5e0be6",
+        "#84f9a716",
+        "#48651550",
+        "#1adc2cf4",
+        "#c191a31c",
+        "#a25518c5",
+        "#cb33f2c9",
+        "#89b21d36",
+        "#cbb97f3e",
+    ];
+
+    let fmts = [
+        "rgb(from {hex} r g b{})",
+        "hwb(from {hex} h w b{})",
+        "hsl(from {hex} h s l{})",
+        "hsv(from {hex} h s v{})",
+        "lab(from {hex} l a b{})",
+        "lch(from {hex} l c h{})",
+        "oklab(from {hex} l a b{})",
+        "oklch(from {hex} l c h{})",
+        // color(...)
+        "color(from {hex} srgb r g b{})",
+        "color(from {hex} srgb-linear r g b{})",
+        "color(from {hex} xyz-d50 x y z{})",
+        "color(from {hex} xyz x y z{})",
+        "color(from {hex} xyz-d65 x y z{})",
+    ];
+
+    let alphas = [
+        "", " / alpha", " / 1",
+        //" / 100%",
+        //" / 0.5",
+    ];
+
+    let mut solid = true;
+
+    for hex in hexs {
+        if hex == "" {
+            solid = false;
+            continue;
+        }
+        for f in fmts {
+            let alphas_ = if solid { &alphas[..] } else { &alphas[0..2] };
+            for a in alphas_ {
+                // Build string
+                let s = f.replace("{hex}", hex);
+                let s = s.replace("{}", a);
+                // Test
+                let c = parse(&s);
+                assert!(c.is_ok(), "{:?}", s);
+                assert_eq!(hex, c.unwrap().to_string(), "{:?}", s);
+            }
+        }
+    }
+}
+
+#[test]
 fn parser() {
     let test_data = [
         ["rgb(FROM #abcdef g B r / Alpha)", "#cdefab"],
@@ -63,60 +149,7 @@ fn parser() {
         ["color(from #f00 srgb r g b / 0.5)", "#ff000080"],
     ];
     for [s, hex] in test_data {
-        assert_eq!(parse(s).unwrap().to_css_hex().to_string(), hex, "{:?}", s);
-    }
-
-    let test_data = [
-        "#ffffff",
-        "#000000",
-        "#71fe15",
-        "#d6e3c9",
-        "#2a7719",
-        "#b53717",
-        "#5b0b8d",
-        "#aff632",
-        "#65ec8d",
-        "#d35493",
-        "#289e5f",
-        "#b46152",
-        "#e0afee",
-        "#ac2be4",
-        "#233490",
-        "#1afbc5",
-        "#e41755",
-        "#e052ee",
-        "#4d1b5e",
-        "#230cde",
-        "#f8a243",
-        "#a130d1",
-        "#b38373",
-        "#6b9fa203",
-        "#0e5e0be6",
-        "#84f9a716",
-        "#48651550",
-        "#1adc2cf4",
-        "#c191a31c",
-        "#a25518c5",
-        "#cb33f2c9",
-        "#89b21d36",
-        "#cbb97f3e",
-    ];
-    for hex in test_data {
-        let p = [
-            format!("rgb(from {hex} r g b)"),
-            format!("hwb(from {hex} h w b / alpha)"),
-            format!("hsl(from {hex} h s l)"),
-            format!("hsv(from {hex} h s v)"),
-            format!("lab(from {hex} l a b)"),
-            format!("lch(from {hex} l c h)"),
-            format!("oklab(from {hex} l a b)"),
-            format!("oklch(from {hex} l c h)"),
-        ];
-        for s in p {
-            let c = parse(&s);
-            assert!(c.is_ok(), "{:?}", s);
-            assert_eq!(hex, c.unwrap().to_css_hex().to_string());
-        }
+        assert_eq!(hex, parse(s).unwrap().to_string(), "{:?}", s);
     }
 }
 

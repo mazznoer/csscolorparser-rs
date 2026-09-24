@@ -73,7 +73,7 @@ pub(crate) const fn hue_to_rgb(n1: f32, n2: f32, h: f32) -> f32 {
 // s, l = 0..1
 // r, g, b = 0..1
 pub(crate) const fn hsl_to_rgb(h: f32, s: f32, l: f32) -> [f32; 3] {
-    if s == 0.0 {
+    if s.abs() < f32::EPSILON {
         return [l, l, l];
     }
 
@@ -104,12 +104,11 @@ pub(crate) const fn hwb_to_rgb(hue: f32, white: f32, black: f32) -> [f32; 3] {
     [r, g, b]
 }
 
-#[allow(clippy::float_cmp)]
 pub(crate) const fn hsv_to_hsl(h: f32, s: f32, v: f32) -> [f32; 3] {
     let l = (2.0 - s) * v / 2.0;
 
-    let s = if l != 0.0 {
-        if l == 1.0 {
+    let s = if l.abs() > f32::EPSILON {
+        if (l - 1.0).abs() < f32::EPSILON {
             0.0
         } else if l < 0.5 {
             s * v / (l * 2.0)
@@ -128,12 +127,11 @@ pub(crate) const fn hsv_to_rgb(h: f32, s: f32, v: f32) -> [f32; 3] {
     hsl_to_rgb(h, s, l)
 }
 
-#[allow(clippy::float_cmp)]
 pub(crate) const fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
     let v = r.max(g.max(b));
     let d = v - r.min(g.min(b));
 
-    if d == 0.0 {
+    if d.abs() < f32::EPSILON {
         return [0.0, 0.0, v];
     }
 
@@ -142,9 +140,9 @@ pub(crate) const fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
     let dg = (v - g) / d;
     let db = (v - b) / d;
 
-    let h = if r == v {
+    let h = if (r - v).abs() < f32::EPSILON {
         db - dg
-    } else if g == v {
+    } else if (g - v).abs() < f32::EPSILON {
         2.0 + dr - db
     } else {
         4.0 + dg - dr
@@ -154,13 +152,12 @@ pub(crate) const fn rgb_to_hsv(r: f32, g: f32, b: f32) -> [f32; 3] {
     [normalize_angle(h), s, v]
 }
 
-#[allow(clippy::float_cmp)]
 pub(crate) const fn rgb_to_hsl(r: f32, g: f32, b: f32) -> [f32; 3] {
     let min = r.min(g.min(b));
     let max = r.max(g.max(b));
     let l = (max + min) / 2.0;
 
-    if min == max {
+    if (min - max).abs() < f32::EPSILON {
         return [0.0, 0.0, l];
     }
 
@@ -176,9 +173,9 @@ pub(crate) const fn rgb_to_hsl(r: f32, g: f32, b: f32) -> [f32; 3] {
     let dg = (max - g) / d;
     let db = (max - b) / d;
 
-    let h = if r == max {
+    let h = if (r - max).abs() < f32::EPSILON {
         db - dg
-    } else if g == max {
+    } else if (g - max).abs() < f32::EPSILON {
         2.0 + dr - db
     } else {
         4.0 + dg - dr

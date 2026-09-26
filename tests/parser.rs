@@ -304,6 +304,7 @@ fn invalid_format() {
         "rgb(ß,0,0)",
         "\u{1F602}",
         "#\u{1F602}",
+        "\u{1F602}(255 0 0)",
         "rgb(\u{1F602},\u{1F602},\u{1F602})",
         &nested_color(33),
         &nested_color(51),

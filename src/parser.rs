@@ -67,223 +67,222 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         Err(e) => e,
     };
 
-    if let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) {
-        if !s.is_ascii() {
-            return Err(err);
-        }
+    let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) else {
+        return Err(err);
+    };
 
-        let mut pp = ParamParser::new(&s[idx + 1..]);
-        pp.space();
-
-        #[rustfmt::skip]
-        let (
-            Some(from),  true,
-            Some(color), true,
-        ) = (
-            pp.value(), pp.space(),
-            pp.value(), pp.space(),
-        ) else {
-            return Err(err);
-        };
-
-        let mut color_func = ColorFunc::Srgb;
-
-        if err == ParseColorError::InvalidColor {
-            if let Some(s) = pp.value() {
-                if s.eq_ignore_ascii_case("srgb") {
-                    // srgb
-                } else if s.eq_ignore_ascii_case("srgb-linear") {
-                    color_func = ColorFunc::SrgbLinear;
-                } else if s.eq_ignore_ascii_case("xyz-d50") {
-                    color_func = ColorFunc::XyzD50;
-                } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
-                    color_func = ColorFunc::XyzD65;
-                } else {
-                    return Err(err);
-                }
-            } else {
-                return Err(err);
-            };
-            pp.space();
-        }
-
-        #[rustfmt::skip]
-        let (
-            Some(val1), true,
-            Some(val2), true,
-            Some(val3),
-        ) = (
-            pp.value(), pp.space(),
-            pp.value(), pp.space(),
-            pp.value(),
-        ) else {
-            return Err(err);
-        };
-
-        if !from.eq_ignore_ascii_case("from") {
-            return Err(err);
-        }
-
-        let Ok(color) = parse_all(color, depth + 1) else {
-            return Err(err);
-        };
-
-        pp.space();
-
-        let val4 = if pp.is_end() {
-            "alpha"
-        } else if let (true, Some(alpha), _, true) =
-            (pp.slash(), pp.value(), pp.space(), pp.is_end())
-        {
-            alpha
-        } else {
-            return Err(err);
-        };
-
-        let values = [val1, val2, val3, val4];
-
-        match err {
-            ParseColorError::InvalidRgb => {
-                // r, g, b [0..255]
-                // alpha   [0..1]
-                let variables = [
-                    ("r", color.r * 255.0),
-                    ("g", color.g * 255.0),
-                    ("b", color.b * 255.0),
-                    ("alpha", color.a),
-                ];
-                if let Some([r, g, b, a]) = parse_values(values, variables) {
-                    return Ok(Color::new(r / 255.0, g / 255.0, b / 255.0, a));
-                };
-            }
-            ParseColorError::InvalidHwb => {
-                // h     [0..360]
-                // w, b  [0..100]
-                // alpha [0..1]
-                let [h, w, b, a] = color.to_hwba();
-                let variables = [("h", h), ("w", w * 100.0), ("b", b * 100.0), ("alpha", a)];
-                if let Some([h, w, b, a]) = parse_values(values, variables) {
-                    return Ok(Color::from_hwba(h, w / 100.0, b / 100.0, a));
-                };
-            }
-            ParseColorError::InvalidHsl => {
-                // h     [0..360]
-                // s, l  [0..100]
-                // alpha [0..1]
-                let [h, s, l, a] = color.to_hsla();
-                let variables = [("h", h), ("s", s * 100.0), ("l", l * 100.0), ("alpha", a)];
-                if let Some([h, s, l, a]) = parse_values(values, variables) {
-                    return Ok(Color::from_hsla(
-                        h,
-                        (s / 100.0).clamp(0.0, 1.0),
-                        (l / 100.0).clamp(0.0, 1.0),
-                        a,
-                    ));
-                };
-            }
-            ParseColorError::InvalidHsv => {
-                // h     [0..360]
-                // s, v  [0..100]
-                // alpha [0..1]
-                let [h, s, v, a] = color.to_hsva();
-                let variables = [("h", h), ("s", s * 100.0), ("v", v * 100.0), ("alpha", a)];
-                if let Some([h, s, v, a]) = parse_values(values, variables) {
-                    return Ok(Color::from_hsva(h, s / 100.0, v / 100.0, a));
-                };
-            }
-            ParseColorError::InvalidLab => {
-                // l     [0..100]
-                // a, b  [-125..125]
-                // alpha [0..1]
-                let [l, a, b, alpha] = color.to_laba();
-                let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-                if let Some([l, a, b, alpha]) = parse_values(values, variables) {
-                    return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
-                };
-            }
-            ParseColorError::InvalidLch => {
-                // l [0..100]
-                // c [0..150]
-                // h [0..360]
-                // alpha [0..1]
-                let [l, c, h, a] = color.to_lcha();
-                let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-                if let Some([l, c, h, a]) = parse_values(values, variables) {
-                    return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
-                };
-            }
-            ParseColorError::InvalidOklab => {
-                // l     [0..1]
-                // a, b  [-0.4 .. 0.4]
-                // alpha [0..1]
-                let [l, a, b, alpha] = color.to_oklaba();
-                let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-                if let Some([l, a, b, alpha]) = parse_values(values, variables) {
-                    return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
-                };
-            }
-            ParseColorError::InvalidOklch => {
-                // l [0..1]
-                // c [0..0.4]
-                // h [0..360]
-                // alpha [0..1]
-                let [l, c, h, a] = color.to_oklcha();
-                let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-                if let Some([l, c, h, a]) = parse_values(values, variables) {
-                    return Ok(Color::from_oklcha(
-                        l.max(0.0),
-                        c.max(0.0),
-                        h.to_radians(),
-                        a,
-                    ));
-                };
-            }
-            ParseColorError::InvalidColor => {
-                match color_func {
-                    ColorFunc::Srgb => {
-                        // r, g, b, alpha [0..1]
-                        let variables = [
-                            ("r", color.r),
-                            ("g", color.g),
-                            ("b", color.b),
-                            ("alpha", color.a),
-                        ];
-                        if let Some([r, g, b, a]) = parse_values(values, variables) {
-                            return Ok(Color::new(r, g, b, a));
-                        };
-                    }
-                    ColorFunc::SrgbLinear => {
-                        // r, g, b, alpha [0..1]
-                        let [r, g, b, a] = color.to_linear_rgba();
-                        let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                        if let Some([r, g, b, a]) = parse_values(values, variables) {
-                            return Ok(Color::from_linear_rgba(r, g, b, a));
-                        };
-                    }
-                    ColorFunc::XyzD50 => {
-                        // x, y, z, alpha [0..1]
-                        let [x, y, z, a] = color.to_xyz_d50();
-                        let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
-                        if let Some([x, y, z, a]) = parse_values(values, variables) {
-                            return Ok(Color::from_xyz_d50(x, y, z, a));
-                        };
-                    }
-                    ColorFunc::XyzD65 => {
-                        // x, y, z, alpha [0..1]
-                        let [x, y, z, a] = color.to_xyz_d65();
-                        let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
-                        if let Some([x, y, z, a]) = parse_values(values, variables) {
-                            return Ok(Color::from_xyz_d65(x, y, z, a));
-                        };
-                    }
-                }
-            }
-            _ => unreachable!(),
-        }
+    if !s.is_ascii() {
         return Err(err);
     }
 
-    unreachable!();
+    let mut pp = ParamParser::new(&s[idx + 1..]);
+    pp.space();
+
+    #[rustfmt::skip]
+    let (
+        Some(from),  true,
+        Some(color), true,
+    ) = (
+        pp.value(), pp.space(),
+        pp.value(), pp.space(),
+    ) else {
+        return Err(err);
+    };
+
+    let mut color_func = ColorFunc::Srgb;
+
+    if err == ParseColorError::InvalidColor {
+        if let Some(s) = pp.value() {
+            if s.eq_ignore_ascii_case("srgb") {
+                // srgb
+            } else if s.eq_ignore_ascii_case("srgb-linear") {
+                color_func = ColorFunc::SrgbLinear;
+            } else if s.eq_ignore_ascii_case("xyz-d50") {
+                color_func = ColorFunc::XyzD50;
+            } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
+                color_func = ColorFunc::XyzD65;
+            } else {
+                return Err(err);
+            }
+        } else {
+            return Err(err);
+        };
+        pp.space();
+    }
+
+    #[rustfmt::skip]
+    let (
+        Some(val1), true,
+        Some(val2), true,
+        Some(val3),
+    ) = (
+        pp.value(), pp.space(),
+        pp.value(), pp.space(),
+        pp.value(),
+    ) else {
+        return Err(err);
+    };
+
+    if !from.eq_ignore_ascii_case("from") {
+        return Err(err);
+    }
+
+    let Ok(color) = parse_all(color, depth + 1) else {
+        return Err(err);
+    };
+
+    pp.space();
+
+    let val4 = if pp.is_end() {
+        "alpha"
+    } else if let (true, Some(alpha), _, true) = (pp.slash(), pp.value(), pp.space(), pp.is_end()) {
+        alpha
+    } else {
+        return Err(err);
+    };
+
+    let values = [val1, val2, val3, val4];
+
+    match err {
+        ParseColorError::InvalidRgb => {
+            // r, g, b [0..255]
+            // alpha   [0..1]
+            let variables = [
+                ("r", color.r * 255.0),
+                ("g", color.g * 255.0),
+                ("b", color.b * 255.0),
+                ("alpha", color.a),
+            ];
+            if let Some([r, g, b, a]) = parse_values(values, variables) {
+                return Ok(Color::new(r / 255.0, g / 255.0, b / 255.0, a));
+            };
+        }
+        ParseColorError::InvalidHwb => {
+            // h     [0..360]
+            // w, b  [0..100]
+            // alpha [0..1]
+            let [h, w, b, a] = color.to_hwba();
+            let variables = [("h", h), ("w", w * 100.0), ("b", b * 100.0), ("alpha", a)];
+            if let Some([h, w, b, a]) = parse_values(values, variables) {
+                return Ok(Color::from_hwba(h, w / 100.0, b / 100.0, a));
+            };
+        }
+        ParseColorError::InvalidHsl => {
+            // h     [0..360]
+            // s, l  [0..100]
+            // alpha [0..1]
+            let [h, s, l, a] = color.to_hsla();
+            let variables = [("h", h), ("s", s * 100.0), ("l", l * 100.0), ("alpha", a)];
+            if let Some([h, s, l, a]) = parse_values(values, variables) {
+                return Ok(Color::from_hsla(
+                    h,
+                    (s / 100.0).clamp(0.0, 1.0),
+                    (l / 100.0).clamp(0.0, 1.0),
+                    a,
+                ));
+            };
+        }
+        ParseColorError::InvalidHsv => {
+            // h     [0..360]
+            // s, v  [0..100]
+            // alpha [0..1]
+            let [h, s, v, a] = color.to_hsva();
+            let variables = [("h", h), ("s", s * 100.0), ("v", v * 100.0), ("alpha", a)];
+            if let Some([h, s, v, a]) = parse_values(values, variables) {
+                return Ok(Color::from_hsva(h, s / 100.0, v / 100.0, a));
+            };
+        }
+        ParseColorError::InvalidLab => {
+            // l     [0..100]
+            // a, b  [-125..125]
+            // alpha [0..1]
+            let [l, a, b, alpha] = color.to_laba();
+            let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
+            if let Some([l, a, b, alpha]) = parse_values(values, variables) {
+                return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+            };
+        }
+        ParseColorError::InvalidLch => {
+            // l [0..100]
+            // c [0..150]
+            // h [0..360]
+            // alpha [0..1]
+            let [l, c, h, a] = color.to_lcha();
+            let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
+            if let Some([l, c, h, a]) = parse_values(values, variables) {
+                return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
+            };
+        }
+        ParseColorError::InvalidOklab => {
+            // l     [0..1]
+            // a, b  [-0.4 .. 0.4]
+            // alpha [0..1]
+            let [l, a, b, alpha] = color.to_oklaba();
+            let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
+            if let Some([l, a, b, alpha]) = parse_values(values, variables) {
+                return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
+            };
+        }
+        ParseColorError::InvalidOklch => {
+            // l [0..1]
+            // c [0..0.4]
+            // h [0..360]
+            // alpha [0..1]
+            let [l, c, h, a] = color.to_oklcha();
+            let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
+            if let Some([l, c, h, a]) = parse_values(values, variables) {
+                return Ok(Color::from_oklcha(
+                    l.max(0.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    a,
+                ));
+            };
+        }
+        ParseColorError::InvalidColor => {
+            match color_func {
+                ColorFunc::Srgb => {
+                    // r, g, b, alpha [0..1]
+                    let variables = [
+                        ("r", color.r),
+                        ("g", color.g),
+                        ("b", color.b),
+                        ("alpha", color.a),
+                    ];
+                    if let Some([r, g, b, a]) = parse_values(values, variables) {
+                        return Ok(Color::new(r, g, b, a));
+                    };
+                }
+                ColorFunc::SrgbLinear => {
+                    // r, g, b, alpha [0..1]
+                    let [r, g, b, a] = color.to_linear_rgba();
+                    let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
+                    if let Some([r, g, b, a]) = parse_values(values, variables) {
+                        return Ok(Color::from_linear_rgba(r, g, b, a));
+                    };
+                }
+                ColorFunc::XyzD50 => {
+                    // x, y, z, alpha [0..1]
+                    let [x, y, z, a] = color.to_xyz_d50();
+                    let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
+                    if let Some([x, y, z, a]) = parse_values(values, variables) {
+                        return Ok(Color::from_xyz_d50(x, y, z, a));
+                    };
+                }
+                ColorFunc::XyzD65 => {
+                    // x, y, z, alpha [0..1]
+                    let [x, y, z, a] = color.to_xyz_d65();
+                    let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
+                    if let Some([x, y, z, a]) = parse_values(values, variables) {
+                        return Ok(Color::from_xyz_d65(x, y, z, a));
+                    };
+                }
+            }
+        }
+        _ => unreachable!(),
+    }
+
+    Err(err)
 }
 
 fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
@@ -294,297 +293,6 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
     // Hex format
     if let Some(s) = s.strip_prefix('#') {
         return parse_hex(s);
-    }
-
-    if let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) {
-        let fname = &s[..idx].trim_end();
-
-        let err = match fname {
-            s if s.eq_ignore_ascii_case("rgb") || s.eq_ignore_ascii_case("rgba") => {
-                ParseColorError::InvalidRgb
-            }
-            s if s.eq_ignore_ascii_case("hsl") || s.eq_ignore_ascii_case("hsla") => {
-                ParseColorError::InvalidHsl
-            }
-            s if s.eq_ignore_ascii_case("hwb") || s.eq_ignore_ascii_case("hwba") => {
-                ParseColorError::InvalidHwb
-            }
-            s if s.eq_ignore_ascii_case("hsv") || s.eq_ignore_ascii_case("hsva") => {
-                ParseColorError::InvalidHsv
-            }
-            s if s.eq_ignore_ascii_case("lab") => ParseColorError::InvalidLab,
-            s if s.eq_ignore_ascii_case("lch") => ParseColorError::InvalidLch,
-            s if s.eq_ignore_ascii_case("oklab") => ParseColorError::InvalidOklab,
-            s if s.eq_ignore_ascii_case("oklch") => ParseColorError::InvalidOklch,
-            s if s.eq_ignore_ascii_case("color") => ParseColorError::InvalidColor,
-            _ => return Err(ParseColorError::InvalidFunction),
-        };
-
-        let s = &s[idx + 1..];
-
-        if !s.is_ascii() {
-            return Err(err);
-        }
-
-        let mut pp = ParamParser::new(s);
-        pp.space();
-
-        let mut color_func = ColorFunc::Srgb;
-
-        if err == ParseColorError::InvalidColor {
-            if let Some(s) = pp.value() {
-                if s.eq_ignore_ascii_case("srgb") {
-                    // srgb
-                } else if s.eq_ignore_ascii_case("srgb-linear") {
-                    color_func = ColorFunc::SrgbLinear;
-                } else if s.eq_ignore_ascii_case("xyz-d50") {
-                    color_func = ColorFunc::XyzD50;
-                } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
-                    color_func = ColorFunc::XyzD65;
-                } else {
-                    return Err(err);
-                }
-            } else {
-                return Err(err);
-            };
-            pp.space();
-        }
-
-        let (Some(val0), true, Some(val1), true, Some(val2)) = (
-            pp.value(),
-            pp.comma_or_space(),
-            pp.value(),
-            pp.comma_or_space(),
-            pp.value(),
-        ) else {
-            return Err(err);
-        };
-
-        let is_space = pp.space();
-
-        let alpha = if pp.is_end() {
-            1.0
-        } else if let (true, Some(a), _, true) = (
-            pp.comma_or_slash() || is_space,
-            pp.value(),
-            pp.space(),
-            pp.is_end(),
-        ) {
-            if let Some((v, _)) = parse_percent_or_float(a) {
-                v.clamp(0.0, 1.0)
-            } else {
-                return Err(err);
-            }
-        } else {
-            return Err(err);
-        };
-
-        match err {
-            ParseColorError::InvalidRgb => {
-                if let (Some((r, r_pct)), Some((g, g_pct)), Some((b, b_pct))) = (
-                    // red
-                    parse_percent_or_float(val0),
-                    // green
-                    parse_percent_or_float(val1),
-                    // blue
-                    parse_percent_or_float(val2),
-                ) {
-                    let r = if r_pct { r } else { r / 255.0 };
-                    let g = if g_pct { g } else { g / 255.0 };
-                    let b = if b_pct { b } else { b / 255.0 };
-                    return Ok(Color {
-                        r: r.clamp(0.0, 1.0),
-                        g: g.clamp(0.0, 1.0),
-                        b: b.clamp(0.0, 1.0),
-                        a: alpha,
-                    });
-                }
-            }
-            ParseColorError::InvalidHsl => {
-                if let (Some(h), Some((s, s_pct)), Some((l, l_pct))) = (
-                    // hue
-                    parse_angle(val0),
-                    // saturation
-                    parse_percent_or_float(val1),
-                    // lightness
-                    parse_percent_or_float(val2),
-                ) {
-                    // A bare number is on the 0..100 scale (CSS Color 4), while a
-                    // percentage is already scaled to 0..1 by parse_percent_or_float.
-                    let s = if s_pct { s } else { s / 100.0 };
-                    let l = if l_pct { l } else { l / 100.0 };
-                    return Ok(Color::from_hsla(h, s, l, alpha));
-                }
-            }
-            ParseColorError::InvalidHwb => {
-                if let (Some(h), Some((w, w_pct)), Some((b, b_pct))) = (
-                    // hue
-                    parse_angle(val0),
-                    // whiteness
-                    parse_percent_or_float(val1),
-                    // blackness
-                    parse_percent_or_float(val2),
-                ) {
-                    // A bare number is on the 0..100 scale (CSS Color 4), while a
-                    // percentage is already scaled to 0..1 by parse_percent_or_float.
-                    let w = if w_pct { w } else { w / 100.0 };
-                    let b = if b_pct { b } else { b / 100.0 };
-                    return Ok(Color::from_hwba(h, w, b, alpha));
-                }
-            }
-            ParseColorError::InvalidHsv => {
-                if let (Some(h), Some((s, s_pct)), Some((v, v_pct))) = (
-                    // hue
-                    parse_angle(val0),
-                    // saturation
-                    parse_percent_or_float(val1),
-                    // value
-                    parse_percent_or_float(val2),
-                ) {
-                    // A bare number is on the 0..100 scale, while a percentage is
-                    // already scaled to 0..1 by parse_percent_or_float.
-                    let s = if s_pct { s } else { s / 100.0 };
-                    let v = if v_pct { v } else { v / 100.0 };
-                    return Ok(Color::from_hsva(h, s, v, alpha));
-                }
-            }
-            ParseColorError::InvalidLab => {
-                if let (Some((l, l_pct)), Some((a, a_pct)), Some((b, b_pct))) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // a
-                    parse_percent_or_float(val1),
-                    // b
-                    parse_percent_or_float(val2),
-                ) {
-                    let l = if l_pct { l * 100.0 } else { l };
-                    let a = if a_pct {
-                        remap(a, -1.0, 1.0, -125.0, 125.0)
-                    } else {
-                        a
-                    };
-                    let b = if b_pct {
-                        remap(b, -1.0, 1.0, -125.0, 125.0)
-                    } else {
-                        b
-                    };
-                    return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
-                }
-            }
-            ParseColorError::InvalidLch => {
-                if let (Some((l, l_pct)), Some((c, c_pct)), Some(h)) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // chroma
-                    parse_percent_or_float(val1),
-                    // hue
-                    parse_angle(val2),
-                ) {
-                    let l = if l_pct { l * 100.0 } else { l };
-                    let c = if c_pct { c * 150.0 } else { c };
-                    return Ok(Color::from_lcha(
-                        l.max(0.0),
-                        c.max(0.0),
-                        h.to_radians(),
-                        alpha,
-                    ));
-                }
-            }
-            ParseColorError::InvalidOklab => {
-                if let (Some((l, _)), Some((a, a_pct)), Some((b, b_pct))) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // a
-                    parse_percent_or_float(val1),
-                    // b
-                    parse_percent_or_float(val2),
-                ) {
-                    let a = if a_pct {
-                        remap(a, -1.0, 1.0, -0.4, 0.4)
-                    } else {
-                        a
-                    };
-                    let b = if b_pct {
-                        remap(b, -1.0, 1.0, -0.4, 0.4)
-                    } else {
-                        b
-                    };
-                    return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
-                }
-            }
-            ParseColorError::InvalidOklch => {
-                if let (Some((l, _)), Some((c, c_pct)), Some(h)) = (
-                    // lightness
-                    parse_percent_or_float(val0),
-                    // chroma
-                    parse_percent_or_float(val1),
-                    // hue
-                    parse_angle(val2),
-                ) {
-                    let c = if c_pct { c * 0.4 } else { c };
-                    return Ok(Color::from_oklcha(
-                        l.max(0.0),
-                        c.max(0.0),
-                        h.to_radians(),
-                        alpha,
-                    ));
-                }
-            }
-            ParseColorError::InvalidColor => {
-                match color_func {
-                    ColorFunc::Srgb => {
-                        if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
-                            // red
-                            parse_percent_or_float(val0),
-                            // green
-                            parse_percent_or_float(val1),
-                            // blue
-                            parse_percent_or_float(val2),
-                        ) {
-                            return Ok(Color { r, g, b, a: alpha });
-                        }
-                    }
-                    ColorFunc::SrgbLinear => {
-                        if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
-                            // red
-                            parse_percent_or_float(val0),
-                            // green
-                            parse_percent_or_float(val1),
-                            // blue
-                            parse_percent_or_float(val2),
-                        ) {
-                            return Ok(Color::from_linear_rgba(r, g, b, alpha));
-                        }
-                    }
-                    ColorFunc::XyzD50 => {
-                        if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
-                            // x
-                            parse_percent_or_float(val0),
-                            // y
-                            parse_percent_or_float(val1),
-                            // z
-                            parse_percent_or_float(val2),
-                        ) {
-                            return Ok(Color::from_xyz_d50(x, y, z, alpha));
-                        }
-                    }
-                    ColorFunc::XyzD65 => {
-                        if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
-                            // x
-                            parse_percent_or_float(val0),
-                            // y
-                            parse_percent_or_float(val1),
-                            // z
-                            parse_percent_or_float(val2),
-                        ) {
-                            return Ok(Color::from_xyz_d65(x, y, z, alpha));
-                        }
-                    }
-                }
-            }
-            _ => unreachable!(),
-        }
-        return Err(err);
     }
 
     // Hex format without prefix '#'
@@ -600,7 +308,299 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         }
     }
 
-    Err(ParseColorError::InvalidUnknown)
+    let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) else {
+        return Err(ParseColorError::InvalidUnknown);
+    };
+
+    let fname = &s[..idx].trim_end();
+
+    let err = match fname {
+        s if s.eq_ignore_ascii_case("rgb") || s.eq_ignore_ascii_case("rgba") => {
+            ParseColorError::InvalidRgb
+        }
+        s if s.eq_ignore_ascii_case("hsl") || s.eq_ignore_ascii_case("hsla") => {
+            ParseColorError::InvalidHsl
+        }
+        s if s.eq_ignore_ascii_case("hwb") || s.eq_ignore_ascii_case("hwba") => {
+            ParseColorError::InvalidHwb
+        }
+        s if s.eq_ignore_ascii_case("hsv") || s.eq_ignore_ascii_case("hsva") => {
+            ParseColorError::InvalidHsv
+        }
+        s if s.eq_ignore_ascii_case("lab") => ParseColorError::InvalidLab,
+        s if s.eq_ignore_ascii_case("lch") => ParseColorError::InvalidLch,
+        s if s.eq_ignore_ascii_case("oklab") => ParseColorError::InvalidOklab,
+        s if s.eq_ignore_ascii_case("oklch") => ParseColorError::InvalidOklch,
+        s if s.eq_ignore_ascii_case("color") => ParseColorError::InvalidColor,
+        _ => return Err(ParseColorError::InvalidFunction),
+    };
+
+    let s = &s[idx + 1..];
+
+    if !s.is_ascii() {
+        return Err(err);
+    }
+
+    let mut pp = ParamParser::new(s);
+    pp.space();
+
+    let mut color_func = ColorFunc::Srgb;
+
+    if err == ParseColorError::InvalidColor {
+        if let Some(s) = pp.value() {
+            if s.eq_ignore_ascii_case("srgb") {
+                // srgb
+            } else if s.eq_ignore_ascii_case("srgb-linear") {
+                color_func = ColorFunc::SrgbLinear;
+            } else if s.eq_ignore_ascii_case("xyz-d50") {
+                color_func = ColorFunc::XyzD50;
+            } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
+                color_func = ColorFunc::XyzD65;
+            } else {
+                return Err(err);
+            }
+        } else {
+            return Err(err);
+        };
+        pp.space();
+    }
+
+    let (Some(val0), true, Some(val1), true, Some(val2)) = (
+        pp.value(),
+        pp.comma_or_space(),
+        pp.value(),
+        pp.comma_or_space(),
+        pp.value(),
+    ) else {
+        return Err(err);
+    };
+
+    let is_space = pp.space();
+
+    let alpha = if pp.is_end() {
+        1.0
+    } else if let (true, Some(a), _, true) = (
+        pp.comma_or_slash() || is_space,
+        pp.value(),
+        pp.space(),
+        pp.is_end(),
+    ) {
+        if let Some((v, _)) = parse_percent_or_float(a) {
+            v.clamp(0.0, 1.0)
+        } else {
+            return Err(err);
+        }
+    } else {
+        return Err(err);
+    };
+
+    match err {
+        ParseColorError::InvalidRgb => {
+            if let (Some((r, r_pct)), Some((g, g_pct)), Some((b, b_pct))) = (
+                // red
+                parse_percent_or_float(val0),
+                // green
+                parse_percent_or_float(val1),
+                // blue
+                parse_percent_or_float(val2),
+            ) {
+                let r = if r_pct { r } else { r / 255.0 };
+                let g = if g_pct { g } else { g / 255.0 };
+                let b = if b_pct { b } else { b / 255.0 };
+                return Ok(Color {
+                    r: r.clamp(0.0, 1.0),
+                    g: g.clamp(0.0, 1.0),
+                    b: b.clamp(0.0, 1.0),
+                    a: alpha,
+                });
+            }
+        }
+        ParseColorError::InvalidHsl => {
+            if let (Some(h), Some((s, s_pct)), Some((l, l_pct))) = (
+                // hue
+                parse_angle(val0),
+                // saturation
+                parse_percent_or_float(val1),
+                // lightness
+                parse_percent_or_float(val2),
+            ) {
+                // A bare number is on the 0..100 scale (CSS Color 4), while a
+                // percentage is already scaled to 0..1 by parse_percent_or_float.
+                let s = if s_pct { s } else { s / 100.0 };
+                let l = if l_pct { l } else { l / 100.0 };
+                return Ok(Color::from_hsla(h, s, l, alpha));
+            }
+        }
+        ParseColorError::InvalidHwb => {
+            if let (Some(h), Some((w, w_pct)), Some((b, b_pct))) = (
+                // hue
+                parse_angle(val0),
+                // whiteness
+                parse_percent_or_float(val1),
+                // blackness
+                parse_percent_or_float(val2),
+            ) {
+                // A bare number is on the 0..100 scale (CSS Color 4), while a
+                // percentage is already scaled to 0..1 by parse_percent_or_float.
+                let w = if w_pct { w } else { w / 100.0 };
+                let b = if b_pct { b } else { b / 100.0 };
+                return Ok(Color::from_hwba(h, w, b, alpha));
+            }
+        }
+        ParseColorError::InvalidHsv => {
+            if let (Some(h), Some((s, s_pct)), Some((v, v_pct))) = (
+                // hue
+                parse_angle(val0),
+                // saturation
+                parse_percent_or_float(val1),
+                // value
+                parse_percent_or_float(val2),
+            ) {
+                // A bare number is on the 0..100 scale, while a percentage is
+                // already scaled to 0..1 by parse_percent_or_float.
+                let s = if s_pct { s } else { s / 100.0 };
+                let v = if v_pct { v } else { v / 100.0 };
+                return Ok(Color::from_hsva(h, s, v, alpha));
+            }
+        }
+        ParseColorError::InvalidLab => {
+            if let (Some((l, l_pct)), Some((a, a_pct)), Some((b, b_pct))) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // a
+                parse_percent_or_float(val1),
+                // b
+                parse_percent_or_float(val2),
+            ) {
+                let l = if l_pct { l * 100.0 } else { l };
+                let a = if a_pct {
+                    remap(a, -1.0, 1.0, -125.0, 125.0)
+                } else {
+                    a
+                };
+                let b = if b_pct {
+                    remap(b, -1.0, 1.0, -125.0, 125.0)
+                } else {
+                    b
+                };
+                return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+            }
+        }
+        ParseColorError::InvalidLch => {
+            if let (Some((l, l_pct)), Some((c, c_pct)), Some(h)) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // chroma
+                parse_percent_or_float(val1),
+                // hue
+                parse_angle(val2),
+            ) {
+                let l = if l_pct { l * 100.0 } else { l };
+                let c = if c_pct { c * 150.0 } else { c };
+                return Ok(Color::from_lcha(
+                    l.max(0.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    alpha,
+                ));
+            }
+        }
+        ParseColorError::InvalidOklab => {
+            if let (Some((l, _)), Some((a, a_pct)), Some((b, b_pct))) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // a
+                parse_percent_or_float(val1),
+                // b
+                parse_percent_or_float(val2),
+            ) {
+                let a = if a_pct {
+                    remap(a, -1.0, 1.0, -0.4, 0.4)
+                } else {
+                    a
+                };
+                let b = if b_pct {
+                    remap(b, -1.0, 1.0, -0.4, 0.4)
+                } else {
+                    b
+                };
+                return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
+            }
+        }
+        ParseColorError::InvalidOklch => {
+            if let (Some((l, _)), Some((c, c_pct)), Some(h)) = (
+                // lightness
+                parse_percent_or_float(val0),
+                // chroma
+                parse_percent_or_float(val1),
+                // hue
+                parse_angle(val2),
+            ) {
+                let c = if c_pct { c * 0.4 } else { c };
+                return Ok(Color::from_oklcha(
+                    l.max(0.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    alpha,
+                ));
+            }
+        }
+        ParseColorError::InvalidColor => {
+            match color_func {
+                ColorFunc::Srgb => {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
+                        // red
+                        parse_percent_or_float(val0),
+                        // green
+                        parse_percent_or_float(val1),
+                        // blue
+                        parse_percent_or_float(val2),
+                    ) {
+                        return Ok(Color { r, g, b, a: alpha });
+                    }
+                }
+                ColorFunc::SrgbLinear => {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
+                        // red
+                        parse_percent_or_float(val0),
+                        // green
+                        parse_percent_or_float(val1),
+                        // blue
+                        parse_percent_or_float(val2),
+                    ) {
+                        return Ok(Color::from_linear_rgba(r, g, b, alpha));
+                    }
+                }
+                ColorFunc::XyzD50 => {
+                    if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
+                        // x
+                        parse_percent_or_float(val0),
+                        // y
+                        parse_percent_or_float(val1),
+                        // z
+                        parse_percent_or_float(val2),
+                    ) {
+                        return Ok(Color::from_xyz_d50(x, y, z, alpha));
+                    }
+                }
+                ColorFunc::XyzD65 => {
+                    if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
+                        // x
+                        parse_percent_or_float(val0),
+                        // y
+                        parse_percent_or_float(val1),
+                        // z
+                        parse_percent_or_float(val2),
+                    ) {
+                        return Ok(Color::from_xyz_d65(x, y, z, alpha));
+                    }
+                }
+            }
+        }
+        _ => unreachable!(),
+    }
+
+    Err(err)
 }
 
 fn parse_hex(s: &str) -> Result<Color, ParseColorError> {

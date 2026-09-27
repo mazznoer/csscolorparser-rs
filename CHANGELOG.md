@@ -10,8 +10,18 @@
 - Supports for:
     - `color(srgb ...)`
     - `color(srgb-linear ...)`
+    - `color(xyz ...)`
+    - `color(xyz-d50 ...)`
+    - `color(xyz-d65 ...)`
     - `color(from ... srgb ...)`
     - `color(from ... srgb-linear ...)`
+    - `color(from ... xyz ...)`
+    - `color(from ... xyz-d50 ...)`
+    - `color(from ... xyz-d65 ...)`
+- `Color::from_xyz_d50()`
+- `Color::from_xyz_d65()`
+- `Color.to_xyz_d50()`
+- `Color.to_xyz_d65()`
 - `Color.to_css_color_srgb()`
 
 ### Changed

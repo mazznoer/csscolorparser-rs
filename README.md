@@ -39,6 +39,9 @@
 * `oklch()`
 * `color(srgb ...)`
 * `color(srgb-linear ...)`
+* `color(xyz ...)`
+* `color(xyz-d50 ...)`
+* `color(xyz-d65 ...)`
 * `hwba()`, `hsv()`, `hsva()` - not in CSS standard.
 
 ### Relative Color

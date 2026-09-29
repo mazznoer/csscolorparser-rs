@@ -105,6 +105,14 @@ impl<'a> CalcParser<'a> {
 }
 
 pub(crate) fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f32; 4]> {
+    let res = calc_values(values, variables)?;
+    Some(res.map(|v| v.0))
+}
+
+pub(crate) fn calc_values(
+    values: [&str; 4],
+    variables: [(&str, f32); 4],
+) -> Option<[(f32, bool); 4]> {
     let parse_v = |s: &str| -> Option<f32> {
         if let Ok(value) = s.parse::<f32>() {
             if value.is_finite() {
@@ -120,30 +128,40 @@ pub(crate) fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Op
         None
     };
 
-    let mut result = [0.0; 4];
-    let mut i = 0;
+    let mut result = [(0.0, false); 4];
 
-    for s in values {
+    for (i, s) in values.iter().enumerate() {
+        // none
         if s.eq_ignore_ascii_case("none") {
-            result[i] = 0.0;
-            i += 1;
             continue;
         }
 
+        // bare number or keyword
         if let Some(t) = parse_v(s) {
-            result[i] = t;
-            i += 1;
+            result[i].0 = t;
             continue;
         }
 
+        // percentage
+        if let Some(s) = s.strip_suffix('%') {
+            if let Ok(v) = s.parse::<f32>() {
+                if v.is_finite() {
+                    result[i] = (v / 100.0, true);
+                    continue;
+                }
+            };
+            return None;
+        }
+
+        // calc(...)
         if let Some(s) = strip_prefix(s, "calc") {
             if let Some(t) = parse_calc(s, &parse_v, 0) {
-                result[i] = t;
-                i += 1;
+                result[i].0 = t;
                 continue;
             }
         }
 
+        // invalid value
         return None;
     }
 

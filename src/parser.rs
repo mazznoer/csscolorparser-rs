@@ -1,4 +1,5 @@
 use crate::utils::ParamParser;
+use crate::utils::calc_values;
 use crate::utils::parse_values;
 use crate::utils::remap;
 use crate::utils::{parse_angle, parse_percent_or_float};
@@ -153,8 +154,13 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                 ("b", color.b * 255.0),
                 ("alpha", color.a),
             ];
-            if let Some([r, g, b, a]) = parse_values(values, variables) {
-                return Ok(Color::new(r / 255.0, g / 255.0, b / 255.0, a));
+            if let Some([(r, r_pct), (g, g_pct), (b, b_pct), (a, _)]) =
+                calc_values(values, variables)
+            {
+                let r = if r_pct { r } else { r / 255.0 };
+                let g = if g_pct { g } else { g / 255.0 };
+                let b = if b_pct { b } else { b / 255.0 };
+                return Ok(Color::new(r, g, b, a));
             };
         }
         ParseColorError::InvalidHwb => {
@@ -249,7 +255,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                         ("b", color.b),
                         ("alpha", color.a),
                     ];
-                    if let Some([r, g, b, a]) = parse_values(values, variables) {
+                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
                         return Ok(Color::new(r, g, b, a));
                     };
                 }
@@ -257,7 +263,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_linear_rgba();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([r, g, b, a]) = parse_values(values, variables) {
+                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
                         return Ok(Color::from_linear_rgba(r, g, b, a));
                     };
                 }

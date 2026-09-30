@@ -169,8 +169,12 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [h, w, b, a] = color.to_hwba();
             let variables = [("h", h), ("w", w * 100.0), ("b", b * 100.0), ("alpha", a)];
-            if let Some([h, w, b, a]) = parse_values(values, variables) {
-                return Ok(Color::from_hwba(h, w / 100.0, b / 100.0, a));
+            if let Some([(h, false), (w, w_pct), (b, b_pct), (a, _)]) =
+                calc_values(values, variables)
+            {
+                let w = if w_pct { w } else { w / 100.0 };
+                let b = if b_pct { b } else { b / 100.0 };
+                return Ok(Color::from_hwba(h, w, b, a));
             };
         }
         ParseColorError::InvalidHsl => {
@@ -179,13 +183,12 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [h, s, l, a] = color.to_hsla();
             let variables = [("h", h), ("s", s * 100.0), ("l", l * 100.0), ("alpha", a)];
-            if let Some([h, s, l, a]) = parse_values(values, variables) {
-                return Ok(Color::from_hsla(
-                    h,
-                    (s / 100.0).clamp(0.0, 1.0),
-                    (l / 100.0).clamp(0.0, 1.0),
-                    a,
-                ));
+            if let Some([(h, false), (s, s_pct), (l, l_pct), (a, _)]) =
+                calc_values(values, variables)
+            {
+                let s = if s_pct { s } else { s / 100.0 };
+                let l = if l_pct { l } else { l / 100.0 };
+                return Ok(Color::from_hsla(h, s.clamp(0.0, 1.0), l.clamp(0.0, 1.0), a));
             };
         }
         ParseColorError::InvalidHsv => {
@@ -194,8 +197,12 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [h, s, v, a] = color.to_hsva();
             let variables = [("h", h), ("s", s * 100.0), ("v", v * 100.0), ("alpha", a)];
-            if let Some([h, s, v, a]) = parse_values(values, variables) {
-                return Ok(Color::from_hsva(h, s / 100.0, v / 100.0, a));
+            if let Some([(h, false), (s, s_pct), (v, v_pct), (a, _)]) =
+                calc_values(values, variables)
+            {
+                let s = if s_pct { s } else { s / 100.0 };
+                let v = if v_pct { v } else { v / 100.0 };
+                return Ok(Color::from_hsva(h, s, v, a));
             };
         }
         ParseColorError::InvalidLab => {

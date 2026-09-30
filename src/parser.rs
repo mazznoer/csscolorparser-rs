@@ -211,7 +211,20 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, a, b, alpha] = color.to_laba();
             let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-            if let Some([l, a, b, alpha]) = parse_values(values, variables) {
+            if let Some([(l, l_pct), (a, a_pct), (b, b_pct), (alpha, _)]) =
+                calc_values(values, variables)
+            {
+                let l = if l_pct { l * 100.0 } else { l };
+                let a = if a_pct {
+                    remap(a, -1.0, 1.0, -125.0, 125.0)
+                } else {
+                    a
+                };
+                let b = if b_pct {
+                    remap(b, -1.0, 1.0, -125.0, 125.0)
+                } else {
+                    b
+                };
                 return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
             };
         }
@@ -222,7 +235,11 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, c, h, a] = color.to_lcha();
             let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-            if let Some([l, c, h, a]) = parse_values(values, variables) {
+            if let Some([(l, l_pct), (c, c_pct), (h, false), (a, _)]) =
+                calc_values(values, variables)
+            {
+                let l = if l_pct { l * 100.0 } else { l };
+                let c = if c_pct { c * 150.0 } else { c };
                 return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
             };
         }

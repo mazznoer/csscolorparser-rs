@@ -249,7 +249,19 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, a, b, alpha] = color.to_oklaba();
             let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-            if let Some([l, a, b, alpha]) = parse_values(values, variables) {
+            if let Some([(l, _), (a, a_pct), (b, b_pct), (alpha, _)]) =
+                calc_values(values, variables)
+            {
+                let a = if a_pct {
+                    remap(a, -1.0, 1.0, -0.4, 0.4)
+                } else {
+                    a
+                };
+                let b = if b_pct {
+                    remap(b, -1.0, 1.0, -0.4, 0.4)
+                } else {
+                    b
+                };
                 return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
             };
         }
@@ -260,7 +272,8 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, c, h, a] = color.to_oklcha();
             let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-            if let Some([l, c, h, a]) = parse_values(values, variables) {
+            if let Some([(l, _), (c, c_pct), (h, false), (a, _)]) = calc_values(values, variables) {
+                let c = if c_pct { c * 0.4 } else { c };
                 return Ok(Color::from_oklcha(
                     l.max(0.0),
                     c.max(0.0),

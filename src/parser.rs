@@ -1,6 +1,5 @@
 use crate::utils::ParamParser;
 use crate::utils::calc_values;
-use crate::utils::parse_values;
 use crate::utils::remap;
 use crate::utils::{parse_angle, parse_percent_or_float};
 use crate::{Color, ParseColorError};
@@ -308,7 +307,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // x, y, z, alpha [0..1]
                     let [x, y, z, a] = color.to_xyz_d50();
                     let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
-                    if let Some([x, y, z, a]) = parse_values(values, variables) {
+                    if let Some([(x, _), (y, _), (z, _), (a, _)]) = calc_values(values, variables) {
                         return Ok(Color::from_xyz_d50(x, y, z, a));
                     };
                 }
@@ -316,7 +315,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // x, y, z, alpha [0..1]
                     let [x, y, z, a] = color.to_xyz_d65();
                     let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
-                    if let Some([x, y, z, a]) = parse_values(values, variables) {
+                    if let Some([(x, _), (y, _), (z, _), (a, _)]) = calc_values(values, variables) {
                         return Ok(Color::from_xyz_d65(x, y, z, a));
                     };
                 }

@@ -104,11 +104,6 @@ impl<'a> CalcParser<'a> {
     }
 }
 
-pub(crate) fn parse_values(values: [&str; 4], variables: [(&str, f32); 4]) -> Option<[f32; 4]> {
-    let res = calc_values(values, variables)?;
-    Some(res.map(|v| v.0))
-}
-
 pub(crate) fn calc_values(
     values: [&str; 4],
     variables: [(&str, f32); 4],
@@ -345,8 +340,8 @@ mod t {
     #[test]
     fn parse_values_() {
         fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
-            if let Some([t, ..]) = parse_values([s; 4], variables) {
-                return Some(t);
+            if let Some([t, ..]) = calc_values([s; 4], variables) {
+                return Some(t.0);
             }
             None
         }

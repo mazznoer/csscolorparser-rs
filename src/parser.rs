@@ -59,6 +59,8 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
 
     let s = s.trim();
 
+    // Parse absolute format
+
     let err = match parse_abs(s) {
         Ok(c) => return Ok(c),
         Err(e @ ParseColorError::InvalidHex) => return Err(e),
@@ -66,6 +68,8 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         Err(e @ ParseColorError::InvalidUnknown) => return Err(e),
         Err(e) => e,
     };
+
+    // Parse relative format
 
     let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) else {
         return Err(err);
@@ -89,18 +93,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         return Err(err);
     };
 
+    if !from.eq_ignore_ascii_case("from") {
+        return Err(err);
+    }
+
     let mut color_func = ColorFunc::Srgb;
 
     if err == ParseColorError::InvalidColor {
         if let Some(s) = pp.value() {
-            if s.eq_ignore_ascii_case("srgb") {
-                // srgb
-            } else if s.eq_ignore_ascii_case("srgb-linear") {
-                color_func = ColorFunc::SrgbLinear;
-            } else if s.eq_ignore_ascii_case("xyz-d50") {
-                color_func = ColorFunc::XyzD50;
-            } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
-                color_func = ColorFunc::XyzD65;
+            if let Some(f) = get_color_func(s) {
+                color_func = f;
             } else {
                 return Err(err);
             }
@@ -122,10 +124,6 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
     ) else {
         return Err(err);
     };
-
-    if !from.eq_ignore_ascii_case("from") {
-        return Err(err);
-    }
 
     let Ok(color) = parse_all(color, depth + 1) else {
         return Err(err);
@@ -350,6 +348,8 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         }
     }
 
+    // Color functions
+
     let (Some(idx), Some(s)) = (s.find('('), s.strip_suffix(')')) else {
         return Err(ParseColorError::InvalidUnknown);
     };
@@ -390,14 +390,8 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
 
     if err == ParseColorError::InvalidColor {
         if let Some(s) = pp.value() {
-            if s.eq_ignore_ascii_case("srgb") {
-                // srgb
-            } else if s.eq_ignore_ascii_case("srgb-linear") {
-                color_func = ColorFunc::SrgbLinear;
-            } else if s.eq_ignore_ascii_case("xyz-d50") {
-                color_func = ColorFunc::XyzD50;
-            } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
-                color_func = ColorFunc::XyzD65;
+            if let Some(f) = get_color_func(s) {
+                color_func = f;
             } else {
                 return Err(err);
             }
@@ -684,6 +678,20 @@ fn parse_hex(s: &str) -> Result<Color, ParseColorError> {
         Ok(Color::from_rgba8(r, g, b, a))
     } else {
         Err(ParseColorError::InvalidHex)
+    }
+}
+
+fn get_color_func(s: &str) -> Option<ColorFunc> {
+    if s.eq_ignore_ascii_case("srgb") {
+        Some(ColorFunc::Srgb)
+    } else if s.eq_ignore_ascii_case("srgb-linear") {
+        Some(ColorFunc::SrgbLinear)
+    } else if s.eq_ignore_ascii_case("xyz-d50") {
+        Some(ColorFunc::XyzD50)
+    } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {
+        Some(ColorFunc::XyzD65)
+    } else {
+        None
     }
 }
 

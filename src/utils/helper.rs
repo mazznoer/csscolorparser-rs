@@ -3,76 +3,73 @@ use core::fmt;
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
 
-// Strip prefix ignore case.
+// Strip prefix ignore case
 pub(crate) fn strip_prefix<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
     if prefix.len() > s.len() {
         return None;
     }
-    let s_start = &s[..prefix.len()];
+
+    let (s_start, remainder) = s.split_at(prefix.len());
+
     if s_start.eq_ignore_ascii_case(prefix) {
-        Some(&s[prefix.len()..])
+        Some(remainder)
     } else {
         None
     }
 }
 
-// strip suffix ignore case
+// Strip suffix ignore case
 pub(crate) fn strip_suffix<'a>(s: &'a str, suffix: &str) -> Option<&'a str> {
-    if suffix.len() > s.len() {
-        return None;
-    }
-    let s_end = &s[s.len() - suffix.len()..];
+    let split_idx = s.len().checked_sub(suffix.len())?;
+
+    let (prefix, s_end) = s.split_at(split_idx);
+
     if s_end.eq_ignore_ascii_case(suffix) {
-        Some(&s[..s.len() - suffix.len()])
+        Some(prefix)
     } else {
         None
     }
+}
+
+#[inline]
+fn parse_finite(s: &str) -> Option<f32> {
+    s.parse::<f32>().ok().filter(|t| t.is_finite())
 }
 
 pub(crate) fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
     if s.eq_ignore_ascii_case("none") {
         return Some((0.0, false));
     }
-    s.strip_suffix('%')
-        .and_then(|s| {
-            s.parse()
-                .ok()
-                .filter(|t: &f32| t.is_finite())
-                .map(|t: f32| (t / 100.0, true))
-        })
-        .or_else(|| {
-            s.parse()
-                .ok()
-                .filter(|t: &f32| t.is_finite())
-                .map(|t| (t, false))
-        })
+
+    if let Some(s) = s.strip_suffix('%') {
+        parse_finite(s).map(|t| (t / 100.0, true))
+    } else {
+        parse_finite(s).map(|t| (t, false))
+    }
 }
 
 pub(crate) fn parse_angle(s: &str) -> Option<f32> {
     if s.eq_ignore_ascii_case("none") {
         return Some(0.0);
     }
-    strip_suffix(s, "deg")
-        .and_then(|s| s.parse().ok().filter(|t: &f32| t.is_finite()))
-        .or_else(|| {
-            strip_suffix(s, "grad")
-                .and_then(|s| s.parse().ok())
-                .filter(|t: &f32| t.is_finite())
-                .map(|t: f32| t * 360.0 / 400.0)
-        })
-        .or_else(|| {
-            strip_suffix(s, "rad")
-                .and_then(|s| s.parse().ok())
-                .filter(|t: &f32| t.is_finite())
-                .map(|t: f32| t.to_degrees())
-        })
-        .or_else(|| {
-            strip_suffix(s, "turn")
-                .and_then(|s| s.parse().ok())
-                .filter(|t: &f32| t.is_finite())
-                .map(|t: f32| t * 360.0)
-        })
-        .or_else(|| s.parse().ok().filter(|t: &f32| t.is_finite()))
+
+    if let Some(s) = strip_suffix(s, "deg") {
+        return parse_finite(s);
+    }
+
+    if let Some(s) = strip_suffix(s, "grad") {
+        return parse_finite(s).map(|t| t * 360.0 / 400.0);
+    }
+
+    if let Some(s) = strip_suffix(s, "rad") {
+        return parse_finite(s).map(|t| t.to_degrees());
+    }
+
+    if let Some(s) = strip_suffix(s, "turn") {
+        return parse_finite(s).map(|t| t * 360.0);
+    }
+
+    parse_finite(s)
 }
 
 // ---

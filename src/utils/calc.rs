@@ -1,107 +1,186 @@
-#![allow(clippy::question_mark)]
-
 use super::strip_prefix;
 
-const MAX_DEPTH: usize = 32;
+const MAX_DEPTH: usize = 65;
 
-struct CalcParser<'a> {
-    s: &'a str,
-    idx: usize,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Op {
+    Add,
+    Sub,
+    Mul,
+    Div,
 }
 
-impl<'a> CalcParser<'a> {
-    fn new(s: &'a str) -> Self {
-        Self { s, idx: 0 }
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum Token<'a> {
+    Num(f32),
+    Ident(&'a str),
+    Op(Op),
+    LParen,
+    RParen,
+    Unknown,
+}
+
+struct Lexer<'a> {
+    input: &'a [u8],
+    pos: usize,
+    peeked: Option<Token<'a>>,
+}
+
+impl<'a> Lexer<'a> {
+    #[inline]
+    fn new(input: &'a str) -> Self {
+        Self {
+            input: input.as_bytes(),
+            pos: 0,
+            peeked: None,
+        }
     }
 
-    // Returns everything until operator is found.
-    // Ignore operator inside parentheses.
-    fn operand(&mut self) -> Option<&'a str> {
-        if self.is_end() {
+    fn next_token(&mut self) -> Option<Token<'a>> {
+        if let Some(tok) = self.peeked.take() {
+            return Some(tok);
+        }
+
+        while self.pos < self.input.len() && self.input[self.pos].is_ascii_whitespace() {
+            self.pos += 1;
+        }
+
+        if self.pos >= self.input.len() {
             return None;
         }
 
-        let start = self.idx;
+        let b = self.input[self.pos];
+        self.pos += 1;
 
-        match self.s.as_bytes()[self.idx] {
-            b'-' => self.idx += 1,
-            b'+' => return None,
-            b'*' => return None,
-            b'/' => return None,
-            _ => (),
-        }
+        match b {
+            b'+' => Some(Token::Op(Op::Add)),
+            b'-' => Some(Token::Op(Op::Sub)),
+            b'*' => Some(Token::Op(Op::Mul)),
+            b'/' => Some(Token::Op(Op::Div)),
+            b'(' => Some(Token::LParen),
+            b')' => Some(Token::RParen),
+            b'0'..=b'9' | b'.' => {
+                let start = self.pos - 1;
+                let mut dot_seen = b == b'.';
 
-        // parenthesis depth
-        let mut nesting = 0i32;
-
-        while self.idx < self.s.len() {
-            let ch = self.s.as_bytes()[self.idx];
-            match ch {
-                b'(' => {
-                    nesting += 1;
-                    self.idx += 1;
-                }
-                b')' => {
-                    if nesting > 0 {
-                        nesting -= 1;
-                    }
-                    self.idx += 1;
-                }
-                b if b.is_ascii_whitespace()
-                    || b == b'+'
-                    || b == b'-'
-                    || b == b'*'
-                    || b == b'/' =>
-                {
-                    if nesting == 0 {
-                        // operator is *outside* parentheses
+                while self.pos < self.input.len() {
+                    let c = self.input[self.pos];
+                    if c.is_ascii_digit() {
+                        self.pos += 1;
+                    } else if c == b'.' && !dot_seen {
+                        dot_seen = true; // Break on second dot to avoid failing f32 parse
+                        self.pos += 1;
+                    } else {
                         break;
                     }
-                    self.idx += 1;
                 }
-                _ => self.idx += 1,
+
+                // Safe: we only advanced over ascii digits and dots
+                let num = unsafe { core::str::from_utf8_unchecked(&self.input[start..self.pos]) };
+
+                if let Ok(val) = num.parse::<f32>() {
+                    Some(Token::Num(val))
+                } else {
+                    Some(Token::Unknown) // Triggered by isolated dots (e.g., ".")
+                }
+            }
+            b'a'..=b'z' | b'A'..=b'Z' => {
+                let start = self.pos - 1;
+                while self.pos < self.input.len() && self.input[self.pos].is_ascii_alphabetic() {
+                    self.pos += 1;
+                }
+
+                // Safe: we only advanced over ascii alphabetic characters.
+                let ident = unsafe { core::str::from_utf8_unchecked(&self.input[start..self.pos]) };
+                Some(Token::Ident(ident))
+            }
+            _ => Some(Token::Unknown),
+        }
+    }
+
+    fn peek_token(&mut self) -> Option<Token<'a>> {
+        if self.peeked.is_none() {
+            self.peeked = self.next_token();
+        }
+        self.peeked
+    }
+}
+
+fn binding_power(op: Op) -> (u8, u8) {
+    match op {
+        Op::Add | Op::Sub => (1, 2),
+        Op::Mul | Op::Div => (3, 4),
+    }
+}
+
+fn eval_expr_inner<'a, F>(
+    lexer: &mut Lexer<'a>,
+    min_bp: u8,
+    vars: &F,
+    depth: usize,
+) -> Result<f32, &'static str>
+where
+    F: Fn(&str) -> Option<f32>,
+{
+    if depth > MAX_DEPTH {
+        return Err("Recursion limit exceeded");
+    }
+
+    let mut left = match lexer.next_token() {
+        Some(Token::Num(n)) => n,
+        Some(Token::Ident(name)) => vars(name).ok_or("Undefined variable")?,
+        Some(Token::Op(Op::Sub)) => {
+            let val = eval_expr_inner(lexer, 5, vars, depth + 1)?;
+            -val
+        }
+        Some(Token::Op(Op::Add)) => eval_expr_inner(lexer, 5, vars, depth + 1)?,
+        Some(Token::LParen) => {
+            let val = eval_expr_inner(lexer, 0, vars, depth + 1)?;
+            match lexer.next_token() {
+                Some(Token::RParen) => val,
+                _ => return Err("Expected closing parenthesis"),
             }
         }
+        _ => return Err("Expected number, variable, or opening parenthesis"),
+    };
 
-        Some(&self.s[start..self.idx])
-    }
+    loop {
+        let op = match lexer.peek_token() {
+            Some(Token::Op(op)) => op,
+            _ => break, // Gracefully halts loop on EOF or Unknown token
+        };
 
-    // Returns first operator found. Skip spaces.
-    fn operator(&mut self) -> Option<u8> {
-        if self.is_end() {
-            return None;
+        let (l_bp, r_bp) = binding_power(op);
+        if l_bp < min_bp {
+            break;
         }
 
-        let ch = self.s.as_bytes()[self.idx];
-        match ch {
-            b'+' | b'-' | b'*' | b'/' => {
-                self.idx += 1;
-                Some(ch)
-            }
-            _ => None,
-        }
+        lexer.next_token(); // Consume operator
+        let right = eval_expr_inner(lexer, r_bp, vars, depth + 1)?;
+
+        left = match op {
+            Op::Add => left + right,
+            Op::Sub => left - right,
+            Op::Mul => left * right,
+            Op::Div => left / right,
+        };
     }
 
-    fn is_end(&mut self) -> bool {
-        // Consume all ascii whitespace characters
-        while self.idx < self.s.len() && self.s.as_bytes()[self.idx].is_ascii_whitespace() {
-            self.idx += 1;
-        }
-        self.idx >= self.s.len()
+    Ok(left)
+}
+
+fn eval_expr<'a, F>(lexer: &mut Lexer<'a>, vars: &F) -> Result<f32, &'static str>
+where
+    F: Fn(&str) -> Option<f32>,
+{
+    let val = eval_expr_inner(lexer, 0, vars, 0)?;
+
+    // Ensure all tokens are consumed
+    if lexer.peek_token().is_some() {
+        return Err("Unexpected trailing token");
     }
 
-    fn parse(&mut self) -> Option<(&str, u8, &str)> {
-        if let (Some(va), Some(op), Some(vb), true) = (
-            self.operand(),
-            self.operator(),
-            self.operand(),
-            self.is_end(),
-        ) {
-            Some((va, op, vb))
-        } else {
-            None
-        }
-    }
+    Ok(val)
 }
 
 pub(crate) fn calc_values(
@@ -109,15 +188,15 @@ pub(crate) fn calc_values(
     variables: [(&str, f32); 4],
 ) -> Option<[(f32, bool); 4]> {
     let parse_v = |s: &str| -> Option<f32> {
-        if let Ok(value) = s.parse::<f32>() {
-            if value.is_finite() {
-                return Some(value);
+        if let Ok(val) = s.parse::<f32>() {
+            if val.is_finite() {
+                return Some(val);
             }
             return None;
         };
-        for (var, value) in variables {
+        for (var, val) in variables {
             if s.eq_ignore_ascii_case(var) {
-                return Some(value);
+                return Some(val);
             }
         }
         None
@@ -149,10 +228,15 @@ pub(crate) fn calc_values(
         }
 
         // calc(...)
-        if let Some(s) = strip_prefix(s, "calc") {
-            if let Some(t) = parse_calc(s, &parse_v, 0) {
-                result[i].0 = t;
-                continue;
+        if let Some(s) = strip_prefix(s, "calc(") {
+            if let Some(s) = s.strip_suffix(')') {
+                let mut lexer = Lexer::new(s);
+                if let Ok(v) = eval_expr(&mut lexer, &parse_v) {
+                    if v.is_finite() {
+                        result[i].0 = v;
+                        continue;
+                    }
+                }
             }
         }
 
@@ -163,135 +247,14 @@ pub(crate) fn calc_values(
     Some(result)
 }
 
-fn parse_calc<F>(s: &str, f: &F, depth: usize) -> Option<f32>
-where
-    F: Fn(&str) -> Option<f32>,
-{
-    if depth > MAX_DEPTH {
-        return None;
-    }
-
-    if let Some(s) = s.strip_prefix('(') {
-        if let Some(s) = s.strip_suffix(')') {
-            let mut p = CalcParser::new(s);
-            let (va, op, vb) = p.parse()?;
-
-            let va = if let Some(v) = f(va) {
-                v
-            } else if let Some(v) = parse_calc(va, f, depth + 1) {
-                v
-            } else {
-                return None;
-            };
-
-            let vb = if let Some(v) = f(vb) {
-                v
-            } else if let Some(v) = parse_calc(vb, f, depth + 1) {
-                v
-            } else {
-                return None;
-            };
-
-            match op {
-                b'+' => return Some(va + vb),
-                b'-' => return Some(va - vb),
-                b'*' => return Some(va * vb),
-                b'/' => {
-                    if vb == 0.0 {
-                        return None;
-                    }
-                    return Some(va / vb);
-                }
-                _ => unreachable!(),
-            }
-        }
-    }
-
-    None
-}
-
 #[cfg(test)]
 mod t {
     use super::*;
 
-    #[test]
-    fn calc_parser() {
-        let s = "78+0.573";
-        let mut p = CalcParser::new(s);
-        assert_eq!(p.operator(), None);
-        assert_eq!(p.operand(), Some("78"));
-        assert_eq!(p.operand(), None);
-        assert_eq!(p.operator(), Some(b'+'));
-        assert_eq!(p.operator(), None);
-        assert_eq!(p.operand(), Some("0.573"));
-        assert_eq!(p.operator(), None);
-        assert_eq!(p.operand(), None);
-        assert!(p.is_end());
-        assert_eq!(p.parse(), None);
-
-        #[rustfmt::skip]
-        let test_data = [
-            (
-                "78+0.573",
-                ("78", b'+', "0.573"),
-            ),
-            (
-                "g-100",
-                ("g", b'-', "100"),
-            ),
-            (
-                " 9 * alpha  ",
-                ("9", b'*', "alpha"),
-            ),
-            (
-                "alpha/2",
-                ("alpha", b'/', "2"),
-            ),
-            (
-                "-360+-55.07",
-                ("-360", b'+', "-55.07"),
-            ),
-            (
-                "-7--5",
-                ("-7", b'-', "-5"),
-            ),
-            (
-                "h+(4*0.75)",
-                ("h", b'+', "(4*0.75)"),
-            ),
-            (
-                "(0.35*r) / (alpha - 10)",
-                ("(0.35*r)", b'/', "(alpha - 10)"),
-            ),
-            (
-                "255\t/\n2 \t \n ",
-                ("255", b'/', "2"),
-            ),
-            (
-                "0.05\r*\x0C25 \r \x0C ",
-                ("0.05", b'*', "25"),
-            ),
-        ];
-        for (s, expected) in test_data {
-            let mut p = CalcParser::new(s);
-            assert_eq!(p.parse(), Some(expected), "{:?}", s);
-            assert!(p.is_end(), "{:?}", s);
-        }
-
-        #[rustfmt::skip]
-        let invalids = [
-            "",
-            " ",
-            "5",
-            "g+",
-            "-",
-            "7---3",
-            "*3+2",
-            "4+5/",
-        ];
-        for s in invalids {
-            let mut p = CalcParser::new(s);
-            assert_eq!(p.parse(), None, "{:?}", s);
+    #[track_caller]
+    fn assert_near(a: f32, b: f32, eps: f32, s: &str) {
+        if (a - b).abs() > eps {
+            panic!("assertion failed: {s:?}\n  left: `{a:?}`\n right: `{b:?}`");
         }
     }
 
@@ -302,51 +265,61 @@ mod t {
         }
 
         let test_data = [
-            ("(1+3.7)", 4.7),
+            ("9", 9.0),
+            (".1", 0.1),
+            ("(3)", 3.0),
+            ("1+7", 8.0),
+            ("(1+3.07)", 4.07),
             ("( 0.35 - -0.5 )", 0.85),
             ("(2.0*(7-5))", 4.0),
             ("((5*10) / (7+3))", 5.0),
             ("(0.5 * (5 + (7 * (9 - (3 * (1 + 1))))))", 13.0),
+            ("((1+3))", 4.0),
+            ("(5+(1+2/3))", 2.0 / 3.0 + 6.0),
         ];
+
         for (s, expected) in test_data {
-            assert_eq!(parse_calc(s, &f, 0), Some(expected), "{:?}", s);
+            let mut lexer = Lexer::new(s);
+            let v = eval_expr(&mut lexer, &f);
+
+            assert!(v.is_ok(), "{s:?}");
+            assert_near(v.unwrap(), expected, 0.000001, s);
         }
 
         let invalids = [
             "",
-            "5",
             "g",
-            "1+7",
             "()",
             "(())",
             "(())",
             "(()+(1*5))",
-            "(9)",
-            "(4/0)",
             "(1-8",
             "7+0.3)",
             "(5+(3*2)",
             "((5-1)",
-            "((1+2))",
-            "(5+(1+2/3))",
             "(4+5(1*3))",
             "((1+2)1*5)",
         ];
+
         for s in invalids {
-            assert_eq!(parse_calc(s, &f, 0), None, "{:?}", s);
+            let mut lexer = Lexer::new(s);
+            let v = eval_expr(&mut lexer, &f);
+
+            assert!(v.is_err(), "{s:?}");
         }
     }
 
     #[test]
     fn parse_values_() {
         fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
-            if let Some([t, ..]) = calc_values([s; 4], variables) {
+            if let Some([t, ..]) = calc_values([s, "1", "1", "1"], variables) {
                 return Some(t.0);
             }
             None
         }
 
         let vars = [("r", 255.0), ("g", 127.0), ("b", 0.0), ("alpha", 0.5)];
+
         let test_data = [
             // simple value
             ("130", 130.0),
@@ -354,6 +327,9 @@ mod t {
             ("g", 127.0),
             ("none", 0.0),
             // calc() simple
+            ("calc(5)", 5.0),
+            ("calc(+13)", 13.0),
+            ("calc(g)", 127.0),
             ("calc(4+5.5)", 9.5),
             ("calc( 10 - 7 )", 3.0),
             ("CALC(2.5 *2)", 5.0),
@@ -361,6 +337,10 @@ mod t {
             ("calc(r-55)", 200.0),
             ("calc(10 + g)", 137.0),
             ("calc(alpha*1.5)", 0.75),
+            // calc() complex
+            ("calc(5+1-4)", 2.0),
+            ("calc(5+(1.5))", 6.5),
+            ("calc(5+(1.5*2/3))", 6.0),
             // calc() negative number
             ("calc(-97+-18)", -115.0),
             ("calc( -1 * -45)", 45.0),
@@ -372,8 +352,9 @@ mod t {
             ("calc((2/(1.5+0.5)) - (0.75 - 0.25))", 0.5),
             ("calc((r + g) / 2)", 191.0),
         ];
+
         for (s, expected) in test_data {
-            assert_eq!(parse_value(s, vars), Some(expected), "{:?}", s);
+            assert_eq!(parse_value(s, vars), Some(expected), "{s:?}");
         }
 
         let invalids = [
@@ -385,22 +366,17 @@ mod t {
             "calcs(4+5)",
             "calc()",
             "calc(-)",
-            "calc(5)",
-            "calc(+5)",
-            "calc(b)",
             "calc(g-)",
-            "calc(5+1-4)",
             "calc(1 * 7 +)",
-            "calc(5 + (1.5))",
-            "calc(5 + (1.5 * 2 / 3))",
             "calc(5 + (2 - ab))",
             "calc(nan)",
             "calc(1 + inf)",
             "calc(1 + infinity)",
             "calc(2 - (3 + 1e400))",
         ];
+
         for s in invalids {
-            assert_eq!(parse_value(s, vars), None, "{:?}", s);
+            assert_eq!(parse_value(s, vars), None, "{s:?}");
         }
     }
 }

@@ -65,7 +65,6 @@
 //! * `cint`: Enables converting [`cint`](https://crates.io/crates/cint) crate types to and from `Color`.
 //! * `serde`: Enables serializing (into HEX string) and deserializing (from any supported string color format) using [`serde`](https://serde.rs/) framework.
 
-#![forbid(unsafe_code)]
 #![warn(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 

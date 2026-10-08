@@ -144,12 +144,7 @@ where
         _ => return Err("Expected number, variable, or opening parenthesis"),
     };
 
-    loop {
-        let op = match lexer.peek_token() {
-            Some(Token::Op(op)) => op,
-            _ => break, // Gracefully halts loop on EOF or Unknown token
-        };
-
+    while let Some(Token::Op(op)) = lexer.peek_token() {
         let (l_bp, r_bp) = binding_power(op);
         if l_bp < min_bp {
             break;

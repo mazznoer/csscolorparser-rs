@@ -25,6 +25,7 @@ fn in_out() {
         ["#ff00ff", "lch(72.03 148.23 341.05)"],
         ["#ff00a7", "lch(63.48 148.37 359)"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -35,11 +36,62 @@ fn in_out() {
 }
 
 #[test]
+fn absolute() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "lch(none none none / none)"],
+
+        // percentage
+        ["#ff0022", "lch(50% 84% 28)"],
+        ["#3d006d", "lch(0% 78% 321)"],
+        ["#005bbb", "lch(30% 58% 237)"],
+        ["#003e9d", "lch(25% 42% 273)"],
+        ["#00ffff", "lch(96% 41% 237)"],
+        ["#ff58ff", "lch(88% 76% 345)"],
+        ["#beb95e", "lch(74% 31% 99)"],
+        ["#005e9f", "lch(29% 69% 214)"],
+        ["#00d2ff", "lch(81% 71% 269)"],
+        ["#00db00", "lch(75% 93% 128)"],
+
+        // angle suffix
+        ["#d200a5", "lch(44.83 91.15 376grad)"],
+        ["#7cc2a1", "lch(73.18 30.1 2.831rad)"],
+        ["#8e0000", "lch(25.03 90.57 0.125turn)"],
+        ["#002f25", "lch(9.58 70.34 208grad)"],
+        ["#b2501f", "lch(46.59 60.86 0.139turn)"],
+        ["#ff00d3", "lch(92.48 129.61 8grad)"],
+        ["#00a5cd", "lch(61.23 45.46 251grad)"],
+        ["#5f4a39", "lch(33.42 15.49 0.171turn)"],
+        ["#f6f933", "lch(95.49 86.25 101deg)"],
+        ["#f5b7c7", "lch(80.55 25.16 0.037rad)"],
+        ["#0076c7", "lch(44.02 61.45 0.688turn)"],
+        ["#becc39", "lch(78.99 68.73 1.833rad)"],
+        ["#3d182a", "lch(14.54 20.69 6.115rad)"],
+        ["#ffdf00", "lch(91.92 104.44 85deg)"],
+        ["#8b0083", "lch(20.55 108.11 5.772rad)"],
+        ["#00aba6", "lch(58.37 80.23 3.338rad)"],
+        ["#00caff", "lch(72.12 141.3 288grad)"],
+        ["#ffd3ff", "lch(99.97 94.49 345grad)"],
+        ["#00aeff", "lch(58.91 99.04 248grad)"],
+        ["#8a8376", "lch(55.02 7.84 1.432rad)"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}
+
+#[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "lch(from #bad455 none none none)"],
         ["#bad45500", "lch(from #bad455 l c h / none)"],
+
         // bare number
         ["#d98ca4", "lch(from #fff 66.84 32.87 0)"],
         ["#ff002b", "lch(from #fff 52.63 134.14 25.64)"],
@@ -56,6 +108,7 @@ fn relative() {
         ["#ca94ff", "lch(from #fff 69.8 58.41 307.71)"],
         ["#d577c2", "lch(from #fff 62.73 50.6 333.36)"],
         ["#ffc7ea", "lch(from #fff 91.48 42.1 359)"],
+
         // percentage
         ["#00caff", "lch(from #fff 70% 53% 217)"],
         ["#ffe900", "lch(from #fff 98% 75% 80)"],
@@ -72,11 +125,17 @@ fn relative() {
         ["#426303", "lch(from #fff 38% 32% 118)"],
         ["#00a1ff", "lch(from #fff 63% 45% 264)"],
         ["#fcf5f3", "lch(from #fff 97% 2% 42)"],
+
         // keywords
         ["#bad455", "lch(from #bad455 l c h)"],
         ["#bad455", "lch(from #bad455 l c h / alpha)"],
+
         // calc(...)
+        ["#bad455", "lch(from #bad455 calc(l) calc(c) calc(h))"],
+        ["#00a7ff", "lch(from #bad455 calc(10 + 300 / 6) calc(150 - 0.5 * 90) calc(36 * 7 + 1))"],
+        ["#5dc275", "lch(from #bad455 calc(l - 10) calc(c * 0.85) calc(h + 35))"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -91,6 +150,7 @@ fn invalid() {
         "lch(0 0 0%)",
         "lch(from #bad455 l c 0%)",
     ];
+
     for s in test_data {
         assert!(parse(s).is_err(), "{s:?}");
     }

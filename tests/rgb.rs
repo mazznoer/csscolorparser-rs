@@ -25,6 +25,7 @@ fn in_out() {
         "rgb(54 70 163)",
         "rgb(90 42 106)",
     ];
+
     for s in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -34,10 +35,12 @@ fn in_out() {
 
 #[test]
 fn absolute() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "rgb(none none none)"],
         ["#ff00ff00", "rgb(255 0 255 / none)"],
+
         // percentage
         ["#d90d12", "rgb(85% 5% 7%)"],
         ["#b8c729", "rgb(72% 78% 16%)"],
@@ -61,6 +64,7 @@ fn absolute() {
         ["#308c2e", "rgb(19% 55% 18%)"],
         ["#a68508", "rgb(65% 52% 3%)"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -70,10 +74,12 @@ fn absolute() {
 
 #[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "rgb(from #fff none none none)"],
         ["#bad45500", "rgb(from #bad455 r g b / none)"],
+
         // bare number
         ["#df5d70", "rgb(from #fff 223 93 112)"],
         ["#8d4b7b", "rgb(from #fff 141 75 123)"],
@@ -91,6 +97,7 @@ fn relative() {
         ["#9accfc", "rgb(from #fff 154 204 252)"],
         ["#a2dd3f", "rgb(from #fff 162 221 63)"],
         ["#34a783", "rgb(from #fff 52 167 131)"],
+
         // percentage
         ["#e85447", "rgb(from #fff 91% 33% 28%)"],
         ["#63b8fa", "rgb(from #fff 39% 72% 98%)"],
@@ -108,11 +115,16 @@ fn relative() {
         ["#9cad7d", "rgb(from #fff 61% 68% 49%)"],
         ["#c229ba", "rgb(from #fff 76% 16% 73%)"],
         ["#0fe8d9", "rgb(from #fff 6% 91% 85%)"],
+
         // keywords
         ["#bad455", "rgb(from #bad455 r g b)"],
-        ["#bad455", "rgb(from #bad455 r g b / alpha)"],
+        ["#55bad4", "rgb(from #bad455 b r g / alpha)"],
+
         // calc(...)
+        ["#bad455", "rgb(from #bad455 calc(r) calc(g) calc(b))"],
+        ["#a18ac5", "rgb(from #bad455 calc((r + g + b) / 3) calc(12 * 9 + 30) calc(0.197 * 1000))"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");

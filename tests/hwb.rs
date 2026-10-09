@@ -25,6 +25,7 @@ fn in_out() {
         "hwb(341 0% 72%)",
         "hwb(359 0% 2%)",
     ];
+
     for s in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -34,10 +35,12 @@ fn in_out() {
 
 #[test]
 fn absolute() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#ff0000", "hwb(none none none)"],
         ["#00b7ff00", "hwb(197 0 0 / none)"],
+
         // bare number
         ["#420000", "hwb(0 0 74)"],
         ["#692800", "hwb(23 0 59)"],
@@ -54,7 +57,30 @@ fn absolute() {
         ["#5e0078", "hwb(287 0 53)"],
         ["#ff1ad5", "hwb(311 10 0)"],
         ["#260010", "hwb(335 0 85)"],
+
+        // angle suffix
+        ["#eee3ff", "hwb(263deg 89 0)"],
+        ["#ff8cf2", "hwb(341grad 55 0)"],
+        ["#8a4a00", "hwb(0.090turn 0 46)"],
+        ["#787bff", "hwb(265grad 47 0)"],
+        ["#ddffab", "hwb(1.472rad 67 0)"],
+        ["#001421", "hwb(227grad 0 87)"],
+        ["#ca00de", "hwb(5.144rad 0 13)"],
+        ["#92ff8c", "hwb(0.325turn 55 0)"],
+        ["#fffd33", "hwb(0.165turn 20 0)"],
+        ["#ff858e", "hwb(6.200rad 52 0)"],
+        ["#b0ecff", "hwb(3.399rad 69 0)"],
+        ["#13001c", "hwb(0.782turn 0 89)"],
+        ["#001f1e", "hwb(3.109rad 0 88)"],
+        ["#f8ffd6", "hwb(0.194turn 84 0)"],
+        ["#00a368", "hwb(0.440turn 0 36)"],
+        ["#302800", "hwb(0.136turn 0 81)"],
+        ["#5c009c", "hwb(0.765turn 0 39)"],
+        ["#a3ffb7", "hwb(148grad 64 0)"],
+        ["#4f85ff", "hwb(0.616turn 31 0)"],
+        ["#0c3600", "hwb(1.851rad 0 79)"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -64,10 +90,12 @@ fn absolute() {
 
 #[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#ff0000", "hwb(from #bad455 none none none)"],
         ["#bad45500", "hwb(from #bad455 h w b / none)"],
+
         // bare number
         ["#ff6161", "hwb(from #fff 0 38 0)"],
         ["#ff873d", "hwb(from #fff 23 24 0)"],
@@ -84,6 +112,7 @@ fn relative() {
         ["#70008f", "hwb(from #fff 287 0 44)"],
         ["#ff85e9", "hwb(from #fff 311 52 0)"],
         ["#e0005d", "hwb(from #fff 335 0 12)"],
+
         // percentage
         ["#ffa1a1", "hwb(from #fff 0 63% 0%)"],
         ["#c74c00", "hwb(from #fff 23 0% 22%)"],
@@ -100,11 +129,18 @@ fn relative() {
         ["#f3c9ff", "hwb(from #fff 287 79% 0%)"],
         ["#ff24d7", "hwb(from #fff 311 14% 0%)"],
         ["#820036", "hwb(from #fff 335 0% 49%)"],
+
         // keywords
         ["#bad455", "hwb(from #bad455 h w b)"],
         ["#bad455", "hwb(from #bad455 h w b / alpha)"],
+
         // calc(...)
+        ["#bad455", "hwb(from #bad455 calc(h) calc(w) calc(b))"],
+        ["#0d94b3", "hwb(from #bad455 calc(7 * 13 + 100) calc(100 - 95) calc(90 / 3))"],
+        ["#ae9d46", "hwb(from #bad455 calc(h * 0.7) calc(w - 6) calc(b + 15))"],
+        //["#f2c63b", "hwb(from #bad455 calc((h + w + b) * 0.37) calc(w - 10) 5)"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -119,6 +155,7 @@ fn invalid() {
         "hwb(55% 0 0)",
         "hwb(from #bad455 0% w b)",
     ];
+
     for s in test_data {
         assert!(parse(s).is_err(), "{s:?}");
     }

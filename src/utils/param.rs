@@ -1,72 +1,91 @@
+// Parser for CSS color function parameters
+
+const KIND_NORMAL: u8 = 0;
+const KIND_DELIM: u8 = 1;
+const KIND_OPEN: u8 = 2;
+const KIND_CLOSE: u8 = 3;
+
+// Compile-time 256-entry lookup table for 1-cycle character classification
+const CHAR_KIND: [u8; 256] = {
+    let mut table = [KIND_NORMAL; 256];
+    let mut i = 0;
+    while i < 256 {
+        let b = i as u8;
+        if b.is_ascii_whitespace() || b == b',' || b == b'/' {
+            table[i] = KIND_DELIM;
+        } else if b == b'(' {
+            table[i] = KIND_OPEN;
+        } else if b == b')' {
+            table[i] = KIND_CLOSE;
+        }
+        i += 1;
+    }
+    table
+};
+
 pub(crate) struct ParamParser<'a> {
-    s: &'a str,
-    idx: usize,
+    bytes: &'a [u8],
 }
 
 impl<'a> ParamParser<'a> {
+    // Input is ASCII only
+    #[inline]
     pub fn new(s: &'a str) -> Self {
-        Self { s, idx: 0 }
+        Self {
+            bytes: s.as_bytes(),
+        }
     }
 
     // Returns `&str` from current index until space, comma, or slash is found.
     // Ignore space, comma, or slash inside parentheses.
     // Returns `None` if value not found.
     pub fn value(&mut self) -> Option<&'a str> {
-        if self.is_end() {
+        let &first = self.bytes.first()?;
+        if CHAR_KIND[first as usize] == KIND_DELIM {
             return None;
         }
 
-        let b = self.s.as_bytes()[self.idx];
-
-        if b.is_ascii_whitespace() || b == b',' || b == b'/' {
-            return None;
-        }
-
-        let start = self.idx;
-
-        // parenthesis depth
+        let mut end = 0;
         let mut nesting = 0i32;
 
-        while self.idx < self.s.len() {
-            let ch = self.s.as_bytes()[self.idx];
-            match ch {
-                b'(' => {
-                    nesting += 1;
-                    self.idx += 1;
-                }
-                b')' => {
+        for &b in self.bytes {
+            match CHAR_KIND[b as usize] {
+                KIND_OPEN => nesting += 1,
+                KIND_CLOSE => {
                     if nesting > 0 {
                         nesting -= 1;
                     }
-                    self.idx += 1;
                 }
-                b if b.is_ascii_whitespace() || b == b',' || b == b'/' => {
-                    if nesting == 0 {
-                        // delimiter is *outside* parentheses
-                        break;
-                    }
-                    self.idx += 1;
+                KIND_DELIM if nesting == 0 => {
+                    break;
                 }
-                _ => self.idx += 1,
+                _ => {}
             }
+            end += 1;
         }
 
-        Some(&self.s[start..self.idx])
+        let (val, rest) = self.bytes.split_at(end);
+        self.bytes = rest;
+
+        // SAFETY: Input originated from valid UTF-8, and ASCII boundaries guarantee valid UTF-8 subslices.
+        Some(unsafe { core::str::from_utf8_unchecked(val) })
     }
 
     // Consume one or more ASCII whitespace characters.
     // Returns `true` if at least one was found, `false` otherwise.
     pub fn space(&mut self) -> bool {
-        let mut found = false;
-        while self.idx < self.s.len() {
-            let b = self.s.as_bytes()[self.idx];
-            if !b.is_ascii_whitespace() {
-                break;
-            }
-            self.idx += 1;
-            found = true;
+        let pos = self
+            .bytes
+            .iter()
+            .position(|b| !b.is_ascii_whitespace())
+            .unwrap_or(self.bytes.len());
+
+        if pos > 0 {
+            self.bytes = &self.bytes[pos..];
+            true
+        } else {
+            false
         }
-        found
     }
 
     // Consume one or more spaces, or single comma.
@@ -75,27 +94,24 @@ impl<'a> ParamParser<'a> {
     pub fn comma_or_space(&mut self) -> bool {
         let mut found_comma = false;
         let mut found_space = false;
+        let mut count = 0;
 
-        while self.idx < self.s.len() {
-            let ch = self.s.as_bytes()[self.idx];
-            match ch {
-                b if b.is_ascii_whitespace() => {
-                    found_space = true;
-                    self.idx += 1;
-                }
-                b',' => {
-                    if found_comma {
-                        break;
-                    }
-                    found_comma = true;
-                    self.idx += 1;
-                }
-                _ => {
+        for &b in self.bytes {
+            if b.is_ascii_whitespace() {
+                found_space = true;
+                count += 1;
+            } else if b == b',' {
+                if found_comma {
                     break;
                 }
+                found_comma = true;
+                count += 1;
+            } else {
+                break;
             }
         }
 
+        self.bytes = &self.bytes[count..];
         found_comma || found_space
     }
 
@@ -103,66 +119,48 @@ impl<'a> ParamParser<'a> {
     // Spaces is allowed around comma or slash.
     // Returns true if one of them is found, false otherwise.
     pub fn comma_or_slash(&mut self) -> bool {
-        let mut found = false;
-
-        while self.idx < self.s.len() {
-            let ch = self.s.as_bytes()[self.idx];
-            match ch {
-                b if b.is_ascii_whitespace() => {
-                    self.idx += 1;
-                }
-                b',' | b'/' => {
-                    if found {
-                        break;
-                    }
-                    found = true;
-                    self.idx += 1;
-                }
-                _ => {
-                    break;
-                }
-            }
-        }
-
-        found
+        self.consume_delim_with_spaces(|b| b == b',' || b == b'/')
     }
 
     // Consume a single slash. Spaces is allowed around slash.
     // Returns true if a slash is found, false otherwise.
     pub fn slash(&mut self) -> bool {
-        let mut found = false;
+        self.consume_delim_with_spaces(|b| b == b'/')
+    }
 
-        while self.idx < self.s.len() {
-            let ch = self.s.as_bytes()[self.idx];
-            match ch {
-                b if b.is_ascii_whitespace() => {
-                    self.idx += 1;
-                }
-                b'/' => {
-                    if found {
-                        break;
-                    }
-                    found = true;
-                    self.idx += 1;
-                }
-                _ => {
+    #[inline]
+    fn consume_delim_with_spaces(&mut self, is_target_delim: impl Fn(u8) -> bool) -> bool {
+        let mut found = false;
+        let mut count = 0;
+
+        for &b in self.bytes {
+            if b.is_ascii_whitespace() {
+                count += 1;
+            } else if is_target_delim(b) {
+                if found {
                     break;
                 }
+                found = true;
+                count += 1;
+            } else {
+                break;
             }
         }
 
+        self.bytes = &self.bytes[count..];
         found
     }
 
-    // Returns true is we finished reading the str.
+    // Returns true if we finished reading the str.
+    #[inline]
     pub fn is_end(&self) -> bool {
-        self.idx >= self.s.len()
+        self.bytes.is_empty()
     }
 }
 
 #[cfg(test)]
 mod t {
-    use super::*;
+    use super::ParamParser;
 
     #[test]
     fn param_parser() {

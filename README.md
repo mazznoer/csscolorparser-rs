@@ -50,38 +50,9 @@ Example:
 
 ```text
 rgb(from red r g calc(b + 20))
-rgb(from gold calc(((r + g) + b) / 3) 127 127)
+rgb(from gold calc((r + g + b) / 3) 127 127)
 hwb(from #bad455 calc(h + 35) w b)
 hsl(from purple h s l / 0.5)
-```
-
-#### Relative Color Format Limitations
-
-Doesn't support percentage.
-
-`calc()` only support the following expression:
-
-```[OPERAND] [OPERATOR] [OPERAND]```
-
-`OPERAND` can be a number, a variable (`r`, `g`, `b`, `alpha` etc. depends on color function) or another expression wrapped in parenthesis.
-`OPERATOR` is one of `+`, `-`, `*` or `/`.
-
-##### Not Supported
-
-```
-rgb(from #bad455 100% g b)
-rgb(from #bad455 r g b / 50%)
-rgb(from #bad455 calc(r+g-30) 90 b)
-```
-
-##### OK
-
-```
-rgb(from #bad455 255 g b)
-rgb(from #bad455 r g b / 0.5)
-rgb(from #bad455 calc(r+15) 90 b)
-rgb(from #bad455 calc((r+g)-30) 90 b)
-hwb(from rgb(from rgb(100% 0% 50%) r g 75) calc(h+25) w b)
 ```
 
 ## Usage

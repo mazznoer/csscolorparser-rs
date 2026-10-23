@@ -13,6 +13,7 @@ const MAX_DEPTH: usize = 32;
 enum ColorFunc {
     Srgb,
     SrgbLinear,
+    Rec2020,
     XyzD50,
     XyzD65,
 }
@@ -299,6 +300,14 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
                     if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
                         return Ok(Color::from_linear_rgba(r, g, b, a));
+                    };
+                }
+                ColorFunc::Rec2020 => {
+                    // r, g, b, alpha [0..1]
+                    let [r, g, b, a] = color.to_rec2020();
+                    let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
+                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                        return Ok(Color::from_rec2020(r, g, b, a));
                     };
                 }
                 ColorFunc::XyzD50 => {
@@ -607,6 +616,18 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         return Ok(Color::from_linear_rgba(r, g, b, alpha));
                     }
                 }
+                ColorFunc::Rec2020 => {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
+                        // red
+                        parse_percent_or_float(val0),
+                        // green
+                        parse_percent_or_float(val1),
+                        // blue
+                        parse_percent_or_float(val2),
+                    ) {
+                        return Ok(Color::from_rec2020(r, g, b, alpha));
+                    }
+                }
                 ColorFunc::XyzD50 => {
                     if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
                         // x
@@ -686,6 +707,8 @@ fn get_color_func(s: &str) -> Option<ColorFunc> {
         Some(ColorFunc::Srgb)
     } else if s.eq_ignore_ascii_case("srgb-linear") {
         Some(ColorFunc::SrgbLinear)
+    } else if s.eq_ignore_ascii_case("rec2020") {
+        Some(ColorFunc::Rec2020)
     } else if s.eq_ignore_ascii_case("xyz-d50") {
         Some(ColorFunc::XyzD50)
     } else if s.eq_ignore_ascii_case("xyz-d65") || s.eq_ignore_ascii_case("xyz") {

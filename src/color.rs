@@ -12,6 +12,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 use crate::lab::{linear_rgb_to_xyz_d50, xyz_d50_to_linear_rgb};
+use crate::utils;
 use crate::utils::*;
 use crate::utils::{linear_rgb_to_xyz_d65, xyz_d65_to_linear_rgb};
 use crate::{ParseColorError, parse};
@@ -174,6 +175,12 @@ impl Color {
     pub fn from_xyz_d65(x: f32, y: f32, z: f32, alpha: f32) -> Self {
         let [r, g, b] = xyz_d65_to_linear_rgb(x, y, z);
         Self::from_linear_rgba(r, g, b, alpha)
+    }
+
+    /// Rec 2020
+    pub fn from_rec2020(r: f32, g: f32, b: f32, alpha: f32) -> Self {
+        let rgb = utils::rec2020_to_srgb(r as f64, g as f64, b as f64);
+        Self::new(rgb[0] as f32, rgb[1] as f32, rgb[2] as f32, alpha)
     }
 
     /// Create color from CSS color string.
@@ -416,6 +423,12 @@ impl Color {
         let [r, g, b, alpha] = self.to_linear_rgba();
         let [x, y, z] = linear_rgb_to_xyz_d65(r, g, b);
         [x, y, z, alpha]
+    }
+
+    /// Convert to Rec 2020
+    pub fn to_rec2020(&self) -> [f32; 4] {
+        let [r, g, b] = utils::srgb_to_rec2020(self.r as f64, self.g as f64, self.b as f64);
+        [r as f32, g as f32, b as f32, self.a]
     }
 
     /// Get CSS RGB hexadecimal color representation

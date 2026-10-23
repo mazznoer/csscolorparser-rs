@@ -1,5 +1,6 @@
 use core::error::Error;
 use core::fmt;
+use core::iter::FusedIterator;
 
 use crate::{Color, ParseColorError, parse};
 
@@ -14,7 +15,7 @@ pub struct ParseColorsError<'a> {
 
 impl fmt::Display for ParseColorsError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {:?}", self.source, self.color)
+        write!(f, "invalid color {:?}", self.color)
     }
 }
 
@@ -27,41 +28,45 @@ impl Error for ParseColorsError<'_> {
 /// Iterator
 #[derive(Debug, Clone)]
 pub struct ParseColors<'a> {
-    s: &'a str,
-    pos: usize,
-    inside: bool,
+    remaining: &'a str,
+}
+
+impl<'a> ParseColors<'a> {
+    /// Split at the first top-level comma: `(segment, rest_after_comma)`.
+    fn split_first(&self) -> (&'a str, &'a str) {
+        let s = self.remaining;
+        let mut depth: usize = 0;
+        // `(`, `)` and `,` are ASCII, so byte indices are valid char boundaries.
+        for (i, &b) in s.as_bytes().iter().enumerate() {
+            match b {
+                b'(' => depth += 1,
+                b')' => depth = depth.saturating_sub(1),
+                b',' if depth == 0 => return (&s[..i], &s[i + 1..]),
+                _ => {}
+            }
+        }
+        (s, "")
+    }
 }
 
 impl<'a> Iterator for ParseColors<'a> {
     type Item = Result<Color, ParseColorsError<'a>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pos > self.s.len() {
-            return None;
-        }
-        let start = self.pos;
-        for (i, c) in self.s[self.pos..].char_indices() {
-            if c == ',' && !self.inside {
-                self.pos = self.pos + i + 1;
-                let s = &self.s[start..self.pos - 1];
-                if s.trim().is_empty() {
-                    return self.next();
-                }
-                return Some(parse(s).map_err(|source| ParseColorsError { source, color: s }));
-            } else if c == '(' {
-                self.inside = true;
-            } else if c == ')' {
-                self.inside = false;
+        while !self.remaining.is_empty() {
+            let (seg, rest) = self.split_first();
+            self.remaining = rest;
+
+            let color = seg.trim();
+            if !color.is_empty() {
+                return Some(parse(color).map_err(|source| ParseColorsError { color, source }));
             }
         }
-        self.pos = self.s.len() + 1;
-        let s = &self.s[start..];
-        if s.trim().is_empty() {
-            return None;
-        }
-        Some(parse(s).map_err(|source| ParseColorsError { source, color: s }))
+        None
     }
 }
+
+impl FusedIterator for ParseColors<'_> {}
 
 /// Parse string of multiple colors separated by comma.
 ///
@@ -77,9 +82,5 @@ impl<'a> Iterator for ParseColors<'a> {
 /// ```
 #[inline]
 pub const fn parse_colors(s: &str) -> ParseColors<'_> {
-    ParseColors {
-        s,
-        pos: 0,
-        inside: false,
-    }
+    ParseColors { remaining: s }
 }

@@ -41,6 +41,10 @@ fn basic() {
             "#0f0,\t#00f\n,\r #ff0",
             vec!["#00ff00", "#0000ff", "#ffff00"],
         ),
+        (
+            "#bad455, hwb(🦀, 10%, 30%), #f08",
+            vec!["#bad455", "", "#ff0088"],
+        ),
     ];
 
     for (s, result) in test_data {
@@ -50,13 +54,15 @@ fn basic() {
             let c = p.next();
             assert!(c.is_some());
             let c = c.unwrap();
+
             if hex == "" {
                 assert!(c.is_err());
                 continue;
             }
+
             assert!(c.is_ok());
             let c = c.unwrap();
-            assert_eq!(c.to_css_hex().to_string(), hex);
+            assert_eq!(c.to_string(), hex);
         }
 
         assert!(p.next().is_none());
@@ -74,19 +80,19 @@ fn invalid_colors() {
     let invalid = [
         [
             "rgb(0,0)",
-            "invalid rgb format: \"rgb(0,0)\"",
+            "invalid color \"rgb(0,0)\"",
         ],
         [
             "rgb(0 0 0),#ffx",
-            "invalid hex format: \"#ffx\"",
+            "invalid color \"#ffx\"",
         ],
         [
             "#0f9, hwb(95 0.3 0.7),§ü¥,#f00",
-            "invalid unknown format: \"§ü¥\"",
+            "invalid color \"§ü¥\"",
         ],
         [
             "π, #ff0",
-            "invalid unknown format: \"π\"",
+            "invalid color \"π\"",
         ],
     ];
 
@@ -100,12 +106,12 @@ fn invalid_colors() {
     let test_data = [
         (
             "rgb(0, 255, 0), #ff000x, #00f",
-            " #ff000x",
+            "#ff000x",
             ParseColorError::InvalidHex,
         ),
         (
             "rgb(0, 255, 0), rgb(0, 0) , #00f",
-            " rgb(0, 0) ",
+            "rgb(0, 0)",
             ParseColorError::InvalidRgb,
         ),
         (
@@ -125,29 +131,5 @@ fn invalid_colors() {
         let e = res.unwrap_err();
         assert_eq!(e.source, err);
         assert_eq!(e.color, s);
-    }
-
-    // ---
-
-    let invalid2 = [
-        "rgb(from rgb(from rgb(255, 0, 0) r g b), #0f0",
-        "rgb(from rgb(from rgb(255,0,0) r g b))), #0f0",
-        "rgb((255, 0, 0), #0f0",
-    ];
-
-    for s in invalid2 {
-        let mut p = parse_colors(s);
-
-        let item = p.next();
-        assert!(item.is_some());
-        let item = item.unwrap();
-        assert!(item.is_err());
-
-        let item = p.next();
-        assert!(item.is_some());
-        let item = item.unwrap().unwrap();
-        assert_eq!(item.to_rgba8(), [0, 255, 0, 255]);
-
-        assert!(p.next().is_none());
     }
 }

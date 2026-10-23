@@ -68,3 +68,60 @@ fn absolute() {
         assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
     }
 }
+
+#[test]
+fn relative() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "color(from #bad455 rec2020 none none none / none)"],
+
+        // bare number
+        ["#00aef1", "color(from #fff rec2020 0.038 0.611 0.908)"],
+        ["#c9e63a", "color(from #fff rec2020 0.793 0.877 0.32)"],
+        ["#d2d5b6", "color(from #fff rec2020 0.803 0.814 0.698)"],
+        ["#dcaf79", "color(from #fff rec2020 0.773 0.664 0.457)"],
+        ["#ff5fad", "color(from #fff rec2020 0.905 0.426 0.632)"],
+        ["#fa0072", "color(from #fff rec2020 0.77 0.133 0.385)"],
+        ["#9e00ff", "color(from #fff rec2020 0.489 0.048 0.949)"],
+        ["#00c6cb", "color(from #fff rec2020 0.102 0.711 0.759)"],
+        ["#5f4e1c", "color(from #fff rec2020 0.286 0.248 0.086)"],
+        ["#ff9949", "color(from #fff rec2020 0.897 0.604 0.302)"],
+        ["#ff33ff", "color(from #fff rec2020 0.865 0.321 0.979)"],
+        ["#ff3c00", "color(from #fff rec2020 0.912 0.342 0.041)"],
+        ["#cb8c4e", "color(from #fff rec2020 0.679 0.523 0.291)"],
+        ["#e442bb", "color(from #fff rec2020 0.725 0.307 0.676)"],
+        ["#dcfefd", "color(from #fff rec2020 0.906 0.987 0.989)"],
+
+        // percentage
+        ["#bfef00", "color(from #fff rec2020 78% 91% 20%)"],
+        ["#4b4c65", "color(from #fff rec2020 24% 24% 33%)"],
+        ["#c4a5c1", "color(from #fff rec2020 70% 62% 72%)"],
+        ["#e66ae7", "color(from #fff rec2020 76% 43% 86%)"],
+        ["#e3ad62", "color(from #fff rec2020 79% 66% 38%)"],
+        ["#99e4c9", "color(from #fff rec2020 69% 86% 77%)"],
+        ["#0080c3", "color(from #fff rec2020 27% 44% 71%)"],
+        ["#ce005c", "color(from #fff rec2020 62% 14% 30%)"],
+        ["#d5de9d", "color(from #fff rec2020 82% 85% 61%)"],
+        ["#a005b1", "color(from #fff rec2020 48% 13% 63%)"],
+        ["#00abca", "color(from #fff rec2020 4% 60% 75%)"],
+        ["#0058bd", "color(from #fff rec2020 16% 28% 68%)"],
+        ["#92ffaf", "color(from #fff rec2020 73% 98% 69%)"],
+        ["#da0071", "color(from #fff rec2020 66% 14% 38%)"],
+        ["#006666", "color(from #fff rec2020 17% 33% 34%)"],
+
+        // keywords
+        ["#bad455", "color(from #bad455 rec2020 r g b)"],
+        ["#f851c6", "color(from #bad455 rec2020 g b r / alpha)"],
+
+        // calc(...)
+        ["#bad455", "color(from #bad455 rec2020 calc(r) calc(g) calc(b))"],
+        ["#f851c6", "color(from #bad455 rec2020 calc(g) calc(b) calc(r))"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}

@@ -1,8 +1,10 @@
+mod a98_rgb;
 mod calc;
 mod helper;
 mod param;
 mod rec2020;
 
+pub(crate) use a98_rgb::*;
 pub(crate) use calc::*;
 pub(crate) use helper::*;
 pub(crate) use param::*;

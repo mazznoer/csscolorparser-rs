@@ -183,6 +183,12 @@ impl Color {
         Self::new(rgb[0] as f32, rgb[1] as f32, rgb[2] as f32, alpha)
     }
 
+    /// A98 RGB
+    pub fn from_a98_rgb(r: f32, g: f32, b: f32, alpha: f32) -> Self {
+        let lrgb = utils::a98_to_linear_srgb(r, g, b);
+        Self::from_linear_rgba(lrgb[0], lrgb[1], lrgb[2], alpha)
+    }
+
     /// Create color from CSS color string.
     ///
     /// # Examples
@@ -429,6 +435,13 @@ impl Color {
     pub fn to_rec2020(&self) -> [f32; 4] {
         let [r, g, b] = utils::srgb_to_rec2020(self.r as f64, self.g as f64, self.b as f64);
         [r as f32, g as f32, b as f32, self.a]
+    }
+
+    /// Convert to A98 RGB
+    pub fn to_a98_rgb(&self) -> [f32; 4] {
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let a98 = utils::linear_srgb_to_a98(r, g, b);
+        [a98[0], a98[1], a98[2], alpha]
     }
 
     /// Get CSS RGB hexadecimal color representation

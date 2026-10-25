@@ -189,6 +189,12 @@ impl Color {
         Self::from_linear_rgba(lrgb[0], lrgb[1], lrgb[2], alpha)
     }
 
+    /// Display P3
+    pub fn from_display_p3(r: f32, g: f32, b: f32, alpha: f32) -> Self {
+        let lrgb = utils::display_p3_to_linear_srgb(r, g, b);
+        Self::from_linear_rgba(lrgb[0], lrgb[1], lrgb[2], alpha)
+    }
+
     /// Create color from CSS color string.
     ///
     /// # Examples
@@ -442,6 +448,13 @@ impl Color {
         let [r, g, b, alpha] = self.to_linear_rgba();
         let a98 = utils::linear_srgb_to_a98(r, g, b);
         [a98[0], a98[1], a98[2], alpha]
+    }
+
+    /// Convert to Display P3
+    pub fn to_display_p3(&self) -> [f32; 4] {
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let p3 = utils::linear_srgb_to_display_p3(r, g, b);
+        [p3[0], p3[1], p3[2], alpha]
     }
 
     /// Get CSS RGB hexadecimal color representation

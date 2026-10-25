@@ -68,3 +68,60 @@ fn absolute() {
         assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
     }
 }
+
+#[test]
+fn relative() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "color(from #bad455 display-p3 none none none / none)"],
+
+        // bare number
+        ["#f3bc00", "color(from #fff display-p3 0.92 0.744 0.025)"],
+        ["#c7984a", "color(from #fff display-p3 0.753 0.604 0.341)"],
+        ["#ff0046", "color(from #fff display-p3 0.929 0.035 0.297)"],
+        ["#8400bc", "color(from #fff display-p3 0.473 0.05 0.71)"],
+        ["#007050", "color(from #fff display-p3 0.043 0.43 0.32)"],
+        ["#413f0e", "color(from #fff display-p3 0.254 0.249 0.09)"],
+        ["#004367", "color(from #fff display-p3 0.043 0.259 0.392)"],
+        ["#c9dd00", "color(from #fff display-p3 0.803 0.863 0.243)"],
+        ["#f3c7ef", "color(from #fff display-p3 0.926 0.788 0.927)"],
+        ["#00edd6", "color(from #fff display-p3 0.068 0.914 0.84)"],
+        ["#3ed8e9", "color(from #fff display-p3 0.439 0.835 0.902)"],
+        ["#ffc053", "color(from #fff display-p3 0.995 0.766 0.405)"],
+        ["#162f26", "color(from #fff display-p3 0.11 0.183 0.151)"],
+        ["#b43255", "color(from #fff display-p3 0.65 0.236 0.338)"],
+        ["#50717e", "color(from #fff display-p3 0.341 0.441 0.489)"],
+
+        // percentage
+        ["#6366cd", "color(from #fff display-p3 39% 40% 78%)"],
+        ["#aefcfb", "color(from #fff display-p3 75% 98% 98%)"],
+        ["#ecd5f4", "color(from #fff display-p3 91% 84% 95%)"],
+        ["#7caff0", "color(from #fff display-p3 53% 68% 92%)"],
+        ["#005d35", "color(from #fff display-p3 10% 36% 22%)"],
+        ["#25cf00", "color(from #fff display-p3 39% 80% 4%)"],
+        ["#b4786e", "color(from #fff display-p3 67% 48% 44%)"],
+        ["#683608", "color(from #fff display-p3 38% 22% 8%)"],
+        //["#2c7200", "color(from #fff display-p3 25% 44% 5%)"],
+        ["#316a00", "color(from #fff display-p3 25% 41% 5%)"],
+        ["#f9df00", "color(from #fff display-p3 96% 88% 10%)"],
+        ["#00c5ed", "color(from #fff display-p3 20% 76% 91%)"],
+        ["#437e00", "color(from #fff display-p3 32% 49% 0%)"],
+        ["#d88094", "color(from #fff display-p3 80% 52% 58%)"],
+        ["#658d87", "color(from #fff display-p3 43% 55% 53%)"],
+
+        // keywords
+        ["#bad455", "color(from #bad455 display-p3 r g b / alpha)"],
+        ["#e360c3", "color(from #bad455 display-p3 g b r)"],
+
+        // calc(...)
+        ["#bad455", "color(from #bad455 display-p3 calc(r) calc(g) calc(b))"],
+        ["#e360c3", "color(from #bad455 display-p3 calc(g) calc(b) calc(r))"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}

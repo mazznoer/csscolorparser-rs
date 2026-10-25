@@ -1,3 +1,5 @@
+#![allow(clippy::excessive_precision)]
+
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
 

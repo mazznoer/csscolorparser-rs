@@ -195,6 +195,12 @@ impl Color {
         Self::from_linear_rgba(lrgb[0], lrgb[1], lrgb[2], alpha)
     }
 
+    /// Prophoto RGB
+    pub fn from_prophoto_rgb(r: f32, g: f32, b: f32, alpha: f32) -> Self {
+        let rgb = utils::prophoto_to_srgb(r, g, b);
+        Self::new(rgb[0], rgb[1], rgb[2], alpha)
+    }
+
     /// Create color from CSS color string.
     ///
     /// # Examples
@@ -455,6 +461,12 @@ impl Color {
         let [r, g, b, alpha] = self.to_linear_rgba();
         let p3 = utils::linear_srgb_to_display_p3(r, g, b);
         [p3[0], p3[1], p3[2], alpha]
+    }
+
+    /// Convert to Prophoto RGB
+    pub fn to_prophoto_rgb(&self) -> [f32; 4] {
+        let [r, g, b] = utils::srgb_to_prophoto(self.r, self.g, self.b);
+        [r, g, b, self.a]
     }
 
     /// Get CSS RGB hexadecimal color representation

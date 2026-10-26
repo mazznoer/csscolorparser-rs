@@ -18,6 +18,7 @@ enum ColorFunc {
     XyzD65,
     A98Rgb,
     DisplayP3,
+    ProphotoRgb,
 }
 
 /// Parse CSS color string
@@ -318,6 +319,14 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
                     if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
                         return Ok(Color::from_display_p3(r, g, b, a));
+                    };
+                }
+                ColorFunc::ProphotoRgb => {
+                    // r, g, b, alpha [0..1]
+                    let [r, g, b, a] = color.to_prophoto_rgb();
+                    let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
+                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                        return Ok(Color::from_prophoto_rgb(r, g, b, a));
                     };
                 }
                 ColorFunc::Rec2020 => {
@@ -658,6 +667,18 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                         return Ok(Color::from_display_p3(r, g, b, alpha));
                     }
                 }
+                ColorFunc::ProphotoRgb => {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
+                        // red
+                        parse_percent_or_float(val0),
+                        // green
+                        parse_percent_or_float(val1),
+                        // blue
+                        parse_percent_or_float(val2),
+                    ) {
+                        return Ok(Color::from_prophoto_rgb(r, g, b, alpha));
+                    }
+                }
                 ColorFunc::Rec2020 => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
@@ -753,6 +774,8 @@ fn get_color_func(s: &str) -> Option<ColorFunc> {
         Some(ColorFunc::A98Rgb)
     } else if s.eq_ignore_ascii_case("display-p3") {
         Some(ColorFunc::DisplayP3)
+    } else if s.eq_ignore_ascii_case("prophoto-rgb") {
+        Some(ColorFunc::ProphotoRgb)
     } else if s.eq_ignore_ascii_case("rec2020") {
         Some(ColorFunc::Rec2020)
     } else if s.eq_ignore_ascii_case("xyz-d50") {

@@ -2,6 +2,20 @@
 
 ## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.9.0...HEAD)
 
+### Added
+
+- Supports for:
+    - `color(a98-rgb ...)`
+    - `color(display-p3 ...)`
+    - `color(prophoto-rgb ...)`
+    - `color(rec2020 ...)`
+    - `color(from ... a98-rgb ...)`
+    - `color(from ... display-p3 ...)`
+    - `color(from ... prophoto-rgb ...)`
+    - `color(from ... rec2020 ...)`
+- Supports for percentange value in relative format.
+- More advanced `calc()` interpreter.
+
 ## [0.9.0]
 
 ### Added

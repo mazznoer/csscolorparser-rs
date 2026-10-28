@@ -68,3 +68,60 @@ fn absolute() {
         assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
     }
 }
+
+#[test]
+fn relative() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "color(from #bad455 display-p3-linear none none none / none)"],
+
+        // bare number
+        ["#00e717", "color(from #fff display-p3-linear 0.106 0.771 0.065)"],
+        //["#78abb5", "color(from #fff display-p3-linear 0.228 0.399 0.452)"],
+        ["#82fde7", "color(from #fff display-p3-linear 0.358 0.958 0.8)"],
+        ["#e4fafc", "color(from #fff display-p3-linear 0.806 0.947 0.966)"],
+        ["#fc00f1", "color(from #fff display-p3-linear 0.799 0.015 0.816)"],
+        ["#cfa0be", "color(from #fff display-p3-linear 0.576 0.36 0.505)"],
+        ["#7d6be0", "color(from #fff display-p3-linear 0.195 0.15 0.695)"],
+        ["#f9eab8", "color(from #fff display-p3-linear 0.922 0.823 0.512)"],
+        ["#b67cbb", "color(from #fff display-p3-linear 0.42 0.209 0.474)"],
+        ["#d9b64b", "color(from #fff display-p3-linear 0.653 0.476 0.11)"],
+        ["#91fdb3", "color(from #fff display-p3-linear 0.406 0.959 0.486)"],
+        ["#79cf7c", "color(from #fff display-p3-linear 0.268 0.607 0.232)"],
+        ["#eaf600", "color(from #fff display-p3-linear 0.84 0.917 0.039)"],
+        ["#d45124", "color(from #fff display-p3-linear 0.556 0.102 0.033)"],
+        ["#78bfff", "color(from #fff display-p3-linear 0.248 0.509 0.979)"],
+
+        // percentage
+        ["#bb9362", "color(from #fff display-p3-linear 46% 30% 14%)"],
+        ["#f0fd67", "color(from #fff display-p3-linear 89% 98% 21%)"],
+        //["#5870ff", "color(from #fff display-p3-linear 11% 16% 92%)"],
+        ["#e2fedb", "color(from #fff display-p3-linear 80% 98% 73%)"],
+        ["#78d297", "color(from #fff display-p3-linear 27% 63% 33%)"],
+        ["#97317f", "color(from #fff display-p3-linear 26% 4% 20%)"],
+        ["#dc79d3", "color(from #fff display-p3-linear 62% 21% 62%)"],
+        ["#fedb75", "color(from #fff display-p3-linear 94% 72% 23%)"],
+        ["#0093ff", "color(from #fff display-p3-linear 5% 28% 96%)"],
+        ["#e2f562", "color(from #fff display-p3-linear 79% 91% 19%)"],
+        ["#00e5e7", "color(from #fff display-p3-linear 2% 75% 78%)"],
+        ["#75ad77", "color(from #fff display-p3-linear 22% 41% 20%)"],
+        ["#d2c661", "color(from #fff display-p3-linear 63% 57% 16%)"],
+        //["#3cee52", "color(from #fff display-p3-linear 19% 83% 14%)"],
+        //["#ff24ed", "color(from #fff display-p3-linear 83% 5% 79%)"],
+
+        // keywords
+        ["#bad455", "color(from #bad455 display-p3-linear r g b)"],
+        ["#41c2d6", "color(from #bad455 display-p3-linear b r g)"],
+
+        // calc(...)
+        ["#bad455", "color(from #bad455 display-p3-linear calc(r) calc(g) calc(b))"],
+        ["#e360c3", "color(from #bad455 display-p3-linear calc(g) calc(b) calc(r))"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}

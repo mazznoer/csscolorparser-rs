@@ -195,6 +195,12 @@ impl Color {
         Self::from_linear_rgba(lrgb[0], lrgb[1], lrgb[2], alpha)
     }
 
+    /// Display P3 Linear
+    pub fn from_display_p3_linear(r: f32, g: f32, b: f32, alpha: f32) -> Self {
+        let lrgb = utils::linear_display_p3_to_linear_srgb(r, g, b);
+        Self::from_linear_rgba(lrgb[0], lrgb[1], lrgb[2], alpha)
+    }
+
     /// Prophoto RGB
     pub fn from_prophoto_rgb(r: f32, g: f32, b: f32, alpha: f32) -> Self {
         let rgb = utils::prophoto_to_srgb(r, g, b);
@@ -460,6 +466,13 @@ impl Color {
     pub fn to_display_p3(&self) -> [f32; 4] {
         let [r, g, b, alpha] = self.to_linear_rgba();
         let p3 = utils::linear_srgb_to_display_p3(r, g, b);
+        [p3[0], p3[1], p3[2], alpha]
+    }
+
+    /// Convert to Display P3 Linear
+    pub fn to_display_p3_linear(&self) -> [f32; 4] {
+        let [r, g, b, alpha] = self.to_linear_rgba();
+        let p3 = utils::linear_srgb_to_linear_display_p3(r, g, b);
         [p3[0], p3[1], p3[2], alpha]
     }
 

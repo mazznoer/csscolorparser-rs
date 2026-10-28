@@ -61,17 +61,29 @@ fn linear_to_srgb(c: f32) -> f32 {
     e.copysign(c)
 }
 
+/// Converts a linear sRGB color to linear Display-P3. This is just the 3x3
+/// primaries matrix with no transfer function. Linear sRGB values inside 0..=1
+/// stay inside 0..=1, since the sRGB gamut sits within P3.
+pub(crate) fn linear_srgb_to_linear_display_p3(r: f32, g: f32, b: f32) -> [f32; 3] {
+    mul3(&SRGB_TO_P3, r, g, b)
+}
+
+/// Converts a linear Display-P3 color to linear sRGB. Colors outside the sRGB
+/// gamut produce components below 0 or above 1.
+pub(crate) fn linear_display_p3_to_linear_srgb(r: f32, g: f32, b: f32) -> [f32; 3] {
+    mul3(&P3_TO_SRGB, r, g, b)
+}
+
 /// Converts a CSS `display-p3` color (gamma-encoded, components nominally 0..=1)
 /// to linear sRGB. Results may fall outside 0..=1 for colors outside the sRGB gamut.
 pub(crate) fn display_p3_to_linear_srgb(r: f32, g: f32, b: f32) -> [f32; 3] {
-    let (r, g, b) = (srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b));
-    mul3(&P3_TO_SRGB, r, g, b)
+    linear_display_p3_to_linear_srgb(srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b))
 }
 
 /// Converts a linear sRGB color to a CSS `display-p3` color (gamma-encoded).
 /// Results may fall outside 0..=1 for colors outside the P3 gamut.
 pub(crate) fn linear_srgb_to_display_p3(r: f32, g: f32, b: f32) -> [f32; 3] {
-    let [r, g, b] = mul3(&SRGB_TO_P3, r, g, b);
+    let [r, g, b] = linear_srgb_to_linear_display_p3(r, g, b);
     [linear_to_srgb(r), linear_to_srgb(g), linear_to_srgb(b)]
 }
 

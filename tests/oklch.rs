@@ -25,6 +25,7 @@ fn in_out() {
         "oklch(0.819 0.343 341)",
         "oklch(0.497 0.188 359)",
     ];
+
     for s in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -34,11 +35,62 @@ fn in_out() {
 }
 
 #[test]
+fn absolute() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "oklch(none none none / none)"],
+
+        // percentage
+        ["#8f90ff", "oklch(77% 73% 277)"],
+        ["#ff0000", "oklch(60% 99% 22)"],
+        ["#3e1a94", "oklch(36% 45% 287)"],
+        ["#ffa96a", "oklch(83% 37% 50)"],
+        ["#910000", "oklch(33% 66% 31)"],
+        ["#00ff91", "oklch(88% 91% 164)"],
+        ["#ff8fff", "oklch(83% 51% 333)"],
+        ["#ff8100", "oklch(88% 76% 51)"],
+        ["#dff7ff", "oklch(97% 14% 259)"],
+        ["#7d00ba", "oklch(41% 75% 312)"],
+
+        // angle suffix
+        ["#51002f", "oklch(0.211 0.243 384grad)"],
+        ["#760000", "oklch(0.313 0.197 47grad)"],
+        ["#ff2100", "oklch(0.827 0.385 0.147turn)"],
+        ["#5a0005", "oklch(0.138 0.398 399grad)"],
+        ["#390097", "oklch(0.132 0.384 328grad)"],
+        ["#00ff00", "oklch(0.897 0.38 143deg)"],
+        ["#471c7b", "oklch(0.349 0.15 5.218rad)"],
+        ["#00fff3", "oklch(0.902 0.269 3.215rad)"],
+        ["#ff77ff", "oklch(0.809 0.261 0.900turn)"],
+        ["#ffbdff", "oklch(0.97 0.187 387grad)"],
+        ["#003070", "oklch(0.307 0.145 4.213rad)"],
+        ["#c5ff61", "oklch(0.941 0.2 142grad)"],
+        ["#007d61", "oklch(0.491 0.172 198grad)"],
+        ["#00f5e9", "oklch(0.819 0.274 0.526turn)"],
+        ["#ba7d11", "oklch(0.638 0.131 74deg)"],
+        ["#eaabff", "oklch(0.829 0.134 317deg)"],
+        ["#830000", "oklch(0.293 0.344 1.188rad)"],
+        //["#11009a", "oklch(0.272 0.24 266deg)"],
+        ["#b49700", "oklch(0.677 0.216 102deg)"],
+        ["#ffed7e", "oklch(0.973 0.142 1.449rad)"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}
+
+#[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "oklch(from #bad455 none none none)"],
         ["#bad45500", "oklch(from #bad455 l c h / none)"],
+
         // bare number
         ["#ff80be", "oklch(from #fff 0.818 0.208 0)"],
         ["#610000", "oklch(from #fff 0.252 0.193 25)"],
@@ -55,6 +107,7 @@ fn relative() {
         ["#a848ef", "oklch(from #fff 0.607 0.24 307)"],
         ["#ff5fff", "oklch(from #fff 0.778 0.271 333)"],
         ["#ffd9f8", "oklch(from #fff 0.985 0.116 359)"],
+
         // percentage
         ["#004439", "oklch(from #fff 34% 18% 179)"],
         ["#200059", "oklch(from #fff 9% 69% 299)"],
@@ -71,11 +124,17 @@ fn relative() {
         ["#d4e200", "oklch(from #fff 87% 56% 114)"],
         ["#00ffab", "oklch(from #fff 88% 61% 164)"],
         ["#33424a", "oklch(from #fff 37% 6% 231)"],
+
         // keywords
         ["#bad455", "oklch(from #bad455 l c h)"],
         ["#bad455", "oklch(from #bad455 l c h / alpha)"],
+
         // calc(...)
+        ["#bad455", "oklch(from #bad455 calc(l) calc(c) calc(h))"],
+        ["#7aa800", "oklch(from #bad455 calc(0.5 + 0.17) calc(1 * 0.2) calc(10 * 12.5))"],
+        ["#ff7e00", "oklch(from #bad455 calc(l - 0.1) calc(c + 0.05) calc(h / 2))"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -90,6 +149,7 @@ fn invalid() {
         "oklch(0 0 0%)",
         "oklch(from #bad455 l c 0%)",
     ];
+
     for s in test_data {
         assert!(parse(s).is_err(), "{s:?}");
     }

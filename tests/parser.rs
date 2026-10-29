@@ -41,6 +41,74 @@ fn parser() {
 }
 
 #[test]
+fn similar() {
+    #[rustfmt::skip]
+    let test_data = [
+        [
+            "rgb(100% 128 0%)",
+            "rgb(255 50% 0)",
+        ],
+
+        // similar bare number and percentage
+        [
+            "hsl(66 75% 55%)",
+            "hsl(66 75 55)",
+        ],
+        [
+            "hwb(230 50% 7%)",
+            "hwb(230 50 7)",
+        ],
+
+        // color()
+        [
+            "color(srgb 0 0.75 1)",
+            "color(srgb 0% 75% 100%)",
+        ],
+        [
+            "color(srgb-linear 0 0.3 1)",
+            "color(srgb-linear 0% 30% 100%)",
+        ],
+        [
+            "color(a98-rgb 0.8 0.03 0.67)",
+            "color(a98-rgb 80% 3% 67%)",],
+        [
+            "color(display-p3 0.42 0.07 0.69)",
+            "color(display-p3 42% 7% 69%)",
+        ],
+        [
+            "color(display-p3-linear 0.42 0.07 0.69)",
+            "color(display-p3-linear 42% 7% 69%)",
+        ],
+        [
+            "color(prophoto-rgb 0.7 0.24 0.02)",
+            "color(prophoto-rgb 70% 24% 2%)",
+        ],
+        [
+            "color(rec2020 0.1 0.81 0.65)",
+            "color(rec2020 10% 81% 65%)",
+        ],
+        [
+            "color(xyz 0.38 0.41 0.09)",
+            "color(xyz 38% 41% 9%)",
+        ],
+        [
+            "color(xyz-d65 0.33 0.78 0.09)",
+            "color(xyz-d65 33% 78% 9%)",
+        ],
+        [
+            "color(xyz-d50 0.05 0.19 0.53)",
+            "color(xyz-d50 5% 19% 53%)",
+        ],
+    ];
+
+    for [s0, s1] in test_data {
+        let a = parse(s0).unwrap();
+        let b = parse(s1).unwrap();
+        assert_eq!(a.to_rgba8(), b.to_rgba8(), "{s0:?} {s1:?}");
+    }
+}
+
+#[test]
 fn equal() {
     let test_data = [
         ("transparent", "rgb(0,0,0,0%)"),
@@ -61,9 +129,18 @@ fn equal() {
     ];
 
     for (a, b) in test_data {
-        let c1 = parse(a).unwrap();
-        let c2 = parse(b).unwrap();
-        assert_eq!(c1.to_rgba8(), c2.to_rgba8(), "{:?}", [a, b]);
+        let c1 = parse(a);
+        let c2 = parse(b);
+
+        assert!(c1.is_ok(), "{a:?}");
+        assert!(c2.is_ok(), "{b:?}");
+
+        assert_eq!(
+            c1.unwrap().to_rgba8(),
+            c2.unwrap().to_rgba8(),
+            "{:?}",
+            [a, b]
+        );
     }
 }
 

@@ -2,7 +2,11 @@ use csscolorparser::parse;
 
 #[test]
 fn absolute() {
+    #[rustfmt::skip]
     let test_data = [
+        // none
+        ["#00000000", "color(srgb-linear none none none / none)"],
+
         // bare number
         ["#9ff79a", "color(srgb-linear 0.347 0.93 0.321)"],
         ["#e9fdf0", "color(srgb-linear 0.813 0.982 0.869)"],
@@ -19,6 +23,7 @@ fn absolute() {
         ["#64d2fb", "color(srgb-linear 0.128 0.643 0.965)"],
         ["#a1a122", "color(srgb-linear 0.356 0.357 0.016)"],
         ["#93d06b", "color(srgb-linear 0.291 0.628 0.146)"],
+
         // percentage
         ["#ddc2a8", "color(srgb-linear 72% 54% 39%)"],
         ["#5927bf", "color(srgb-linear 10% 2% 52%)"],
@@ -36,6 +41,7 @@ fn absolute() {
         ["#fdc761", "color(srgb-linear 98% 57% 12%)"],
         ["#00badf", "color(srgb-linear 0% 49% 74%)"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -45,10 +51,12 @@ fn absolute() {
 
 #[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "color(from #bad455 srgb-linear none none none)"],
         ["#bad45500", "color(from #bad455 srgb-linear r g b / none)"],
+
         // bare number
         ["#d8b1d5", "color(from #fff srgb-linear 0.687 0.437 0.665)"],
         ["#73ff6f", "color(from #fff srgb-linear 0.173 0.997 0.159)"],
@@ -65,6 +73,7 @@ fn relative() {
         ["#ed6bc1", "color(from #fff srgb-linear 0.844 0.147 0.531)"],
         ["#86daf8", "color(from #fff srgb-linear 0.238 0.7 0.942)"],
         ["#ebb56a", "color(from #fff srgb-linear 0.834 0.463 0.143)"],
+
         // percentage
         ["#559797", "color(from #fff srgb-linear 9% 31% 31%)"],
         ["#f2edba", "color(from #fff srgb-linear 89% 85% 49%)"],
@@ -81,15 +90,19 @@ fn relative() {
         ["#f8a661", "color(from #fff srgb-linear 94% 38% 12%)"],
         ["#bf6f55", "color(from #fff srgb-linear 52% 16% 9%)"],
         ["#818ba8", "color(from #fff srgb-linear 22% 26% 39%)"],
+
         // keywords
         ["#bad455", "color(from #bad455 srgb-linear r g b)"],
         ["#bad455", "color(from #bad455 srgb-linear r g b / alpha)"],
+
         // calc(...)
+        ["#bad455", "color(from #bad455 srgb-linear calc(r) calc(g) calc(b))"],
         /*[
             "#daa9d56e",
             "color(from #dda0dd srgb-linear calc(r - 0.031) calc(g + 0.052) calc(b * 0.92) / calc(alpha - 0.57))",
         ],*/
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");

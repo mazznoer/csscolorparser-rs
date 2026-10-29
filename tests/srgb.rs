@@ -46,11 +46,55 @@ fn in_out() {
 }
 
 #[test]
+fn absolute() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "color(srgb none none none / none)"],
+
+        // percentage
+        ["#429e8a", "color(srgb 26% 62% 54%)"],
+        ["#c9030d", "color(srgb 79% 1% 5%)"],
+        ["#474a54", "color(srgb 28% 29% 33%)"],
+        ["#380885", "color(srgb 22% 3% 52%)"],
+        ["#38ba57", "color(srgb 22% 73% 34%)"],
+        ["#5e29b0", "color(srgb 37% 16% 69%)"],
+        ["#f53d38", "color(srgb 96% 24% 22%)"],
+        ["#8f4ac7", "color(srgb 56% 29% 78%)"],
+        ["#40338a", "color(srgb 25% 20% 54%)"],
+        ["#faed29", "color(srgb 98% 93% 16%)"],
+        ["#7df0f7", "color(srgb 49% 94% 97%)"],
+        ["#6e4d3d", "color(srgb 43% 30% 24%)"],
+        ["#eb08d6", "color(srgb 92% 3% 84%)"],
+        ["#9166a6", "color(srgb 57% 40% 65%)"],
+        ["#00b385", "color(srgb 0% 70% 52%)"],
+        ["#63ebdb", "color(srgb 39% 92% 86%)"],
+        ["#24b526", "color(srgb 14% 71% 15%)"],
+        ["#c2f0bd", "color(srgb 76% 94% 74%)"],
+        ["#c22eb8", "color(srgb 76% 18% 72%)"],
+        ["#b3c9c9", "color(srgb 70% 79% 79%)"],
+        ["#829c73", "color(srgb 51% 61% 45%)"],
+        ["#6e7a66", "color(srgb 43% 48% 40%)"],
+        ["#d9d4a3", "color(srgb 85% 83% 64%)"],
+        ["#c23070", "color(srgb 76% 19% 44%)"],
+        ["#733608", "color(srgb 45% 21% 3%)"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}
+
+#[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "color(from #bad455 srgb none none none)"],
         ["#bad45500", "color(from #bad455 srgb r g b / none)"],
+
         // bare number
         ["#9b3af4", "color(from #fff srgb 0.608 0.229 0.958)"],
         ["#4a230f", "color(from #fff srgb 0.29 0.137 0.059)"],
@@ -67,6 +111,7 @@ fn relative() {
         ["#d5a488", "color(from #fff srgb 0.835 0.645 0.532)"],
         ["#d10f04", "color(from #fff srgb 0.819 0.06 0.014)"],
         ["#5445a5", "color(from #fff srgb 0.331 0.272 0.647)"],
+
         // percentage
         ["#696e3d", "color(from #fff srgb 41% 43% 24%)"],
         ["#572ee0", "color(from #fff srgb 34% 18% 88%)"],
@@ -83,11 +128,15 @@ fn relative() {
         ["#d4d40d", "color(from #fff srgb 83% 83% 5%)"],
         ["#bfa330", "color(from #fff srgb 75% 64% 19%)"],
         ["#2eed54", "color(from #fff srgb 18% 93% 33%)"],
+
         // keywords
         ["#bad455", "color(from #bad455 srgb r g b)"],
         ["#bad455", "color(from #bad455 srgb r g b / alpha)"],
+
         // calc(...)
+        ["#d455ba", "color(from #bad455 srgb calc(g) calc(b) calc(r))"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");

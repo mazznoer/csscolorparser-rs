@@ -35,11 +35,55 @@ fn in_out() {
 }
 
 #[test]
+fn absolute() {
+    #[rustfmt::skip]
+    let test_data = [
+        // none
+        ["#00000000", "lab(none none none / none)"],
+
+        // percentage
+        ["#ff86ad", "lab(98% 83% 35%)"],
+        ["#00ffff", "lab(84% -92% -31%)"],
+        ["#00d883", "lab(73% -73% 19%)"],
+        ["#00d5ff", "lab(67% -99% -96%)"],
+        ["#ffcc00", "lab(88% 16% 96%)"],
+        ["#ff8e0e", "lab(71% 32% 60%)"],
+        ["#009600", "lab(50% -78% 45%)"],
+        ["#2a3400", "lab(19% -16% 66%)"],
+        ["#ff79ff", "lab(78% 67% -72%)"],
+        ["#8ea200", "lab(63% -17% 73%)"],
+        ["#695687", "lab(40% 13% -20%)"],
+        ["#0050d7", "lab(27% -17% -75%)"],
+        ["#ff8c8f", "lab(82% 56% 28%)"],
+        ["#b59fff", "lab(72% 25% -51%)"],
+        ["#88ca55", "lab(75% -29% 40%)"],
+        ["#51582b", "lab(36% -7% 20%)"],
+        ["#6a0000", "lab(16% 40% 72%)"],
+        ["#00e7ff", "lab(84% -21% -79%)"],
+        ["#b3cc00", "lab(78% -20% 73%)"],
+        ["#6e0000", "lab(4% 73% 89%)"],
+        ["#ad4639", "lab(44% 34% 24%)"],
+        ["#004e00", "lab(25% -61% 91%)"],
+        ["#003ea2", "lab(21% -12% -58%)"],
+        ["#a18b4d", "lab(59% 2% 29%)"],
+        ["#00ebe6", "lab(79% -72% -16%)"],
+    ];
+
+    for [hex, s] in test_data {
+        let c = parse(s);
+        assert!(c.is_ok(), "{s:?}");
+        assert_eq!(hex, c.unwrap().to_string(), "{s:?}");
+    }
+}
+
+#[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "lab(from #bad455 none none none)"],
         ["#bad45500", "lab(from #bad455 l a b / none)"],
+
         // bare number
         ["#ff0000", "lab(from #fff 57.2 90.45 98.64)"],
         ["#3b0000", "lab(from #fff 1.71 39.72 36.87)"],
@@ -56,6 +100,7 @@ fn relative() {
         ["#d66d00", "lab(from #fff 57.78 37.99 85.95)"],
         ["#00cfff", "lab(from #fff 66.05 -121.45 -90.23)"],
         ["#009dff", "lab(from #fff 60.32 -9.75 -93.04)"],
+
         // percentage
         ["#8ac17a", "lab(from #fff 73% -23% 24%)"],
         ["#bd0034", "lab(from #fff 29% 80% 13%)"],
@@ -72,10 +117,13 @@ fn relative() {
         ["#007900", "lab(from #fff 40% -75% 68%)"],
         ["#003cb5", "lab(from #fff 8% -86% -85%)"],
         ["#590000", "lab(from #fff 6% 51% 50%)"],
+
         // keywords
         ["#bad455", "lab(from #bad455 l a b)"],
         ["#bad455", "lab(from #bad455 l a b / alpha)"],
+
         // calc(...)
+        ["#bad455", "lab(from #bad455 calc(l) calc(a) calc(b) / calc(alpha))"],
     ];
     for [hex, s] in test_data {
         let c = parse(s);

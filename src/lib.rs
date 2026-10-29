@@ -17,6 +17,11 @@
 //! * `lch()`
 //! * `oklab()`
 //! * `oklch()`
+//! * `color(a98-rgb ...)`
+//! * `color(display-p3 ...)`
+//! * `color(display-p3-linear ...)`
+//! * `color(prophoto-rgb ...)`
+//! * `color(rec2020 ...)`
 //! * `color(srgb ...)`
 //! * `color(srgb-linear ...)`
 //! * `color(xyz ...)`

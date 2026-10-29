@@ -37,6 +37,11 @@
 * `lch()`
 * `oklab()`
 * `oklch()`
+* `color(a98-rgb ...)`
+* `color(display-p3 ...)`
+* `color(display-p3-linear ...)`
+* `color(prophoto-rgb ...)`
+* `color(rec2020 ...)`
 * `color(srgb ...)`
 * `color(srgb-linear ...)`
 * `color(xyz ...)`
@@ -53,6 +58,7 @@ rgb(from red r g calc(b + 20))
 rgb(from gold calc((r + g + b) / 3) 127 127)
 hwb(from #bad455 calc(h + 35) w b)
 hsl(from purple h s l / 0.5)
+color(from plum srgb-linear r g calc(b * 0.9))
 ```
 
 ## Usage

@@ -117,6 +117,16 @@ fn relative() {
         // calc(...)
         ["#bad455", "color(from #bad455 display-p3 calc(r) calc(g) calc(b))"],
         ["#e360c3", "color(from #bad455 display-p3 calc(g) calc(b) calc(r))"],
+        ["#bad455", "color(from #fff display-p3 calc(2.995748 * 1 / 4) calc(0.25 * 1.764796 + 0.354653 + 0.032362) calc((0.09461 + 0.15539) * 0.81654 * 2))"],
+        ["#bad455", "color(from #fff display-p3 calc(1.10659 / 10 + 0.508403 + 0.129875) calc(0.5 * 11.875342 - (3.611148 + 1.498309)) calc((0.73049 + 0.08605) / (4 * 0.5)))"],
+        ["#bad455", "color(from #fff display-p3 calc(0.25 * (8.212775 - 5.217027)) calc(20.70535 / 5 / 5) calc(0.81654 * 2 / 4))"],
+        ["#bad455", "color(from #fff display-p3 calc(10.26375 - 9.855526 + 0.340713) calc(13.251424 * 0.25 * 0.75 / 3) calc(1.63308 * 0.125 * 2))"],
+        ["#bad455", "color(from #fff display-p3 calc(0.5 * 14.157402 - (4.525078 + 1.804686)) calc(0.25 * 20.237276 - 12.693315 / 3) calc(0.0457 + 0.23191 + 0.06305 + 0.06761))"],
+        ["#bad455", "color(from #f45e45 display-p3 calc((10.036368 - 8.538494) * (r - 0.388072)) calc(g + 6.222178 - 5.801517) calc(b - (9.590191 - 9.68956)))"],
+        ["#bad455", "color(from #773c81 display-p3 calc(0.674873 + 0.510392 - r) calc(0.319096 + g + 0.26182) calc(0.89979 - b))"],
+        ["#bad455", "color(from #1ce0c7 display-p3 calc((1.085109 + r) * 0.125 * 4) calc(12.244854 - 8.386072 - (3.896131 - g)) calc(0.163308 * 5 / (1.217795 + b)))"],
+        ["#bad455", "color(from #970ba3 display-p3 calc(1.291083 - r) calc(0.948691 - g) calc(-0.339711 + b + 0.130808))"],
+        ["#bad455", "color(from #a4bdae display-p3 calc((r + 0.835868) * (5.278682 - 4.778682)) calc((0.918272 + g) * (0.03878 + 0.46122)) calc(b - 0.277877))"],
     ];
 
     for [hex, s] in test_data {

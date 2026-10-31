@@ -78,7 +78,12 @@ pub(crate) struct AlphaFmt(pub f32);
 
 impl fmt::Display for AlphaFmt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.0.is_nan() {
+            return write!(f, " / 0");
+        }
+
         let t = (self.0.clamp(0.0, 1.0) * 100.0 + 0.5) as u8;
+
         if t < 100 {
             write!(f, " / {t}%")
         } else {
@@ -91,28 +96,14 @@ pub(crate) struct FloatFmt(pub f32);
 
 impl fmt::Display for FloatFmt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.0.is_nan() {
-            return write!(f, "none");
+        if !self.0.is_finite() {
+            return write!(f, "0");
         }
 
-        // Round to 3 decimal places first to clear floating point noise
-        let rounded = (self.0 * 1000.0).round() / 1000.0;
+        // Round to 3 decimal places
+        let t = (self.0 * 1000.0).round() / 1000.0;
 
-        // Get the 3-digit fractional part as an integer
-        let fract = (rounded.abs().fract() * 1000.0).round() as u16;
-
-        // Determine precision based on the integer fractional part
-        let precision = if fract == 0 {
-            0
-        } else if fract % 10 != 0 {
-            3
-        } else if fract % 100 != 0 {
-            2
-        } else {
-            1
-        };
-
-        write!(f, "{:.*}", precision, rounded)
+        write!(f, "{t}")
     }
 }
 

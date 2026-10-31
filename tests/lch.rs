@@ -134,6 +134,11 @@ fn relative() {
         ["#bad455", "lch(from #bad455 calc(l) calc(c) calc(h))"],
         ["#00a7ff", "lch(from #bad455 calc(10 + 300 / 6) calc(150 - 0.5 * 90) calc(36 * 7 + 1))"],
         ["#5dc275", "lch(from #bad455 calc(l - 10) calc(c * 0.85) calc(h + 35))"],
+        ["#bad455", "lch(from #fff calc(162.2224 * 0.5) calc(26.3937 + 14.1089 + 0.25 * 85.8364) calc(80.409 + 152.54 / 5))"],
+        ["#bad455", "lch(from #fff calc((39.7895 + 0.7661) / (0.1232 + 0.3768)) calc((292.52 + 17.2885) / (10.3113 - 5.3113)) calc(2218.34 * 0.25 / (11.574 - 6.574)))"],
+        ["#bad455", "lch(from #fff calc((30.6666 + 9.889) / (0.25 / 0.5)) calc(743.5404 / 4 / (1.5 / 0.5)) calc(443.668 * 0.25 * 1))"],
+        ["#bad455", "lch(from #ddf5d3 calc(230.4402 / 2 - (-59.9861 + l)) calc(452.5228 * 0.25 - (c + 32.56)) calc((h + 310.867) / 4))"],
+        ["#bad455", "lch(from #13c9ed calc(20.0892 - 13.2627 + l) calc(c + 65.9614 - 2 * 24.2863) calc(h - 446.5 / 4))"],
     ];
 
     for [hex, s] in test_data {

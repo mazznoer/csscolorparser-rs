@@ -97,10 +97,16 @@ fn relative() {
 
         // calc(...)
         ["#bad455", "color(from #bad455 srgb-linear calc(r) calc(g) calc(b))"],
-        /*[
-            "#daa9d56e",
-            "color(from #dda0dd srgb-linear calc(r - 0.031) calc(g + 0.052) calc(b * 0.92) / calc(alpha - 0.57))",
-        ],*/
+        ["#bad455", "color(from #fff srgb-linear calc(6.273348 + 2.635799 - (1.765538 + 6.652588)) calc((7.855699 - 4.563824) / (1.680393 + 3.319607)) calc(1.816834 / 5 / 4))"],
+        ["#bad455", "color(from #fff srgb-linear calc(12.275525 / 5 / (9.970386 - 4.970386)) calc((7.817321 - 7.685646) * 5 * 1) calc(13.7093106 / 2 - (8.6283233 - 1.8645097)))"],
+        ["#bad455", "color(from #fff srgb-linear calc(1.515402 - 1.238052 + 0.854684 * 0.25) calc(2 * 0.125 * 7.9005 / 3) calc(0.0528517 + 0.0131702 + 0.0248198))"],
+        ["#bad455", "color(from #fff srgb-linear calc(0.328459 + 0.031842 + 0.13072) calc(0.658375 * 2 * (0.067566 + 0.432434)) calc(0.1816834 * (6.5163563 - 6.0163563)))"],
+        ["#bad455", "color(from #fff srgb-linear calc(0.25 * 0.863264 + 1.10082 / 4) calc(0.43638 + 0.221995) calc(1.816834 / 5 / (2.4048269 + 1.5951731)))"],
+        ["#bad455", "color(from #cca98b srgb-linear calc(0.751816 * 0.5 - 0.488714 + r) calc(g + 5.213094 - 2.475737 / 0.5) calc(0.908417 / 5 / (2.258183 - b)))"],
+        ["#bad455", "color(from #e9548d srgb-linear calc(9.288919 - r - 7.983051) calc(0.7269493 - g + 0.0401626 * 0.5) calc(b + 9.5064288 - (6.282671 + 3.3992721)))"],
+        ["#bad455", "color(from #e21460 srgb-linear calc(r - 0.269504) calc(0.13531346 - g + 0.25 * 2.12022788) calc(4.1668669 - b - (3.9393827 + 0.0196715)))"],
+        ["#bad455", "color(from #0cd42d srgb-linear calc((5.0880391 - 4.8425286) / (0.5036764 - r)) calc(0.053509 + 2.373046 - (1.109805 + g)) calc((b + 0.4737588) * (1.2185254 - 1.036842)))"],
+        ["#bad455", "color(from #dd950c srgb-linear calc(-0.464068 * 0.5 + r) calc(18.402444 * 0.5 - (8.843391 - g)) calc(0.03418705 + 0.05606969 + b / 6.28506223))"],
     ];
 
     for [hex, s] in test_data {

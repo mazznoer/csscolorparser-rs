@@ -123,6 +123,8 @@ fn relative() {
         // calc(...)
         ["#bad455", "rgb(from #bad455 calc(r) calc(g) calc(b))"],
         ["#a18ac5", "rgb(from #bad455 calc((r + g + b) / 3) calc(12 * 9 + 30) calc(0.197 * 1000))"],
+        ["#64d455", "rgb(from #bad455 calc(1e2) g b)"],
+        ["#64d455", "rgb(from #bad455 calc(1E+2) calc(2.12e2) calc(8.5e1))"],
     ];
 
     for [hex, s] in test_data {

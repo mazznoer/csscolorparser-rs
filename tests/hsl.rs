@@ -146,6 +146,7 @@ fn relative() {
         ["#266573", "hsl(from #fff calc(7 * 13 + 100) calc(5 * 20 / 2) calc(6 * 5))"],
         ["#55bfd4", "hsl(from #bad455 calc(h + s + l) s l)"],
         ["#b9db35", "hsl(from #bad455 h calc(s + 10) calc(l - 5))"],
+        ["#80ff00", "hsl(from #f00 calc(9e1) s l)"],
     ];
 
     for [hex, s] in test_data {

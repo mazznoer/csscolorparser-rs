@@ -75,7 +75,21 @@ impl<'a> Lexer<'a> {
                     }
                 }
 
-                // Safe: we only advanced over ascii digits and dots
+                // Optional exponent: 'e' or 'E', optional sign, at least one digit.
+                // CSS numbers allow scientific notation (e.g. `1e2`, `2.5E-1`).
+                if matches!(self.input.get(self.pos), Some(b'e' | b'E')) {
+                    let mut end = self.pos + 1;
+                    if matches!(self.input.get(end), Some(b'+' | b'-')) {
+                        end += 1;
+                    }
+                    if self.input.get(end).is_some_and(u8::is_ascii_digit) {
+                        while matches!(self.input.get(end), Some(c) if c.is_ascii_digit()) {
+                            end += 1;
+                        }
+                        self.pos = end;
+                    }
+                }
+                // Safe: we only advanced over ascii digits, dots, and exponent characters
                 let num = unsafe { core::str::from_utf8_unchecked(&self.input[start..self.pos]) };
 
                 if let Ok(val) = num.parse::<f32>() {
@@ -271,6 +285,11 @@ mod t {
             ("(0.5 * (5 + (7 * (9 - (3 * (1 + 1))))))", 13.0),
             ("((1+3))", 4.0),
             ("(5+(1+2/3))", 2.0 / 3.0 + 6.0),
+            // scientific notation
+            ("(1e2)", 100.0),
+            ("(2.5E-1)", 0.25),
+            ("(5e+2)", 500.0),
+            ("(1e-2)", 0.01),
         ];
 
         for (s, expected) in test_data {
@@ -294,6 +313,11 @@ mod t {
             "((5-1)",
             "(4+5(1*3))",
             "((1+2)1*5)",
+            // invalid scientific notation
+            "(1e)",
+            "(1E)",
+            "(1e+)",
+            "(1e2.5)",
         ];
 
         for s in invalids {
@@ -346,6 +370,10 @@ mod t {
             ("calc( ( 19 + 6 ) / 5 )", 5.0),
             ("calc((2/(1.5+0.5)) - (0.75 - 0.25))", 0.5),
             ("calc((r + g) / 2)", 191.0),
+            // calc() scientific notation
+            ("calc(1e2)", 100.0),
+            ("calc(2.5E-1 * 100)", 25.0),
+            ("calc(alpha * 1e1)", 5.0),
         ];
 
         for (s, expected) in test_data {
@@ -368,6 +396,9 @@ mod t {
             "calc(1 + inf)",
             "calc(1 + infinity)",
             "calc(2 - (3 + 1e400))",
+            "calc(1e)",
+            "calc(1e+)",
+            "calc(1e2.5)",
         ];
 
         for s in invalids {

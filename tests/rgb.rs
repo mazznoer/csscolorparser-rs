@@ -123,6 +123,8 @@ fn relative() {
         // calc(...)
         ["#bad455", "rgb(from #bad455 calc(r) calc(g) calc(b))"],
         ["#a18ac5", "rgb(from #bad455 calc((r + g + b) / 3) calc(12 * 9 + 30) calc(0.197 * 1000))"],
+        ["#64d455", "rgb(from #bad455 calc(1e2) g b)"],
+        ["#64d455", "rgb(from #bad455 calc(1E+2) calc(2.12e2) calc(8.5e1))"],
         ["#bad455", "rgb(from #fff calc(97.0503 - 22.27043 + 222.44038 * 0.5) calc((1081.826285 - 21.82571) / 5) calc(428.031666 / 3 - 57.677307))"],
         ["#bad455", "rgb(from #fff calc(18600.006 / 10 / 10) calc(2120.00115 / (2 * 5)) calc(10.154295 + 299.38248 / 4))"],
         ["#bad455", "rgb(from #fff calc(277.64082 - 91.64076) calc(108.961923 + 95.113882 + 7.92431) calc((4.30072 - 1.30072) * 28.333305))"],

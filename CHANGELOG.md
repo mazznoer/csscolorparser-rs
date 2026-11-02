@@ -17,6 +17,7 @@
     - `color(from ... rec2020 ...)`
 - Supports for percentange value in relative format.
 - More advanced `calc()` interpreter.
+- Scientific notation (e.g. `1e2`) in `calc()` expressions.
 
 ## [0.9.0]
 

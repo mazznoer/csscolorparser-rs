@@ -2,9 +2,11 @@ use csscolorparser::parse;
 
 #[test]
 fn absolute() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#00000000", "color(xyz none none none / none)"],
+
         // bare number
         ["#770024", "color(xyz-d65 0.066 0.013 0.016)"],
         ["#ffdddf", "color(xyz-d65 0.814 0.789 0.804)"],
@@ -27,6 +29,7 @@ fn absolute() {
         ["#e593eb", "color(xyz-d65 0.578 0.435 0.839)"],
         //["#f2d5e6", "color(xyz-d65 0.747 0.72 0.846)"],
         ["#ffdfff", "color(xyz-d65 1.208 0.992 1.104)"],
+
         // percentage
         ["#ff65b6", "color(xyz 72% 43% 49%)"],
         ["#ff289f", "color(xyz 135% 70% 39%)"],
@@ -48,6 +51,7 @@ fn absolute() {
         ["#771dff", "color(xyz 31% 14% 121%)"],
         ["#312f37", "color(xyz 3% 3% 4%)"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");
@@ -57,10 +61,12 @@ fn absolute() {
 
 #[test]
 fn relative() {
+    #[rustfmt::skip]
     let test_data = [
         // none
         ["#000000", "color(from #bad455 xyz none none none)"],
         ["#bad45500", "color(from #bad455 xyz-d65 x y z / none)"],
+
         // bare number
         ["#ffbce2", "color(from #fff xyz-d65 0.938 0.734 0.81)"],
         ["#d50037", "color(from #fff xyz-d65 0.279 0.14 0.048)"],
@@ -77,6 +83,7 @@ fn relative() {
         ["#ffa6ff", "color(from #fff xyz-d65 1.105 0.717 2.627)"],
         ["#ff00fe", "color(from #fff xyz-d65 0.682 0.252 0.949)"],
         ["#a1878e", "color(from #fff xyz-d65 0.282 0.268 0.294)"],
+
         // percentage
         ["#9f697a", "color(from #fff xyz-d65 23% 19% 21%)"],
         ["#c3002a", "color(from #fff xyz-d65 22% 10% 3%)"],
@@ -93,11 +100,25 @@ fn relative() {
         ["#5d29af", "color(from #fff xyz-d65 13% 7% 41%)"],
         ["#de91cc", "color(from #fff xyz-d65 51% 40% 62%)"],
         ["#ff00ff", "color(from #fff xyz-d65 187% 89% 106%)"],
+
         // keywords
         ["#bad455", "color(from #bad455 xyz-d65 x y z)"],
         ["#bad455", "color(from #bad455 xyz x y z / alpha)"],
+
         // calc(...)
+        ["#bad455", "color(from #bad455 xyz-d65 calc(x) calc(y) calc(z))"],
+        ["#bad455", "color(from #fff xyz-d65 calc((0.322516 + 0.586196) * 1.5 / 3) calc((4.197883 - 1.870671) * (3.027181 - 2.777181)) calc(0.25 * (0.338035 + 0.359097)))"],
+        ["#bad455", "color(from #fff xyz-d65 calc(4.0487 + 1.003925 - 4.598269) calc((4.260608 - 1.933396) * 0.25) calc(2.091396 * 0.25 / (0.75 / 0.25)))"],
+        ["#bad455", "color(from #fff xyz-d65 calc(0.454356 * 0.5 * 10 / 5) calc(0.422114 + 0.159689) calc(0.243916 * 0.25 + 1.799407 - 1.686103))"],
+        ["#bad455", "color(from #fff xyz-d65 calc(0.073823 + 0.004232 + 0.376301) calc(0.517729 + 0.128148 * 0.5) calc(6.549054 - (13.533017 - 7.158246)))"],
+        ["#bad455", "color(from #fff xyz-d65 calc(7.315932 - 7.220236 + 0.35866) calc((1.13729 + 0.026316) * 0.5) calc(0.25 * (0.376027 + 0.321105)))"],
+        ["#bad455", "color(from #9ad490 xyz calc(x + 0.021657 + 0.013646) calc(0.123346 + y - 0.10122) calc((1.046899 - z) * 0.5 * 0.5))"],
+        ["#bad455", "color(from #9437f4 xyz calc(x + 0.136267 + 0.19043 / 10) calc(0.490115 - y + 0.247276) calc(z - 0.139157 * 5))"],
+        ["#bad455", "color(from #030e72 xyz calc(x + 0.1641806 + 0.2578649) calc(5.3312392 - (y + 4.7339573)) calc((0.188101 + z) * (7.274881 - 6.774881)))"],
+        ["#bad455", "color(from #f9256c xyz calc(x - (5.654272 - 5.684258)) calc(0.356307 + y) calc(z + 0.022512 * 0.5))"],
+        ["#bad455", "color(from #a1c56b xyz calc((0.535514 + x) * 0.5) calc(0.013766 + 1.053729 - y) calc(z - 0.077754 / 2))"],
     ];
+
     for [hex, s] in test_data {
         let c = parse(s);
         assert!(c.is_ok(), "{s:?}");

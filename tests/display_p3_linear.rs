@@ -117,6 +117,16 @@ fn relative() {
         // calc(...)
         ["#bad455", "color(from #bad455 display-p3-linear calc(r) calc(g) calc(b))"],
         ["#e360c3", "color(from #bad455 display-p3-linear calc(g) calc(b) calc(r))"],
+        ["#bad455", "color(from #fff display-p3-linear calc((7.92048 - 6.878748) / (5.591231 - 3.591231)) calc(64.72245 / 10 - 58.19487 / 10) calc(12.179576 / 2 - (3.572552 + 2.378498)))"],
+        ["#bad455", "color(from #fff display-p3-linear calc(0.383296 / 2 + 0.658436 / 2) calc((0.34083 + 0.15917) * (8.363013 - 7.057497)) calc(0.009775 + 0.128963))"],
+        ["#bad455", "color(from #fff display-p3-linear calc(0.260433 * 2) calc(6.850732 - 6.733431 + 2.141828 / 4) calc((5.490034 - 5.07382) / (12.951016 - 9.951016)))"],
+        ["#bad455", "color(from #fff display-p3-linear calc(8.854462 - 8.409099 + 0.151006 / 2) calc((2.877809 - 2.627809) * (4.785033 - 2.174001)) calc(0.002561 + 0.005806 + 0.25 * 0.521484))"],
+        ["#bad455", "color(from #fff display-p3-linear calc(0.958186 * 5 - (2.610794 + 1.65927)) calc((0.461535 + 0.843981) * 0.5) calc(0.259472 / 4 + 0.25 * 0.29548))"],
+        ["#bad455", "color(from #8fc381 display-p3-linear calc((2.406361 - r) * 0.5 * 0.5) calc(g + 2.840318 - 2.724236) calc((b - 0.174677) * (0.392545 + 1.607455)))"],
+        ["#bad455", "color(from #e2fda1 display-p3-linear calc(5.896649 - r - 4.575692) calc(0.208307 + g - 0.530344) calc((b - 0.339177) / 0.5))"],
+        ["#bad455", "color(from #223fdf display-p3-linear calc(3.6624538 - (3.1635737 - r)) calc(g + 2.4167288 * 0.25) calc(-0.644272 + b + 3.198829 - 3.091482))"],
+        ["#bad455", "color(from #acf6a3 display-p3-linear calc(r + 9.880283 - (2.9682 + 6.894296)) calc(6.003656 - (6.255498 - g)) calc(b - 0.324963 + 0.022972 + 0.033545))"],
+        ["#bad455", "color(from #cda4dd display-p3-linear calc(0.25 * (r + 1.515345)) calc((g + 0.926383) * 1.5 / 3) calc(4.372937 + 2.718273 - (6.256911 + b)))"],
     ];
 
     for [hex, s] in test_data {

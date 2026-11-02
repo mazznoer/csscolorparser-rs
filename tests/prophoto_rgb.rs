@@ -117,6 +117,16 @@ fn relative() {
         // calc(...)
         ["#bad455", "color(from #bad455 prophoto-rgb calc(r) calc(g) calc(b) / calc(alpha))"],
         ["#00c6d3", "color(from #bad455 prophoto-rgb calc(b) calc(r) calc(g))"],
+        ["#bad455", "color(from #fff prophoto-rgb calc(7.647537 - 7.286453 + 0.311773) calc((1.869082 + 1.214106) / (0.8 * 5)) calc(0.000836 + 0.265427 + 0.001938 + 0.098493))"],
+        ["#bad455", "color(from #fff prophoto-rgb calc(0.5 * 2.691428 * (0.245931 + 0.254069)) calc((17.278481 - 9.570511) / (0.25 * 40)) calc(0.339768 + 0.013463 / 0.5))"],
+        ["#bad455", "color(from #fff prophoto-rgb calc(8.400446 - (10.085242 - 2.357653)) calc((13.742583 - 9.888598) / (1.607998 + 3.392002)) calc(0.25 * 27.052908 - 6.396533))"],
+        ["#bad455", "color(from #fff prophoto-rgb calc((2.82107 + 3.9075) / (3.946445 + 6.053555)) calc(0.330989 * 2 + 0.217638 * 0.5) calc(1.422695 - (0.758587 + 0.297414)))"],
+        ["#bad455", "color(from #fff prophoto-rgb calc(8.074284 * 0.25 / (0.75 / 0.25)) calc(3.083188 / (16 / 4)) calc(0.019069 + 0.254097 + 2.038856 - 1.945328))"],
+        ["#bad455", "color(from #0f52cb prophoto-rgb calc(2.37564 / 10 + r + 0.135538) calc(5.815998 - 4.781181 - g) calc(b - (6.862915 - 6.529192)))"],
+        ["#bad455", "color(from #6650d6 prophoto-rgb calc(0.54765 * 0.5 + r) calc(g + 6.244594 - 5.755233) calc((0.4064 + 0.326988) / (1.496868 / b)))"],
+        ["#bad455", "color(from #535d0e prophoto-rgb calc(r + 0.235535 + 0.187189) calc(g + 3.762896 - 3.276843) calc(2.996011 - (b + 2.521541)))"],
+        ["#bad455", "color(from #f01c53 prophoto-rgb calc(r + 0.009843) calc((8.688922 - 7.147328) * (0.775588 - g)) calc(0.098556 + 0.004225 + b))"],
+        ["#bad455", "color(from #421129 prophoto-rgb calc(r - (5.403053 - 5.923583)) calc(g + 4.0201586 - 3.330496) calc(1.001984 / 4 + b))"],
     ];
 
     for [hex, s] in test_data {

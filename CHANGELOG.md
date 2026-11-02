@@ -7,10 +7,12 @@
 - Supports for:
     - `color(a98-rgb ...)`
     - `color(display-p3 ...)`
+    - `color(display-p3-linear ...)`
     - `color(prophoto-rgb ...)`
     - `color(rec2020 ...)`
     - `color(from ... a98-rgb ...)`
     - `color(from ... display-p3 ...)`
+    - `color(from ... display-p3-linear ...)`
     - `color(from ... prophoto-rgb ...)`
     - `color(from ... rec2020 ...)`
 - Supports for percentange value in relative format.

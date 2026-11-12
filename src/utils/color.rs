@@ -1,6 +1,3 @@
-#[cfg(not(feature = "std"))]
-use num_traits::float::Float as _;
-
 /// Wraps angle in degrees into `[0, 360)`. NaN becomes 0.
 pub(crate) const fn normalize_angle(h: f32) -> f32 {
     if h.is_nan() {

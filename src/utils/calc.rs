@@ -192,68 +192,77 @@ where
     Ok(val)
 }
 
-pub(crate) fn calc_values(
-    values: [&str; 4],
-    variables: [(&str, f32); 4],
-) -> Option<[(f32, bool); 4]> {
-    let parse_v = |s: &str| -> Option<f32> {
-        if let Ok(val) = s.parse::<f32>() {
-            if val.is_finite() {
-                return Some(val);
+pub(crate) fn calc_value(s: &str, variables: &[(&str, f32)]) -> Option<(f32, bool)> {
+    // percentage
+    if let Some(s) = s.strip_suffix('%') {
+        if let Ok(v) = s.parse::<f32>() {
+            if v.is_finite() {
+                return Some((v / 100.0, true));
             }
-            return None;
         };
-        for (var, val) in variables {
-            if s.eq_ignore_ascii_case(var) {
-                return Some(val);
-            }
-        }
-        None
-    };
-
-    let mut result = [(0.0, false); 4];
-
-    for (i, s) in values.iter().enumerate() {
-        // none
-        if s.eq_ignore_ascii_case("none") {
-            continue;
-        }
-
-        // bare number or keyword
-        if let Some(t) = parse_v(s) {
-            result[i].0 = t;
-            continue;
-        }
-
-        // percentage
-        if let Some(s) = s.strip_suffix('%') {
-            if let Ok(v) = s.parse::<f32>() {
-                if v.is_finite() {
-                    result[i] = (v / 100.0, true);
-                    continue;
-                }
-            };
-            return None;
-        }
-
-        // calc(...)
-        if let Some(s) = strip_prefix(s, "calc(") {
-            if let Some(s) = s.strip_suffix(')') {
-                let mut lexer = Lexer::new(s);
-                if let Ok(v) = eval_expr(&mut lexer, &parse_v) {
-                    if v.is_finite() {
-                        result[i].0 = v;
-                        continue;
-                    }
-                }
-            }
-        }
-
-        // invalid value
         return None;
     }
 
-    Some(result)
+    if let Some(v) = parse_value(s, variables) {
+        return Some((v, false));
+    }
+
+    None
+}
+
+pub(crate) fn calc_angle(s: &str, variables: &[(&str, f32)]) -> Option<f32> {
+    // angle suffix
+    if let Some(v) = super::parse_angle(s) {
+        return Some(v);
+    }
+
+    if let Some(v) = parse_value(s, variables) {
+        return Some(v);
+    }
+
+    None
+}
+
+fn parse_value(s: &str, variables: &[(&str, f32)]) -> Option<f32> {
+    let parse_key = |k: &str| {
+        variables
+            .iter()
+            .find(|(key, _)| key.eq_ignore_ascii_case(k))
+            .map(|&(_, value)| value)
+    };
+
+    // none
+    if s.eq_ignore_ascii_case("none") {
+        return Some(0.0);
+    }
+
+    // bare number
+    if let Ok(t) = s.parse::<f32>() {
+        if t.is_finite() {
+            return Some(t);
+        }
+        return None;
+    };
+
+    // keyword
+    if let Some(t) = parse_key(s) {
+        return Some(t);
+    }
+
+    // calc(...)
+    if let Some(s) = strip_prefix(s, "calc(") {
+        if let Some(s) = s.strip_suffix(')') {
+            let mut lexer = Lexer::new(s);
+            if let Ok(v) = eval_expr(&mut lexer, &parse_key) {
+                if v.is_finite() {
+                    return Some(v);
+                }
+            }
+        }
+    }
+
+    // invalid value
+    None
 }
 
 #[cfg(test)]
@@ -330,13 +339,6 @@ mod t {
 
     #[test]
     fn parse_values_() {
-        fn parse_value(s: &str, variables: [(&str, f32); 4]) -> Option<f32> {
-            if let Some([t, ..]) = calc_values([s, "1", "1", "1"], variables) {
-                return Some(t.0);
-            }
-            None
-        }
-
         let vars = [("r", 255.0), ("g", 127.0), ("b", 0.0), ("alpha", 0.5)];
 
         let test_data = [
@@ -377,7 +379,7 @@ mod t {
         ];
 
         for (s, expected) in test_data {
-            assert_eq!(parse_value(s, vars), Some(expected), "{s:?}");
+            assert_eq!(parse_value(s, &vars), Some(expected), "{s:?}");
         }
 
         let invalids = [
@@ -402,7 +404,7 @@ mod t {
         ];
 
         for s in invalids {
-            assert_eq!(parse_value(s, vars), None, "{s:?}");
+            assert_eq!(parse_value(s, &vars), None, "{s:?}");
         }
     }
 }

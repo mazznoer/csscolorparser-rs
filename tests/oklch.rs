@@ -125,6 +125,11 @@ fn relative() {
         ["#00ffab", "oklch(from #fff 88% 61% 164)"],
         ["#33424a", "oklch(from #fff 37% 6% 231)"],
 
+        // angle suffix
+        ["#00ff00", "oklch(from #fff 0.897 0.38 143deg)"],
+        ["#471c7b", "oklch(from #fff 0.349 0.15 5.218rad)"],
+        ["#ff77ff", "oklch(from #fff 0.809 0.261 0.900turn)"],
+
         // keywords
         ["#bad455", "oklch(from #bad455 l c h)"],
         ["#bad455", "oklch(from #bad455 l c h / alpha)"],

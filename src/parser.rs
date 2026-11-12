@@ -1,6 +1,6 @@
 use crate::utils::ParamParser;
-use crate::utils::calc_values;
 use crate::utils::remap;
+use crate::utils::{calc_angle, calc_value};
 use crate::utils::{parse_angle, parse_percent_or_float};
 use crate::{Color, ParseColorError};
 
@@ -144,8 +144,6 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
         return Err(err);
     };
 
-    let values = [val1, val2, val3, val4];
-
     match err {
         ParseColorError::InvalidRgb => {
             // r, g, b [0..255]
@@ -156,9 +154,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                 ("b", color.b * 255.0),
                 ("alpha", color.a),
             ];
-            if let Some([(r, r_pct), (g, g_pct), (b, b_pct), (a, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some((r, r_pct)), Some((g, g_pct)), Some((b, b_pct)), Some((a, _))) = (
+                // red
+                calc_value(val1, &variables),
+                // green
+                calc_value(val2, &variables),
+                // blue
+                calc_value(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let r = if r_pct { r } else { r / 255.0 };
                 let g = if g_pct { g } else { g / 255.0 };
                 let b = if b_pct { b } else { b / 255.0 };
@@ -171,9 +176,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [h, w, b, a] = color.to_hwba();
             let variables = [("h", h), ("w", w * 100.0), ("b", b * 100.0), ("alpha", a)];
-            if let Some([(h, false), (w, w_pct), (b, b_pct), (a, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some(h), Some((w, w_pct)), Some((b, b_pct)), Some((a, _))) = (
+                // hue
+                calc_angle(val1, &variables),
+                // whiteness
+                calc_value(val2, &variables),
+                // blackness
+                calc_value(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let w = if w_pct { w } else { w / 100.0 };
                 let b = if b_pct { b } else { b / 100.0 };
                 return Ok(Color::from_hwba(h, w, b, a));
@@ -185,9 +197,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [h, s, l, a] = color.to_hsla();
             let variables = [("h", h), ("s", s * 100.0), ("l", l * 100.0), ("alpha", a)];
-            if let Some([(h, false), (s, s_pct), (l, l_pct), (a, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some(h), Some((s, s_pct)), Some((l, l_pct)), Some((a, _))) = (
+                // hue
+                calc_angle(val1, &variables),
+                // saturation
+                calc_value(val2, &variables),
+                // lightness
+                calc_value(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let s = if s_pct { s } else { s / 100.0 };
                 let l = if l_pct { l } else { l / 100.0 };
                 return Ok(Color::from_hsla(h, s.clamp(0.0, 1.0), l.clamp(0.0, 1.0), a));
@@ -199,9 +218,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [h, s, v, a] = color.to_hsva();
             let variables = [("h", h), ("s", s * 100.0), ("v", v * 100.0), ("alpha", a)];
-            if let Some([(h, false), (s, s_pct), (v, v_pct), (a, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some(h), Some((s, s_pct)), Some((v, v_pct)), Some((a, _))) = (
+                // hue
+                calc_angle(val1, &variables),
+                // saturation
+                calc_value(val2, &variables),
+                // value
+                calc_value(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let s = if s_pct { s } else { s / 100.0 };
                 let v = if v_pct { v } else { v / 100.0 };
                 return Ok(Color::from_hsva(h, s, v, a));
@@ -213,9 +239,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, a, b, alpha] = color.to_laba();
             let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-            if let Some([(l, l_pct), (a, a_pct), (b, b_pct), (alpha, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some((l, l_pct)), Some((a, a_pct)), Some((b, b_pct)), Some((alpha, _))) = (
+                // lightness
+                calc_value(val1, &variables),
+                // a
+                calc_value(val2, &variables),
+                // b
+                calc_value(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let l = if l_pct { l * 100.0 } else { l };
                 let a = if a_pct {
                     remap(a, -1.0, 1.0, -125.0, 125.0)
@@ -237,9 +270,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, c, h, a] = color.to_lcha();
             let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-            if let Some([(l, l_pct), (c, c_pct), (h, false), (a, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some((l, l_pct)), Some((c, c_pct)), Some(h), Some((a, _))) = (
+                // lightness
+                calc_value(val1, &variables),
+                // chroma
+                calc_value(val2, &variables),
+                // hue
+                calc_angle(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let l = if l_pct { l * 100.0 } else { l };
                 let c = if c_pct { c * 150.0 } else { c };
                 return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
@@ -251,9 +291,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, a, b, alpha] = color.to_oklaba();
             let variables = [("l", l), ("a", a), ("b", b), ("alpha", alpha)];
-            if let Some([(l, _), (a, a_pct), (b, b_pct), (alpha, _)]) =
-                calc_values(values, variables)
-            {
+            if let (Some((l, _)), Some((a, a_pct)), Some((b, b_pct)), Some((alpha, _))) = (
+                // lightness
+                calc_value(val1, &variables),
+                // a
+                calc_value(val2, &variables),
+                // b
+                calc_value(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let a = if a_pct {
                     remap(a, -1.0, 1.0, -0.4, 0.4)
                 } else {
@@ -274,7 +321,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             // alpha [0..1]
             let [l, c, h, a] = color.to_oklcha();
             let variables = [("l", l), ("c", c), ("h", h.to_degrees()), ("alpha", a)];
-            if let Some([(l, _), (c, c_pct), (h, false), (a, _)]) = calc_values(values, variables) {
+            if let (Some((l, _)), Some((c, c_pct)), Some(h), Some((a, _))) = (
+                // lightness
+                calc_value(val1, &variables),
+                // chroma
+                calc_value(val2, &variables),
+                // hue
+                calc_angle(val3, &variables),
+                // alpha
+                calc_value(val4, &variables),
+            ) {
                 let c = if c_pct { c * 0.4 } else { c };
                 return Ok(Color::from_oklcha(
                     l.max(0.0),
@@ -294,7 +350,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                         ("b", color.b),
                         ("alpha", color.a),
                     ];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::new(r, g, b, a));
                     };
                 }
@@ -302,7 +367,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_linear_rgba();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_linear_rgba(r, g, b, a));
                     };
                 }
@@ -310,7 +384,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_a98_rgb();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_a98_rgb(r, g, b, a));
                     };
                 }
@@ -318,7 +401,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_display_p3();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_display_p3(r, g, b, a));
                     };
                 }
@@ -326,7 +418,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_display_p3_linear();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_display_p3_linear(r, g, b, a));
                     };
                 }
@@ -334,7 +435,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_prophoto_rgb();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_prophoto_rgb(r, g, b, a));
                     };
                 }
@@ -342,7 +452,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // r, g, b, alpha [0..1]
                     let [r, g, b, a] = color.to_rec2020();
                     let variables = [("r", r), ("g", g), ("b", b), ("alpha", a)];
-                    if let Some([(r, _), (g, _), (b, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((r, _)), Some((g, _)), Some((b, _)), Some((a, _))) = (
+                        // red
+                        calc_value(val1, &variables),
+                        // green
+                        calc_value(val2, &variables),
+                        // blue
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_rec2020(r, g, b, a));
                     };
                 }
@@ -350,7 +469,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // x, y, z, alpha [0..1]
                     let [x, y, z, a] = color.to_xyz_d50();
                     let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
-                    if let Some([(x, _), (y, _), (z, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((x, _)), Some((y, _)), Some((z, _)), Some((a, _))) = (
+                        // x
+                        calc_value(val1, &variables),
+                        // y
+                        calc_value(val2, &variables),
+                        // z
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_xyz_d50(x, y, z, a));
                     };
                 }
@@ -358,7 +486,16 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                     // x, y, z, alpha [0..1]
                     let [x, y, z, a] = color.to_xyz_d65();
                     let variables = [("x", x), ("y", y), ("z", z), ("alpha", a)];
-                    if let Some([(x, _), (y, _), (z, _), (a, _)]) = calc_values(values, variables) {
+                    if let (Some((x, _)), Some((y, _)), Some((z, _)), Some((a, _))) = (
+                        // x
+                        calc_value(val1, &variables),
+                        // y
+                        calc_value(val2, &variables),
+                        // z
+                        calc_value(val3, &variables),
+                        // alpha
+                        calc_value(val4, &variables),
+                    ) {
                         return Ok(Color::from_xyz_d65(x, y, z, a));
                     };
                 }

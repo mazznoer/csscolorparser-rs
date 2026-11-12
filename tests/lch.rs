@@ -126,6 +126,11 @@ fn relative() {
         ["#00a1ff", "lch(from #fff 63% 45% 264)"],
         ["#fcf5f3", "lch(from #fff 97% 2% 42)"],
 
+        // angle suffix
+        ["#f6f933", "lch(from #fff 95.49 86.25 101deg)"],
+        ["#f5b7c7", "lch(from #fff 80.55 25.16 0.037rad)"],
+        ["#0076c7", "lch(from #fff 44.02 61.45 0.688turn)"],
+
         // keywords
         ["#bad455", "lch(from #bad455 l c h)"],
         ["#bad455", "lch(from #bad455 l c h / alpha)"],

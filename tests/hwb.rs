@@ -130,6 +130,12 @@ fn relative() {
         ["#ff24d7", "hwb(from #fff 311 14% 0%)"],
         ["#820036", "hwb(from #fff 335 0% 49%)"],
 
+        // angle suffix
+        ["#eee3ff", "hwb(from #fff 263deg 89 0)"],
+        ["#ff8cf2", "hwb(from #fff 341grad 55 0)"],
+        ["#8a4a00", "hwb(from #fff 0.090turn 0 46)"],
+        ["#ddffab", "hwb(from #fff 1.472rad 67 0)"],
+
         // keywords
         ["#bad455", "hwb(from #bad455 h w b)"],
         ["#bad455", "hwb(from #bad455 h w b / alpha)"],
@@ -163,6 +169,8 @@ fn invalid() {
         // invalid hue (percentage)
         "hwb(55% 0 0)",
         "hwb(from #bad455 0% w b)",
+        // invalid w & b
+        "hwb(from #bad455 h 0.01rad 10deg)",
     ];
 
     for s in test_data {

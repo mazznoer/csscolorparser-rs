@@ -138,6 +138,12 @@ fn relative() {
         ["#c1a4bc", "hsl(from #fff 311 19% 70%)"],
         ["#aa0349", "hsl(from #fff 335 96% 34%)"],
 
+        // angle suffix
+        ["#c9cfab", "hsl(from #fff 1.197rad 27 74)"],
+        ["#91baf8", "hsl(from #fff 216deg 88 77)"],
+        ["#fce9e9", "hsl(from #fff 0.003turn 76 95)"],
+        ["#43143c", "hsl(from #fff 343grad 54 17)"],
+
         // keywords
         ["#bad455", "hsl(from #bad455 h s l)"],
         ["#bad455", "hsl(from #bad455 h s l / alpha)"],
@@ -172,6 +178,8 @@ fn invalid() {
         // invalid hue (percentage)
         "hsl(0% 35 60)",
         "hsl(from #bad455 0% s l)",
+        // invalid s and l
+        "hsl(from #bad455 h 0deg 0.25turn)",
     ];
 
     for s in test_data {

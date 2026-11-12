@@ -97,7 +97,7 @@ impl Color {
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn from_hsva(h: f32, s: f32, v: f32, a: f32) -> Self {
-        let [r, g, b] = hsv_to_rgb(normalize_angle(h), s.clamp(0.0, 1.0), v.clamp(0.0, 1.0));
+        let [r, g, b] = hsv_to_rgb(h, s, v);
         Self::new(r, g, b, a)
     }
 
@@ -108,7 +108,7 @@ impl Color {
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn from_hsla(h: f32, s: f32, l: f32, a: f32) -> Self {
-        let [r, g, b] = hsl_to_rgb(normalize_angle(h), s.clamp(0.0, 1.0), l.clamp(0.0, 1.0));
+        let [r, g, b] = hsl_to_rgb(h, s, l);
         Self::new(r, g, b, a)
     }
 
@@ -119,7 +119,7 @@ impl Color {
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn from_hwba(h: f32, w: f32, b: f32, a: f32) -> Self {
-        let [r, g, b] = hwb_to_rgb(normalize_angle(h), w.clamp(0.0, 1.0), b.clamp(0.0, 1.0));
+        let [r, g, b] = hwb_to_rgb(h, w, b);
         Self::new(r, g, b, a)
     }
 

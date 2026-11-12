@@ -4,7 +4,12 @@ pub(crate) const fn normalize_angle(h: f32) -> f32 {
         return 0.0;
     }
     let h = h % 360.0;
-    if h < 0.0 { h + 360.0 } else { h }
+    if h < 0.0 {
+        let h = h + 360.0;
+        if h < 360.0 { h } else { 0.0 }
+    } else {
+        h
+    }
 }
 
 /// Hue in degrees (`[0, 360)`) of an RGB color, given its max channel and

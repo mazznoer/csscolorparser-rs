@@ -260,7 +260,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                 } else {
                     b
                 };
-                return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+                return Ok(Color::from_laba(l.clamp(0.0, 100.0), a, b, alpha));
             };
         }
         ParseColorError::InvalidLch => {
@@ -282,7 +282,12 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             ) {
                 let l = if l_pct { l * 100.0 } else { l };
                 let c = if c_pct { c * 150.0 } else { c };
-                return Ok(Color::from_lcha(l.max(0.0), c.max(0.0), h.to_radians(), a));
+                return Ok(Color::from_lcha(
+                    l.clamp(0.0, 100.0),
+                    c.max(0.0),
+                    h.to_radians(),
+                    a,
+                ));
             };
         }
         ParseColorError::InvalidOklab => {
@@ -311,7 +316,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
                 } else {
                     b
                 };
-                return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
+                return Ok(Color::from_oklaba(l.clamp(0.0, 1.0), a, b, alpha));
             };
         }
         ParseColorError::InvalidOklch => {
@@ -333,7 +338,7 @@ fn parse_all(s: &str, depth: usize) -> Result<Color, ParseColorError> {
             ) {
                 let c = if c_pct { c * 0.4 } else { c };
                 return Ok(Color::from_oklcha(
-                    l.max(0.0),
+                    l.clamp(0.0, 1.0),
                     c.max(0.0),
                     h.to_radians(),
                     a,
@@ -701,7 +706,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 } else {
                     b
                 };
-                return Ok(Color::from_laba(l.max(0.0), a, b, alpha));
+                return Ok(Color::from_laba(l.clamp(0.0, 100.0), a, b, alpha));
             }
         }
         ParseColorError::InvalidLch => {
@@ -716,7 +721,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 let l = if l_pct { l * 100.0 } else { l };
                 let c = if c_pct { c * 150.0 } else { c };
                 return Ok(Color::from_lcha(
-                    l.max(0.0),
+                    l.clamp(0.0, 100.0),
                     c.max(0.0),
                     h.to_radians(),
                     alpha,
@@ -742,7 +747,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 } else {
                     b
                 };
-                return Ok(Color::from_oklaba(l.max(0.0), a, b, alpha));
+                return Ok(Color::from_oklaba(l.clamp(0.0, 1.0), a, b, alpha));
             }
         }
         ParseColorError::InvalidOklch => {
@@ -756,7 +761,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
             ) {
                 let c = if c_pct { c * 0.4 } else { c };
                 return Ok(Color::from_oklcha(
-                    l.max(0.0),
+                    l.clamp(0.0, 1.0),
                     c.max(0.0),
                     h.to_radians(),
                     alpha,

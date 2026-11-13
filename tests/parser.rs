@@ -335,6 +335,32 @@ fn none_value() {
     }
 }
 
+#[test]
+fn lightness_clamp() {
+    // Lightness outside 0..100% is clamped to it at parsed-value time (CSS Color 4).
+    #[rustfmt::skip]
+    let test_data = [
+        ["lab(150 20 -30)", "lab(100 20 -30)"],
+        ["lab(120% 20 -30)", "lab(100 20 -30)"],
+        ["lab(-10 20 -30)", "lab(0 20 -30)"],
+        ["lch(150 30 90)", "lch(100 30 90)"],
+        ["lch(-10 30 90)", "lch(0 30 90)"],
+        ["oklab(1.5 0.1 -0.1)", "oklab(1 0.1 -0.1)"],
+        ["oklab(120% 0.1 -0.1)", "oklab(1 0.1 -0.1)"],
+        ["oklch(1.2 0.1 30)", "oklch(1 0.1 30)"],
+        ["oklch(120% 0.1 30)", "oklch(1 0.1 30)"],
+        ["oklch(-0.5 0.1 30)", "oklch(0 0.1 30)"],
+        ["lab(from #bad455 calc(l + 100) a b)", "lab(from #bad455 100 a b)"],
+        ["lch(from #bad455 calc(l + 100) c h)", "lch(from #bad455 100 c h)"],
+        ["oklab(from #bad455 calc(l + 1) a b)", "oklab(from #bad455 1 a b)"],
+        ["oklch(from #bad455 calc(l + 1) c h)", "oklch(from #bad455 1 c h)"],
+    ];
+    for [s, clamped] in test_data {
+        assert!(parse(s).is_ok(), "{:?}", s);
+        assert_eq!(parse(s), parse(clamped), "{:?}", s);
+    }
+}
+
 #[cfg(feature = "named-colors")]
 #[test]
 fn invalid_format() {

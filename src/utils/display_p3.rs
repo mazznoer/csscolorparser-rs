@@ -1,8 +1,5 @@
 #![allow(clippy::excessive_precision)]
 
-#[cfg(not(feature = "std"))]
-use num_traits::float::Float as _;
-
 use super::{linear_to_srgb, mul3, srgb_to_linear};
 
 // Conversions between linear sRGB and CSS `display-p3`.

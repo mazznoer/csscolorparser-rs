@@ -3,6 +3,8 @@
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
 
+use super::{linear_to_srgb, mul3, srgb_to_linear};
+
 // Conversions between linear sRGB and CSS `display-p3`.
 //
 // CSS Color 4 `color(display-p3 r g b)` is *gamma-encoded* (it uses the sRGB
@@ -28,50 +30,17 @@ const SRGB_TO_P3: [[f32; 3]; 3] = [
     [0.017_082_63, 0.072_397_44, 0.910_519_9],
 ];
 
-#[inline]
-fn mul3(m: &[[f32; 3]; 3], r: f32, g: f32, b: f32) -> [f32; 3] {
-    [
-        m[0][0] * r + m[0][1] * g + m[0][2] * b,
-        m[1][0] * r + m[1][1] * g + m[1][2] * b,
-        m[2][0] * r + m[2][1] * g + m[2][2] * b,
-    ]
-}
-
-/// sRGB electro-optical transfer function (gamma-encoded -> linear).
-#[inline]
-fn srgb_to_linear(c: f32) -> f32 {
-    let a = c.abs();
-    let l = if a <= 0.04045 {
-        a / 12.92
-    } else {
-        ((a + 0.055) / 1.055).powf(2.4)
-    };
-    l.copysign(c)
-}
-
-/// sRGB inverse transfer function (linear -> gamma-encoded).
-#[inline]
-fn linear_to_srgb(c: f32) -> f32 {
-    let a = c.abs();
-    let e = if a <= 0.003_130_8 {
-        a * 12.92
-    } else {
-        1.055 * a.powf(1.0 / 2.4) - 0.055
-    };
-    e.copysign(c)
-}
-
 /// Converts a linear sRGB color to linear Display-P3. This is just the 3x3
 /// primaries matrix with no transfer function. Linear sRGB values inside 0..=1
 /// stay inside 0..=1, since the sRGB gamut sits within P3.
 pub(crate) fn linear_srgb_to_linear_display_p3(r: f32, g: f32, b: f32) -> [f32; 3] {
-    mul3(&SRGB_TO_P3, r, g, b)
+    mul3(&SRGB_TO_P3, [r, g, b])
 }
 
 /// Converts a linear Display-P3 color to linear sRGB. Colors outside the sRGB
 /// gamut produce components below 0 or above 1.
 pub(crate) fn linear_display_p3_to_linear_srgb(r: f32, g: f32, b: f32) -> [f32; 3] {
-    mul3(&P3_TO_SRGB, r, g, b)
+    mul3(&P3_TO_SRGB, [r, g, b])
 }
 
 /// Converts a CSS `display-p3` color (gamma-encoded, components nominally 0..=1)

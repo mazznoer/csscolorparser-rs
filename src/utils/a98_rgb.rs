@@ -1,5 +1,9 @@
+#![allow(clippy::excessive_precision)]
+
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
+
+use super::mul3;
 
 // Conversion between linear-light sRGB and A98 RGB (Adobe RGB 1998),
 // matching the `a98-rgb` color space from CSS Color Level 4.
@@ -29,15 +33,6 @@ const LIN_SRGB_TO_LIN_A98: [[f32; 3]; 3] = [
     [0.0, 1.0, 0.0],
     [0.0, 0.041161947, 0.95883805],
 ];
-
-#[inline]
-fn mul3(m: &[[f32; 3]; 3], v: [f32; 3]) -> [f32; 3] {
-    [
-        m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
-        m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
-        m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2],
-    ]
-}
 
 /// Gamma-encoded A98 RGB -> linear light (sign-preserving power function).
 #[inline]

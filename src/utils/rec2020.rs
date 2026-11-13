@@ -1,5 +1,9 @@
+#![allow(clippy::excessive_precision)]
+
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
+
+use super::{linear_to_srgb, mul3, srgb_to_linear};
 
 // sRGB <-> Rec.2020 (ITU-R BT.2020) conversion.
 //
@@ -10,7 +14,7 @@ use num_traits::float::Float as _;
 // the sRGB gamut. The result is not clipped, so the conversion stays invertible.
 
 /// Linear sRGB -> linear Rec.2020 (D65).
-const SRGB_TO_REC2020: [[f64; 3]; 3] = [
+const SRGB_TO_REC2020: [[f32; 3]; 3] = [
     [
         0.627_403_895_934_699_1,
         0.329_283_038_377_883_7,
@@ -29,7 +33,7 @@ const SRGB_TO_REC2020: [[f64; 3]; 3] = [
 ];
 
 /// Linear Rec.2020 -> linear sRGB (D65).
-const REC2020_TO_SRGB: [[f64; 3]; 3] = [
+const REC2020_TO_SRGB: [[f32; 3]; 3] = [
     [
         1.660_491_002_108_434_4,
         -0.587_641_138_788_549_5,
@@ -47,63 +51,28 @@ const REC2020_TO_SRGB: [[f64; 3]; 3] = [
     ],
 ];
 
-const BT2020_ALPHA: f64 = 1.099_296_826_809_44;
-const BT2020_BETA: f64 = 0.018_053_968_510_807;
+const BT2020_ALPHA: f32 = 1.099_296_826_809_44;
+const BT2020_BETA: f32 = 0.018_053_968_510_807;
 
 /// Convert gamma-encoded sRGB to gamma-encoded Rec.2020.
-pub(crate) fn srgb_to_rec2020(r: f64, g: f64, b: f64) -> [f64; 3] {
-    let (r, g, b) = mul(
+pub(crate) fn srgb_to_rec2020(r: f32, g: f32, b: f32) -> [f32; 3] {
+    let [r, g, b] = mul3(
         &SRGB_TO_REC2020,
-        srgb_decode(r),
-        srgb_decode(g),
-        srgb_decode(b),
+        [srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b)],
     );
     [rec2020_encode(r), rec2020_encode(g), rec2020_encode(b)]
 }
 
 /// Convert gamma-encoded Rec.2020 to gamma-encoded sRGB.
-pub(crate) fn rec2020_to_srgb(r: f64, g: f64, b: f64) -> [f64; 3] {
-    let (r, g, b) = mul(
+pub(crate) fn rec2020_to_srgb(r: f32, g: f32, b: f32) -> [f32; 3] {
+    let [r, g, b] = mul3(
         &REC2020_TO_SRGB,
-        rec2020_decode(r),
-        rec2020_decode(g),
-        rec2020_decode(b),
+        [rec2020_decode(r), rec2020_decode(g), rec2020_decode(b)],
     );
-    [srgb_encode(r), srgb_encode(g), srgb_encode(b)]
+    [linear_to_srgb(r), linear_to_srgb(g), linear_to_srgb(b)]
 }
 
-fn mul(m: &[[f64; 3]; 3], r: f64, g: f64, b: f64) -> (f64, f64, f64) {
-    (
-        m[0][0] * r + m[0][1] * g + m[0][2] * b,
-        m[1][0] * r + m[1][1] * g + m[1][2] * b,
-        m[2][0] * r + m[2][1] * g + m[2][2] * b,
-    )
-}
-
-// Transfer functions mirror around zero so out-of-gamut (negative) values
-// survive the round trip.
-
-fn srgb_decode(v: f64) -> f64 {
-    let a = v.abs();
-    let lin = if a <= 0.04045 {
-        a / 12.92
-    } else {
-        ((a + 0.055) / 1.055).powf(2.4)
-    };
-    lin.copysign(v)
-}
-
-fn srgb_encode(l: f64) -> f64 {
-    let a = l.abs();
-    let enc = if a <= 0.003_130_8 {
-        12.92 * a
-    } else {
-        1.055 * a.powf(1.0 / 2.4) - 0.055
-    };
-    enc.copysign(l)
-}
-
-fn rec2020_decode(v: f64) -> f64 {
+fn rec2020_decode(v: f32) -> f32 {
     let a = v.abs();
     let lin = if a < 4.5 * BT2020_BETA {
         a / 4.5
@@ -113,7 +82,7 @@ fn rec2020_decode(v: f64) -> f64 {
     lin.copysign(v)
 }
 
-fn rec2020_encode(l: f64) -> f64 {
+fn rec2020_encode(l: f32) -> f32 {
     let a = l.abs();
     let enc = if a < BT2020_BETA {
         4.5 * a

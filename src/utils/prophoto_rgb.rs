@@ -3,6 +3,39 @@
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
 
+// Helpers
+
+#[inline]
+pub(crate) fn mul3(m: &[[f32; 3]; 3], v: [f32; 3]) -> [f32; 3] {
+    [
+        m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
+        m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+        m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2],
+    ]
+}
+
+/// sRGB gamma-encoded -> linear light (sign-preserving for out-of-range input)
+#[inline]
+pub(crate) fn srgb_to_linear(v: f32) -> f32 {
+    let a = v.abs();
+    if a <= 0.04045 {
+        v / 12.92
+    } else {
+        v.signum() * ((a + 0.055) / 1.055).powf(2.4)
+    }
+}
+
+/// linear light -> sRGB gamma-encoded (sign-preserving)
+#[inline]
+pub(crate) fn linear_to_srgb(v: f32) -> f32 {
+    let a = v.abs();
+    if a > 0.0031308 {
+        v.signum() * (1.055 * a.powf(1.0 / 2.4) - 0.055)
+    } else {
+        12.92 * v
+    }
+}
+
 // sRGB <-> ProPhoto RGB conversion, following the sample code in
 // CSS Color Module Level 4 (https://www.w3.org/TR/css-color-4/#color-conversion-code).
 //
@@ -14,21 +47,19 @@ use num_traits::float::Float as _;
 // As in CSS, values are NOT clamped: out-of-gamut colors produce components
 // outside 0..=1 (and negative values are handled symmetrically).
 
-type Mat3 = [[f64; 3]; 3];
-
 // ---------------------------------------------------------------------------
 // Matrices (from the CSS Color 4 spec)
 // ---------------------------------------------------------------------------
 
 /// Linear sRGB -> XYZ (D65)
-const LIN_SRGB_TO_XYZ_D65: Mat3 = [
+const LIN_SRGB_TO_XYZ_D65: [[f32; 3]; 3] = [
     [506752.0 / 1228815.0, 87881.0 / 245763.0, 12673.0 / 70218.0],
     [87098.0 / 409605.0, 175762.0 / 245763.0, 12673.0 / 175545.0],
     [7918.0 / 409605.0, 87881.0 / 737289.0, 1001167.0 / 1053270.0],
 ];
 
 /// XYZ (D65) -> linear sRGB
-const XYZ_D65_TO_LIN_SRGB: Mat3 = [
+const XYZ_D65_TO_LIN_SRGB: [[f32; 3]; 3] = [
     [12831.0 / 3959.0, -329.0 / 214.0, -1974.0 / 3959.0],
     [
         -851781.0 / 878810.0,
@@ -39,7 +70,7 @@ const XYZ_D65_TO_LIN_SRGB: Mat3 = [
 ];
 
 /// Bradford chromatic adaptation, D65 -> D50
-const D65_TO_D50: Mat3 = [
+const D65_TO_D50: [[f32; 3]; 3] = [
     [
         1.0479297925449969,
         0.022946870601609652,
@@ -58,7 +89,7 @@ const D65_TO_D50: Mat3 = [
 ];
 
 /// Bradford chromatic adaptation, D50 -> D65
-const D50_TO_D65: Mat3 = [
+const D50_TO_D65: [[f32; 3]; 3] = [
     [
         0.9554734527042182,
         -0.023098536874261423,
@@ -77,7 +108,7 @@ const D50_TO_D65: Mat3 = [
 ];
 
 /// Linear ProPhoto -> XYZ (D50)
-const LIN_PROPHOTO_TO_XYZ_D50: Mat3 = [
+const LIN_PROPHOTO_TO_XYZ_D50: [[f32; 3]; 3] = [
     [
         0.79776664490064230,
         0.13518129740053308,
@@ -96,7 +127,7 @@ const LIN_PROPHOTO_TO_XYZ_D50: Mat3 = [
 ];
 
 /// XYZ (D50) -> linear ProPhoto
-const XYZ_D50_TO_LIN_PROPHOTO: Mat3 = [
+const XYZ_D50_TO_LIN_PROPHOTO: [[f32; 3]; 3] = [
     [
         1.34578688164715830,
         -0.25557208737979464,
@@ -114,43 +145,10 @@ const XYZ_D50_TO_LIN_PROPHOTO: Mat3 = [
     ],
 ];
 
-// Helpers
-
-#[inline]
-fn mul(m: &Mat3, v: [f64; 3]) -> [f64; 3] {
-    [
-        m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
-        m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
-        m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2],
-    ]
-}
-
-/// sRGB gamma-encoded -> linear light (sign-preserving for out-of-range input)
-#[inline]
-fn srgb_to_linear(v: f64) -> f64 {
-    let a = v.abs();
-    if a <= 0.04045 {
-        v / 12.92
-    } else {
-        v.signum() * ((a + 0.055) / 1.055).powf(2.4)
-    }
-}
-
-/// linear light -> sRGB gamma-encoded (sign-preserving)
-#[inline]
-fn linear_to_srgb(v: f64) -> f64 {
-    let a = v.abs();
-    if a > 0.0031308 {
-        v.signum() * (1.055 * a.powf(1.0 / 2.4) - 0.055)
-    } else {
-        12.92 * v
-    }
-}
-
 /// ProPhoto gamma-encoded -> linear light (sign-preserving)
 #[inline]
-fn prophoto_to_linear(v: f64) -> f64 {
-    const ET2: f64 = 16.0 / 512.0;
+fn prophoto_to_linear(v: f32) -> f32 {
+    const ET2: f32 = 16.0 / 512.0;
     let a = v.abs();
     if a <= ET2 {
         v / 16.0
@@ -161,8 +159,8 @@ fn prophoto_to_linear(v: f64) -> f64 {
 
 /// linear light -> ProPhoto gamma-encoded (sign-preserving)
 #[inline]
-fn linear_to_prophoto(v: f64) -> f64 {
-    const ET: f64 = 1.0 / 512.0;
+fn linear_to_prophoto(v: f32) -> f32 {
+    const ET: f32 = 1.0 / 512.0;
     let a = v.abs();
     if a >= ET {
         v.signum() * a.powf(1.0 / 1.8)
@@ -173,18 +171,14 @@ fn linear_to_prophoto(v: f64) -> f64 {
 
 /// Convert gamma-encoded sRGB to gamma-encoded ProPhoto RGB.
 pub(crate) fn srgb_to_prophoto(r: f32, g: f32, b: f32) -> [f32; 3] {
-    let lin = [
-        srgb_to_linear(r as f64),
-        srgb_to_linear(g as f64),
-        srgb_to_linear(b as f64),
-    ];
-    let xyz_d65 = mul(&LIN_SRGB_TO_XYZ_D65, lin);
-    let xyz_d50 = mul(&D65_TO_D50, xyz_d65);
-    let pp = mul(&XYZ_D50_TO_LIN_PROPHOTO, xyz_d50);
+    let lin = [srgb_to_linear(r), srgb_to_linear(g), srgb_to_linear(b)];
+    let xyz_d65 = mul3(&LIN_SRGB_TO_XYZ_D65, lin);
+    let xyz_d50 = mul3(&D65_TO_D50, xyz_d65);
+    let pp = mul3(&XYZ_D50_TO_LIN_PROPHOTO, xyz_d50);
     [
-        linear_to_prophoto(pp[0]) as f32,
-        linear_to_prophoto(pp[1]) as f32,
-        linear_to_prophoto(pp[2]) as f32,
+        linear_to_prophoto(pp[0]),
+        linear_to_prophoto(pp[1]),
+        linear_to_prophoto(pp[2]),
     ]
 }
 
@@ -193,16 +187,16 @@ pub(crate) fn srgb_to_prophoto(r: f32, g: f32, b: f32) -> [f32; 3] {
 /// The result may fall outside 0.0..=1.0 for colors outside the sRGB gamut.
 pub(crate) fn prophoto_to_srgb(r: f32, g: f32, b: f32) -> [f32; 3] {
     let lin = [
-        prophoto_to_linear(r as f64),
-        prophoto_to_linear(g as f64),
-        prophoto_to_linear(b as f64),
+        prophoto_to_linear(r),
+        prophoto_to_linear(g),
+        prophoto_to_linear(b),
     ];
-    let xyz_d50 = mul(&LIN_PROPHOTO_TO_XYZ_D50, lin);
-    let xyz_d65 = mul(&D50_TO_D65, xyz_d50);
-    let srgb = mul(&XYZ_D65_TO_LIN_SRGB, xyz_d65);
+    let xyz_d50 = mul3(&LIN_PROPHOTO_TO_XYZ_D50, lin);
+    let xyz_d65 = mul3(&D50_TO_D65, xyz_d50);
+    let srgb = mul3(&XYZ_D65_TO_LIN_SRGB, xyz_d65);
     [
-        linear_to_srgb(srgb[0]) as f32,
-        linear_to_srgb(srgb[1]) as f32,
-        linear_to_srgb(srgb[2]) as f32,
+        linear_to_srgb(srgb[0]),
+        linear_to_srgb(srgb[1]),
+        linear_to_srgb(srgb[2]),
     ]
 }

@@ -179,8 +179,8 @@ impl Color {
 
     /// Rec 2020
     pub fn from_rec2020(r: f32, g: f32, b: f32, alpha: f32) -> Self {
-        let rgb = utils::rec2020_to_srgb(r as f64, g as f64, b as f64);
-        Self::new(rgb[0] as f32, rgb[1] as f32, rgb[2] as f32, alpha)
+        let rgb = utils::rec2020_to_srgb(r, g, b);
+        Self::new(rgb[0], rgb[1], rgb[2], alpha)
     }
 
     /// A98 RGB
@@ -451,8 +451,8 @@ impl Color {
 
     /// Convert to Rec 2020
     pub fn to_rec2020(&self) -> [f32; 4] {
-        let [r, g, b] = utils::srgb_to_rec2020(self.r as f64, self.g as f64, self.b as f64);
-        [r as f32, g as f32, b as f32, self.a]
+        let [r, g, b] = utils::srgb_to_rec2020(self.r, self.g, self.b);
+        [r, g, b, self.a]
     }
 
     /// Convert to A98 RGB

@@ -13,8 +13,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
 use crate::lab::{linear_rgb_to_xyz_d50, xyz_d50_to_linear_rgb};
 use crate::utils;
-use crate::utils::*;
-use crate::utils::{linear_rgb_to_xyz_d65, xyz_d65_to_linear_rgb};
+use crate::utils::{AlphaFmt, FloatFmt, opaque_display};
 use crate::{ParseColorError, parse};
 
 #[cfg(feature = "named-colors")]
@@ -66,13 +65,12 @@ impl Color {
     /// * `b`: Blue value [0..1]
     /// * `a`: Alpha value [0..1]
     pub fn from_linear_rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
-        fn from_linear(x: f32) -> f32 {
-            if x >= 0.0031308 {
-                return 1.055 * x.powf(1.0 / 2.4) - 0.055;
-            }
-            12.92 * x
-        }
-        Self::new(from_linear(r), from_linear(g), from_linear(b), a)
+        Self::new(
+            utils::linear_to_srgb(r),
+            utils::linear_to_srgb(g),
+            utils::linear_to_srgb(b),
+            a,
+        )
     }
 
     /// Arguments:
@@ -97,7 +95,7 @@ impl Color {
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn from_hsva(h: f32, s: f32, v: f32, a: f32) -> Self {
-        let [r, g, b] = hsv_to_rgb(h, s, v);
+        let [r, g, b] = utils::hsv_to_rgb(h, s, v);
         Self::new(r, g, b, a)
     }
 
@@ -108,7 +106,7 @@ impl Color {
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn from_hsla(h: f32, s: f32, l: f32, a: f32) -> Self {
-        let [r, g, b] = hsl_to_rgb(h, s, l);
+        let [r, g, b] = utils::hsl_to_rgb(h, s, l);
         Self::new(r, g, b, a)
     }
 
@@ -119,7 +117,7 @@ impl Color {
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn from_hwba(h: f32, w: f32, b: f32, a: f32) -> Self {
-        let [r, g, b] = hwb_to_rgb(h, w, b);
+        let [r, g, b] = utils::hwb_to_rgb(h, w, b);
         Self::new(r, g, b, a)
     }
 
@@ -130,7 +128,7 @@ impl Color {
     /// * `b`: How blue/yellow the color is
     /// * `alpha`: Alpha [0..1]
     pub fn from_oklaba(l: f32, a: f32, b: f32, alpha: f32) -> Self {
-        let [r, g, b] = oklab_to_linear_rgb(l, a, b);
+        let [r, g, b] = utils::oklab_to_linear_rgb(l, a, b);
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
@@ -173,7 +171,7 @@ impl Color {
 
     /// XYZ D65
     pub fn from_xyz_d65(x: f32, y: f32, z: f32, alpha: f32) -> Self {
-        let [r, g, b] = xyz_d65_to_linear_rgb(x, y, z);
+        let [r, g, b] = utils::xyz_d65_to_linear_rgb(x, y, z);
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
@@ -320,7 +318,7 @@ impl Color {
     /// * `v`: Value [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn to_hsva(&self) -> [f32; 4] {
-        let [h, s, v] = rgb_to_hsv(
+        let [h, s, v] = utils::rgb_to_hsv(
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
             self.b.clamp(0.0, 1.0),
@@ -340,7 +338,7 @@ impl Color {
     /// * `l`: Lightness [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn to_hsla(&self) -> [f32; 4] {
-        let [h, s, l] = rgb_to_hsl(
+        let [h, s, l] = utils::rgb_to_hsl(
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
             self.b.clamp(0.0, 1.0),
@@ -360,7 +358,7 @@ impl Color {
     /// * `b`: Blackness [0..1]
     /// * `a`: Alpha [0..1]
     pub const fn to_hwba(&self) -> [f32; 4] {
-        let [h, w, b] = rgb_to_hwb(
+        let [h, w, b] = utils::rgb_to_hwb(
             self.r.clamp(0.0, 1.0),
             self.g.clamp(0.0, 1.0),
             self.b.clamp(0.0, 1.0),
@@ -377,16 +375,10 @@ impl Color {
     ///
     /// * Red, green, blue and alpha in the range [0..1]
     pub fn to_linear_rgba(&self) -> [f32; 4] {
-        fn to_linear(x: f32) -> f32 {
-            if x >= 0.04045 {
-                return ((x + 0.055) / 1.055).powf(2.4);
-            }
-            x / 12.92
-        }
         [
-            to_linear(self.r),
-            to_linear(self.g),
-            to_linear(self.b),
+            utils::srgb_to_linear(self.r),
+            utils::srgb_to_linear(self.g),
+            utils::srgb_to_linear(self.b),
             self.a,
         ]
     }
@@ -408,7 +400,7 @@ impl Color {
     /// Returns: `[l, a, b, alpha]`
     pub fn to_oklaba(&self) -> [f32; 4] {
         let [r, g, b, _] = self.to_linear_rgba();
-        let [l, a, b] = linear_rgb_to_oklab(r, g, b);
+        let [l, a, b] = utils::linear_rgb_to_oklab(r, g, b);
         [l, a, b, self.a.clamp(0.0, 1.0)]
     }
 
@@ -445,7 +437,7 @@ impl Color {
     /// Returns: `[x, y, z, alpha]`
     pub fn to_xyz_d65(&self) -> [f32; 4] {
         let [r, g, b, alpha] = self.to_linear_rgba();
-        let [x, y, z] = linear_rgb_to_xyz_d65(r, g, b);
+        let [x, y, z] = utils::linear_rgb_to_xyz_d65(r, g, b);
         [x, y, z, alpha]
     }
 
@@ -525,7 +517,7 @@ impl Color {
         let [l, c, h, alpha] = self.to_oklcha();
         let l = FloatFmt(l);
         let c = FloatFmt(c);
-        let h = FloatFmt(normalize_angle(h.to_degrees()));
+        let h = FloatFmt(utils::normalize_angle(h.to_degrees()));
         opaque_display!("oklch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
@@ -543,7 +535,7 @@ impl Color {
         let [l, c, h, alpha] = self.to_lcha();
         let l = FloatFmt(l);
         let c = FloatFmt(c);
-        let h = FloatFmt(normalize_angle(h.to_degrees()));
+        let h = FloatFmt(utils::normalize_angle(h.to_degrees()));
         opaque_display!("lch({l} {c} {h}{})", AlphaFmt(alpha))
     }
 
@@ -583,7 +575,7 @@ impl Color {
         let [h1, s1, v1, a1] = self.to_hsva();
         let [h2, s2, v2, a2] = other.to_hsva();
         Self::from_hsva(
-            interp_angle(h1, h2, t),
+            utils::interp_angle(h1, h2, t),
             s1 + t * (s2 - s1),
             v1 + t * (v2 - v1),
             a1 + t * (a2 - a1),
@@ -621,7 +613,7 @@ impl Color {
         Self::from_lcha(
             l1 + t * (l2 - l1),
             c1 + t * (c2 - c1),
-            interp_angle_rad(h1, h2, t),
+            utils::interp_angle_rad(h1, h2, t),
             alpha1 + t * (alpha2 - alpha1),
         )
     }
@@ -641,10 +633,11 @@ impl Default for Color {
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let [r, g, b, a] = self.to_rgba8();
+        write!(f, "#{r:02x}{g:02x}{b:02x}")?;
         if a < 255 {
-            write!(f, "#{r:02x}{g:02x}{b:02x}{a:02x}")
+            write!(f, "{a:02x}")
         } else {
-            write!(f, "#{r:02x}{g:02x}{b:02x}")
+            Ok(())
         }
     }
 }

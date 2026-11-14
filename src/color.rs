@@ -10,8 +10,6 @@ use rgb::{RGB, RGBA};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de::Visitor};
 
-use crate::lab::{lab_to_linear_rgb, linear_rgb_to_lab};
-use crate::lab::{linear_rgb_to_xyz_d50, xyz_d50_to_linear_rgb};
 use crate::utils;
 use crate::utils::{AlphaFmt, FloatFmt, opaque_display};
 use crate::{ParseColorError, parse};
@@ -149,7 +147,7 @@ impl Color {
     /// * `b`: Distance along the `b` axis
     /// * `alpha`: Alpha [0..1]
     pub fn from_laba(l: f32, a: f32, b: f32, alpha: f32) -> Self {
-        let [r, g, b] = lab_to_linear_rgb(l, a, b);
+        let [r, g, b] = utils::lab_to_linear_rgb(l, a, b);
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
@@ -165,7 +163,7 @@ impl Color {
 
     /// XYZ D50
     pub fn from_xyz_d50(x: f32, y: f32, z: f32, alpha: f32) -> Self {
-        let [r, g, b] = xyz_d50_to_linear_rgb(x, y, z);
+        let [r, g, b] = utils::xyz_d50_to_linear_rgb(x, y, z);
         Self::from_linear_rgba(r, g, b, alpha)
     }
 
@@ -415,7 +413,7 @@ impl Color {
     /// Returns: `[l, a, b, alpha]`
     pub fn to_laba(&self) -> [f32; 4] {
         let [r, g, b, alpha] = self.to_linear_rgba();
-        let [l, a, b] = linear_rgb_to_lab(r, g, b);
+        let [l, a, b] = utils::linear_rgb_to_lab(r, g, b);
         [l, a, b, alpha.clamp(0.0, 1.0)]
     }
 
@@ -430,7 +428,7 @@ impl Color {
     /// Returns: `[x, y, z, alpha]`
     pub fn to_xyz_d50(&self) -> [f32; 4] {
         let [r, g, b, alpha] = self.to_linear_rgba();
-        let [x, y, z] = linear_rgb_to_xyz_d50(r, g, b);
+        let [x, y, z] = utils::linear_rgb_to_xyz_d50(r, g, b);
         [x, y, z, alpha]
     }
 

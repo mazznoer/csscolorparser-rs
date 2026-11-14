@@ -1,20 +1,26 @@
+#![allow(clippy::excessive_precision)]
+
 mod a98_rgb;
 mod calc;
 mod color;
 mod display_p3;
 mod helper;
+mod lab;
 mod param;
 mod prophoto_rgb;
 mod rec2020;
+mod xyz;
 
 pub(crate) use a98_rgb::*;
 pub(crate) use calc::*;
 pub(crate) use color::*;
 pub(crate) use display_p3::*;
 pub(crate) use helper::*;
+pub(crate) use lab::*;
 pub(crate) use param::*;
 pub(crate) use prophoto_rgb::*;
 pub(crate) use rec2020::*;
+pub(crate) use xyz::*;
 
 use core::f32::consts::{PI, TAU};
 
@@ -23,23 +29,6 @@ const PI_3: f32 = PI * 3.0;
 #[cfg(not(feature = "std"))]
 use num_traits::float::Float as _;
 
-// Converts linear RGB components to CIE XYZ (D65 white point).
-pub(crate) fn linear_rgb_to_xyz_d65(r: f32, g: f32, b: f32) -> [f32; 3] {
-    let x = 0.4124564 * r + 0.3575761 * g + 0.1804375 * b;
-    let y = 0.2126729 * r + 0.7151522 * g + 0.0721750 * b;
-    let z = 0.0193339 * r + 0.119192 * g + 0.9503041 * b;
-    [x, y, z]
-}
-
-// Converts CIE XYZ (D65 white point) to linear RGB components.
-pub(crate) fn xyz_d65_to_linear_rgb(x: f32, y: f32, z: f32) -> [f32; 3] {
-    let r = 3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
-    let g = -0.969266 * x + 1.8760108 * y + 0.0415560 * z;
-    let b = 0.0556434 * x - 0.2040259 * y + 1.0572252 * z;
-    [r, g, b]
-}
-
-#[allow(clippy::excessive_precision)]
 pub(crate) fn oklab_to_linear_rgb(l: f32, a: f32, b: f32) -> [f32; 3] {
     let l_ = (l + 0.3963377774 * a + 0.2158037573 * b).powi(3);
     let m_ = (l - 0.1055613458 * a - 0.0638541728 * b).powi(3);
@@ -50,7 +39,6 @@ pub(crate) fn oklab_to_linear_rgb(l: f32, a: f32, b: f32) -> [f32; 3] {
     [r, g, b]
 }
 
-#[allow(clippy::excessive_precision)]
 pub(crate) fn linear_rgb_to_oklab(r: f32, g: f32, b: f32) -> [f32; 3] {
     let l_ = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b).cbrt();
     let m_ = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b).cbrt();

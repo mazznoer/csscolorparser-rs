@@ -36,7 +36,7 @@ fn parse_finite(s: &str) -> Option<f32> {
     s.parse::<f32>().ok().filter(|t| t.is_finite())
 }
 
-pub(crate) fn parse_percent_or_float(s: &str) -> Option<(f32, bool)> {
+pub(crate) fn parse_value(s: &str) -> Option<(f32, bool)> {
     if s.eq_ignore_ascii_case("none") {
         return Some((0.0, false));
     }

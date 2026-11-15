@@ -1,7 +1,7 @@
 use crate::utils::ParamParser;
 use crate::utils::remap;
 use crate::utils::{calc_angle, calc_value};
-use crate::utils::{parse_angle, parse_percent_or_float};
+use crate::utils::{parse_angle, parse_value};
 use crate::{Color, ParseColorError};
 
 #[cfg(feature = "named-colors")]
@@ -608,7 +608,7 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         pp.space(),
         pp.is_end(),
     ) {
-        if let Some((v, _)) = parse_percent_or_float(a) {
+        if let Some((v, _)) = parse_value(a) {
             v.clamp(0.0, 1.0)
         } else {
             return Err(err);
@@ -621,11 +621,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         ParseColorError::InvalidRgb => {
             if let (Some((r, r_pct)), Some((g, g_pct)), Some((b, b_pct))) = (
                 // red
-                parse_percent_or_float(val0),
+                parse_value(val0),
                 // green
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // blue
-                parse_percent_or_float(val2),
+                parse_value(val2),
             ) {
                 let r = if r_pct { r } else { r / 255.0 };
                 let g = if g_pct { g } else { g / 255.0 };
@@ -643,12 +643,12 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 // hue
                 parse_angle(val0),
                 // saturation
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // lightness
-                parse_percent_or_float(val2),
+                parse_value(val2),
             ) {
                 // A bare number is on the 0..100 scale (CSS Color 4), while a
-                // percentage is already scaled to 0..1 by parse_percent_or_float.
+                // percentage is already scaled to 0..1 by parse_value.
                 let s = if s_pct { s } else { s / 100.0 };
                 let l = if l_pct { l } else { l / 100.0 };
                 return Ok(Color::from_hsla(h, s, l, alpha));
@@ -659,12 +659,12 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 // hue
                 parse_angle(val0),
                 // whiteness
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // blackness
-                parse_percent_or_float(val2),
+                parse_value(val2),
             ) {
                 // A bare number is on the 0..100 scale (CSS Color 4), while a
-                // percentage is already scaled to 0..1 by parse_percent_or_float.
+                // percentage is already scaled to 0..1 by parse_value.
                 let w = if w_pct { w } else { w / 100.0 };
                 let b = if b_pct { b } else { b / 100.0 };
                 return Ok(Color::from_hwba(h, w, b, alpha));
@@ -675,12 +675,12 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 // hue
                 parse_angle(val0),
                 // saturation
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // value
-                parse_percent_or_float(val2),
+                parse_value(val2),
             ) {
                 // A bare number is on the 0..100 scale, while a percentage is
-                // already scaled to 0..1 by parse_percent_or_float.
+                // already scaled to 0..1 by parse_value.
                 let s = if s_pct { s } else { s / 100.0 };
                 let v = if v_pct { v } else { v / 100.0 };
                 return Ok(Color::from_hsva(h, s, v, alpha));
@@ -689,11 +689,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         ParseColorError::InvalidLab => {
             if let (Some((l, l_pct)), Some((a, a_pct)), Some((b, b_pct))) = (
                 // lightness
-                parse_percent_or_float(val0),
+                parse_value(val0),
                 // a
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // b
-                parse_percent_or_float(val2),
+                parse_value(val2),
             ) {
                 let l = if l_pct { l * 100.0 } else { l };
                 let a = if a_pct {
@@ -712,9 +712,9 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         ParseColorError::InvalidLch => {
             if let (Some((l, l_pct)), Some((c, c_pct)), Some(h)) = (
                 // lightness
-                parse_percent_or_float(val0),
+                parse_value(val0),
                 // chroma
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // hue
                 parse_angle(val2),
             ) {
@@ -731,11 +731,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         ParseColorError::InvalidOklab => {
             if let (Some((l, _)), Some((a, a_pct)), Some((b, b_pct))) = (
                 // lightness
-                parse_percent_or_float(val0),
+                parse_value(val0),
                 // a
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // b
-                parse_percent_or_float(val2),
+                parse_value(val2),
             ) {
                 let a = if a_pct {
                     remap(a, -1.0, 1.0, -0.4, 0.4)
@@ -753,9 +753,9 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
         ParseColorError::InvalidOklch => {
             if let (Some((l, _)), Some((c, c_pct)), Some(h)) = (
                 // lightness
-                parse_percent_or_float(val0),
+                parse_value(val0),
                 // chroma
-                parse_percent_or_float(val1),
+                parse_value(val1),
                 // hue
                 parse_angle(val2),
             ) {
@@ -773,11 +773,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::Srgb => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color { r, g, b, a: alpha });
                     }
@@ -785,11 +785,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::SrgbLinear => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_linear_rgba(r, g, b, alpha));
                     }
@@ -797,11 +797,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::A98Rgb => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_a98_rgb(r, g, b, alpha));
                     }
@@ -809,11 +809,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::DisplayP3 => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_display_p3(r, g, b, alpha));
                     }
@@ -821,11 +821,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::DisplayP3Linear => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_display_p3_linear(r, g, b, alpha));
                     }
@@ -833,11 +833,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::ProphotoRgb => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_prophoto_rgb(r, g, b, alpha));
                     }
@@ -845,11 +845,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::Rec2020 => {
                     if let (Some((r, _)), Some((g, _)), Some((b, _))) = (
                         // red
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // green
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // blue
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_rec2020(r, g, b, alpha));
                     }
@@ -857,11 +857,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::XyzD50 => {
                     if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
                         // x
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // y
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // z
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_xyz_d50(x, y, z, alpha));
                     }
@@ -869,11 +869,11 @@ fn parse_abs(s: &str) -> Result<Color, ParseColorError> {
                 ColorFunc::XyzD65 => {
                     if let (Some((x, _)), Some((y, _)), Some((z, _))) = (
                         // x
-                        parse_percent_or_float(val0),
+                        parse_value(val0),
                         // y
-                        parse_percent_or_float(val1),
+                        parse_value(val1),
                         // z
-                        parse_percent_or_float(val2),
+                        parse_value(val2),
                     ) {
                         return Ok(Color::from_xyz_d65(x, y, z, alpha));
                     }

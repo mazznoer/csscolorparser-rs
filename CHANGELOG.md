@@ -1,6 +1,17 @@
 # Changelog
 
-## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.9.1...HEAD)
+## [Unreleased](https://github.com/mazznoer/csscolorparser-rs/compare/v0.9.2...HEAD)
+
+## [0.9.2]
+
+### Added
+
+- `Hash` trait for `Color`.
+
+### Fixed
+
+- Parse angle in relative formats.
+- Clamp lightness in `lab`, `lch`, `oklab`, `oklch`.
 
 ## [0.9.1]
 

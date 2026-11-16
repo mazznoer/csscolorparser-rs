@@ -167,7 +167,7 @@ mod t {
     }
 
     #[test]
-    fn parse_percent_or_float_() {
+    fn parse_value_() {
         let test_data = [
             ("none", Some((0.0, false))),
             ("NONE", Some((0.0, false))),
@@ -189,7 +189,7 @@ mod t {
             ("1e400%", None),
         ];
         for (s, expected) in test_data {
-            assert_eq!(parse_percent_or_float(s), expected);
+            assert_eq!(parse_value(s), expected);
         }
     }
 

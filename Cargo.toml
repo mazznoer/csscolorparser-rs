@@ -1,6 +1,6 @@
 [package]
 name = "csscolorparser"
-version = "0.9.1"
+version = "0.9.2"
 authors = ["Nor Khasyatillah <mazznoer@ymail.com>"]
 edition = "2024"
 rust-version = "1.85"
